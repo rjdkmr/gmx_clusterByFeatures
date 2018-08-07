@@ -45,7 +45,7 @@ macro(check_python_module module)
     endif(NOT ${FOUND_MODULE} EQUAL 0)
 endmacro(check_python_module module)
 
-set(Python_ADDITIONAL_VERSIONS 3.0 3.1 3.2 3.3 3.4 3.5 3.6 3.7)
+set(Python_ADDITIONAL_VERSIONS 3.4 3.5 3.6 3.7)
 find_package(PythonInterp)
 if (NOT PYTHONINTERP_FOUND)
         message(FATAL_ERROR "Python3 not found... Please install python3. ")
