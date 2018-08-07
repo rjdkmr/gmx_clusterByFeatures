@@ -37,6 +37,9 @@ in a molecular dynamics trajectory using collection of features. The features
 could be any quantity as a function of time such as Projections of egienvector
 from PCA or dihedral-PCA, distances, angles, channel radius etc.
 
+.. note:: It is developed for **GROMACS MD trajectory**. However, it can be used with
+  any other trajectory format after converting it to GROMACS format trajectory.
+
 When Projections of egienvector from PCA or dihedral-PCA is used as features,
 it yields clusters depending on the largest conformational changes during the
 simulations. Depending on the Clustering metrics, a cluster may contain small
