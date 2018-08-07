@@ -62,18 +62,3 @@ To determine the number of clustering, following metrics are implemented:
   * SSR/SST ratio ( |elbow| ) : Relative change in SSR/SST ratio in percentage.
   * pFS : Psuedo F-statatics determined from SSR/SST ratio.
   * |DBI|
-
-
-
-.. toctree::
-   :maxdepth: 2
-   :caption: Contents:
-
-
-
-Indices and tables
-==================
-
-* :ref:`genindex`
-* :ref:`modindex`
-* :ref:`search`
