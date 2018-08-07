@@ -21,31 +21,12 @@
 
 gmx_clusterByFeatures
 =====================
-During the Molecular Dynamics Simulations, molecule conformations changes considerably
-and identifying the conformations is very important to study the biomolecular dynamics.
-Conformational clustering can be performed to identify different conformations
-sampled during the simulations.
+it can be used to cluster the conformations of a molecule in a molecular dynamics
+trajectory using collection of features. The features could be any quantity as a
+function of time such as Projections of egienvector from PCA or dihedral-PCA,
+distances, angles, channel radius etc.
 
-Most widely approach for conformational clustering is to calculate Root Mean Square
-Deviations between all conformations and cluster them according to these deviations.
-However, for large MD trajectories, this RMSD matrix could be huge and takes very
-long time to calculate. Therefore, an alternative method such as features based
-clustering can be used to identify the cluster of conformations.
-
-**gmx_clusterByFeatures** can be used to cluster the conformations of a molecule
-in a molecular dynamics trajectory using collection of features. The features
-could be any quantity as a function of time such as Projections of egienvector
-from PCA or dihedral-PCA, distances, angles, channel radius etc.
-
-When Projections of egienvector from PCA or dihedral-PCA is used as features,
-it yields clusters depending on the largest conformational changes during the
-simulations. Depending on the Clustering metrics, a cluster may contain small
-conformational fluctuations around the respective central structure.
-
-When other features such as distances, angles, channel radius etc are used as the
-features, the obtained clusters of conformations depends on these features. It can
-be used to study the specific conformations given the features while ignoring all
-other conformational fluctuations.
+**See details at:** `gmx_clusterByFeatures homepage <https://gmx-clusterbyfeatures.readthedocs.io>`_
 
 Clustering methods
 ------------------
