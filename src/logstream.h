@@ -4,6 +4,7 @@
 #include <cstdio>
 #include <sstream>
 #include <iomanip>
+#include <iostream>
 
 // LOG output and file handler ///////
 class LogStream

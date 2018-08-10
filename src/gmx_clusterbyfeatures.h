@@ -14,7 +14,8 @@ enum { ePriorClusterMetric = 1, eCRmsdClusterMetric, eSsrSstClusterMetric, ePfsC
 
 // Trajectory stuffs, clumped in one data structure for easy handling
 struct TrajectoryStuffs {
-    const char *filename;
+    const char *filename = NULL;
+    bool bTraj = false;
     t_atoms atoms;
     t_trxstatus *status;
     rvec *x;

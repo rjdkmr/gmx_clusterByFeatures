@@ -9,12 +9,15 @@ It can be downloaded using git as follows
 
 It can be also downloaded as `zip file <https://github.com/rjdkmr/gmx_clusterByFeatures/archive/master.zip>`_.
 
+******
 
 Requirements
 ------------
 It depends on following two packages:
-  * GROMACS : 2016 and above version
-  * Python : 3.4 and above version
+  * **GROMACS** : 2016 and above version
+  * **Python** : 3.4 and above version
+
+******
 
 GROMACS
 ~~~~~~~
@@ -24,6 +27,8 @@ A standard installation of GROMACS is sufficient. GROMACS library
 
 If GROMACS is not installed at standard location, ``-DGMX_PATH`` can be used to locate
 GROMACS installation. e.g. ``-DGMX_PATH=/opt/gromacs``
+
+******
 
 Python3
 ~~~~~~~
@@ -52,6 +57,7 @@ Two other Python packages are required that can be installed as follows:
 
   sudo pip3 install sklearn matplotlib
 
+******
 
 Installation
 ------------

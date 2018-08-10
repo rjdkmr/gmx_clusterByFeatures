@@ -14,11 +14,5 @@ Contents
 
    Introduction <intro>
    Download and Installation <install>
-
-
-Indices and tables
-==================
-
-* :ref:`genindex`
-* :ref:`modindex`
-* :ref:`search`
+   How to use gmx_clusterByFeatures? <usage>
+   Command line options in details <cmdline>
