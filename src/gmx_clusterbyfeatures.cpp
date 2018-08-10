@@ -1244,7 +1244,7 @@ int gmx_clusterByFeatures(int argc,char *argv[])    {
         { "-db_eps",         FALSE, etREAL, {&dbscan_eps},          "The maximum distance between two samples for them to be considered as in the same neighborhood." },
         { "-db_min_samples", FALSE, etINT,  {&dbscan_min_samples},  "The number of samples (or total weight) in a neighborhood for a point to be considered as a core point. This includes the point itself." },
         { "-nminfr",         FALSE, etINT,  {&numMinFrameCluster},  "Number of nimimum frames in a cluster to output it as trajectory" },
-        { "-fit",            FALSE, etBOOL, {&bFit},                "Enable/Disable superimpose or fit of the atoms groups before RMSD calculation." },
+        { "-fit",            FALSE, etBOOL, {&bFit},                "Enable fitting and superimposition of the atoms groups different from RMSD/clustering group before RMSD calculation." },
         { "-fit2central",    FALSE, etBOOL, {&bAlignTrajToCentral}, "Enable/Disable trajectory superimposition or fitting to central structure in the output trajectory" },
         { "-sort",           FALSE, etENUM, { sortMethod },         "Sort trajectory according to these values. Accepted methods are" },
         { "-plot",           FALSE, etSTR,  { &plotfile },          "To plot features with clusters in this file." },

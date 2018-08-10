@@ -32,8 +32,10 @@
 # extensions coming with Sphinx (named 'sphinx.ext.*') or your custom
 # ones.
 extensions = ['sphinx.ext.mathjax',
-    'sphinx.ext.githubpages']
+    'sphinx.ext.githubpages',
+    'sphinx.ext.autosectionlabel']
 
+autosectionlabel_prefix_document = True
 # Add any paths that contain templates here, relative to this directory.
 templates_path = ['_templates']
 
@@ -102,7 +104,7 @@ html_context = {
         '_static/theme_overrides.css',  # override wide tables in RTD theme
         ],
      }
-     
+
 # Custom sidebar templates, must be a dictionary that maps document names
 # to template names.
 #

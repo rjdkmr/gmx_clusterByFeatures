@@ -235,16 +235,14 @@ Presently following methods are implemented:
 
      |kmeans|- It needs cluster number as input (``-ncluster <int>``).
      Therefore, one should know beforehand how many cluster is there in data.
-     To automatically determine the cluster number,
-     see `-cmetric  <keyword> <cmdline.html#cmetric-keyword>`_.
+     To automatically determine the cluster number, :ref:`cmdline:-cmetric \<keyword\>`
      For more details about k-means method, see |kmeans-detail|.
 
   2. ``-method dbscan``
 
      |DBSCAN| - It does not require cluster number beforehand.
      The clusters are controlled by two other input options:
-     `-db_eps  <real> <cmdline.html#db_eps-real>`_
-     and `-db_min_samples  <int> <cmdline.html#db_min_samples-int>`_.
+     :ref:`cmdline:-db_eps \<real\>` and :ref:`cmdline:-db_min_samples \<int\>`.
      For more details about DBSCAN method, see |dbscan-detail|.
 
   3. ``-method gmixture``
@@ -252,8 +250,7 @@ Presently following methods are implemented:
      |gmixture| - It also needs cluster number as input
      (``-ncluster <int>``).
      Therefore, one should know beforehand how many cluster is there in data.
-     To automatically determine the cluster number, see
-     `-cmetric  <keyword> <cmdline.html#cmetric-keyword>`_.
+     To automatically determine the cluster number, see :ref:`cmdline:-cmetric \<keyword\>`
      For more details about k-means method, see |gmixture-detail|.
 
 ******
@@ -261,8 +258,7 @@ Presently following methods are implemented:
 ``-nfeature <int>``
 ~~~~~~~~~~~~~~~~~~~
 
-Number of features to be read from `-feat [<.xvg>]  <cmdline.html#feat-xvg>`_
-file.
+Number of features to be read from :ref:`cmdline:-feat [\<.xvg\>]` file.
 
 If file contains less than requested number of features, all features will be read.
 
@@ -288,12 +284,12 @@ Presently following cluster metrics are implemented:
   2. ``-cmetric rmsd``
 
      Root Mean Square deviation between central structures of clusters. It uses
-     `-crmsthres  <real> <cmdline.html#crmsthres-real>`_ option for RMSD
+     :ref:`cmdline:-crmsthres \<real\>` option for RMSD
      threshold/cutoff.
 
      .. note:: It requires trajectory file as input.
                Otherwise, ``-cmetric ssr-sst`` will be used for cluster metric with
-               default `-ssrchange <real> <cmdline.html#ssrchange-real>`_ value.
+               default :ref:`cmdline:-ssrchange \<real\>` value.
 
   3. ``-cmetric ssr-sst``
 
@@ -317,8 +313,7 @@ Presently following cluster metrics are implemented:
 ``-ncluster <int>``
 ~~~~~~~~~~~~~~~~~~~
 
-It takes the number of clusters. Its usage depends on
-`-cmetric <keyword> <cmdline.html#cmetric-keyword`.
+It takes the number of clusters. Its usage depends on :ref:`cmdline:-cmetric \<keyword\>`.
 
 
 .. note:: It is only applicable when ``-method kmeans`` or ``-method gmixture``
@@ -330,7 +325,7 @@ Conditions:
   2. For ``-cmetric rmsd``, it is considered as largest number of clusters to
      be generated and iteratively number of clusters are reduced to check whether
      RMSD between central structures are **not** below RMSD threshold
-     (`-crmsthres  <real> <cmdline.html#crmsthres-real>`_).
+     (:ref:`cmdline:-crmsthres \<real\>`).
 
   3. For ``-cmetric ssr-sst``, ``-cmetric pFS`` and ``-cmetric DBI``, it is
      considered as maximum number of clusters to generated. At first, two
@@ -352,3 +347,98 @@ threshold, number of clusters is decreased by one in next iteration.
 It is assumed that when RMSD between two central structures are within the threshold,
 central structures are similar enough to merge the two clusters as a single cluster.
 However, it is **not** necessary that these two clusters will merge in next iteration.
+
+******
+
+``-ssrchange <real>``
+~~~~~~~~~~~~~~~~~~~~~
+Threshold relative percentage change in SSR/SST ratio to choose number of clusters
+automatically. This threshold gives potential position of Elbow in |elbow|.
+
+.. note::This option is only used when ``-cmetric ssr-sst`` is provided as input.
+
+******
+
+``-db_eps <real>``
+~~~~~~~~~~~~~~~~~~~~~
+
+The maximum distance between two samples for them to be considered as in the
+same neighborhood.
+
+.. seealso: `scikit-learn DBSCAN class <http://scikit-learn.org/stable/modules/generated/sklearn.cluster.DBSCAN.html#sklearn.cluster.DBSCAN>`_
+
+******
+
+``-db_min_samples <int>``
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+The number of samples (or total weight) in a neighborhood for a point to be
+considered as a core point. This includes the point
+itself.
+
+.. seealso: `scikit-learn DBSCAN class <http://scikit-learn.org/stable/modules/generated/sklearn.cluster.DBSCAN.html#sklearn.cluster.DBSCAN>`_
+
+******
+
+``-nminfr <int>``
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+Number of minimum frames in a cluster to output it as trajectory. If number
+of frames is less than this number, the cluster will be ignored.
+
+******
+
+``-[no]fit``
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+Enable fitting and superimposition of the atoms groups different from RMSD/clustering
+group before RMSD calculation.
+If Enabled, index group for fitting will be prompted. Otherwise, fitting will be
+performed with RMSD/clustering group.
+
+******
+
+``-[no]fit2central``
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+Enable/Disable trajectory superimposition or fitting to central structure in
+the output trajectory. Atoms group used for fitting depends on ``-[no]fit``
+option. If ``-nofit``, second input index group (RMSD/clustering group) will
+be used for fitting otherwise third index group will be used for fitting.
+
+******
+
+``-sort <keyword>``
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+Sort trajectory according to these values.
+
+Accepted methods are:
+  * ``-sort rmsd``
+
+    Sort trajectory according to RMSD with respect to central structure. Therefore,
+    obtained trajectory's first frame will be central structure and RMSD will increase
+    gradually after first frame.
+
+  * ``-sort features``
+
+    Sort trajectory according to features sub-space. Distance of each conformation
+    to respective central structure is calculated in feature-space and Trajectory
+    is written from lowest to highest distance. In this trajectory, first frame
+    will be central structure.
+
+    This option is very useful when features are other than PCA's projections of
+    eigenvector.
+
+  * ``-sort user``
+
+    Sort trajectory using values supplied by user. Not yet implemented.
+
+******
+
+``-plot <string>``
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+To plot features with clusters in this file.
+
+Plot is generated where feature-vs-feature are depicted with different clusters
+as colors. It is helpful in checking whether number of clusters is enough.
