@@ -83,10 +83,13 @@ Users will be prompted for three index group
   * **Choose a group for the output:** Select a index group to output it as central
     structure and clustered trajectory. It can be whole system or any part of the
     system.
+
   * **Choose a group for clustering/RMSD calculation:** The actual atom groups for
     which clustering has to be done and RMSD has to be calculated.
-    .. note :: If you are doing PCA based clustering, it should be same first
-    index group as selected in ``gmx covar`` and ``gmx anaeig``.
+
+    .. note:: If you are doing PCA based clustering, it should be same first
+              index group as selected in ``gmx covar`` and ``gmx anaeig``.
+
   * **Choose a group for fitting or superposition:** The atom groups used for
     fitting or superposition before RMSD calculation.
 
@@ -235,14 +238,14 @@ Presently following methods are implemented:
 
      |kmeans|- It needs cluster number as input (``-ncluster <int>``).
      Therefore, one should know beforehand how many cluster is there in data.
-     To automatically determine the cluster number, :ref:`-cmetric \<keyword\>`
+     To automatically determine the cluster number, `-cmetric \<keyword\> <#cmetric-keyword>`_
      For more details about k-means method, see |kmeans-detail|.
 
   2. ``-method dbscan``
 
      |DBSCAN| - It does not require cluster number beforehand.
      The clusters are controlled by two other input options:
-     :ref:`-db_eps \<real\>` and :ref:`-db_min_samples \<int\>`.
+     `-db_eps \<real\> <#db_eps-real>`_ and `-db_min_samples \<int\> <#db_min_samples-int>`_.
      For more details about DBSCAN method, see |dbscan-detail|.
 
   3. ``-method gmixture``
@@ -250,7 +253,7 @@ Presently following methods are implemented:
      |gmixture| - It also needs cluster number as input
      (``-ncluster <int>``).
      Therefore, one should know beforehand how many cluster is there in data.
-     To automatically determine the cluster number, see :ref:`-cmetric \<keyword\>`
+     To automatically determine the cluster number, see `-cmetric \<keyword\> <#cmetric-keyword>`_
      For more details about k-means method, see |gmixture-detail|.
 
 ******
@@ -258,7 +261,7 @@ Presently following methods are implemented:
 ``-nfeature <int>``
 ~~~~~~~~~~~~~~~~~~~
 
-Number of features to be read from :ref:`-feat [\<.xvg\>]` file.
+Number of features to be read from `-feat [\<.xvg\>] <#feat-xvg>`_ file.
 
 If file contains less than requested number of features, all features will be read.
 
@@ -284,12 +287,12 @@ Presently following cluster metrics are implemented:
   2. ``-cmetric rmsd``
 
      Root Mean Square deviation between central structures of clusters. It uses
-     :ref:`-crmsthres \<real\>` option for RMSD
+     `-crmsthres \<real\> <#crmsthres-real>`_ option for RMSD
      threshold/cutoff.
 
      .. note:: It requires trajectory file as input.
                Otherwise, ``-cmetric ssr-sst`` will be used for cluster metric with
-               default :ref:`-ssrchange \<real\>` value.
+               default `-ssrchange \<real\> <#ssrchange-real>`_ value.
 
   3. ``-cmetric ssr-sst``
 
@@ -313,7 +316,7 @@ Presently following cluster metrics are implemented:
 ``-ncluster <int>``
 ~~~~~~~~~~~~~~~~~~~
 
-It takes the number of clusters. Its usage depends on :ref:`-cmetric \<keyword\>`.
+It takes the number of clusters. Its usage depends on `-cmetric \<keyword\> <#cmetric-keyword>`_.
 
 
 .. note:: It is only applicable when ``-method kmeans`` or ``-method gmixture``
@@ -325,7 +328,7 @@ Conditions:
   2. For ``-cmetric rmsd``, it is considered as largest number of clusters to
      be generated and iteratively number of clusters are reduced to check whether
      RMSD between central structures are **not** below RMSD threshold
-     (:ref:`-crmsthres \<real\>`).
+     (`-crmsthres \<real\> <#crmsthres-real>`_).
 
   3. For ``-cmetric ssr-sst``, ``-cmetric pFS`` and ``-cmetric DBI``, it is
      considered as maximum number of clusters to generated. At first, two

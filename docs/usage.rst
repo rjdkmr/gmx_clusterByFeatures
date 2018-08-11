@@ -51,19 +51,19 @@ Options
       - Default
       - File type
 
-    * - :ref:`-f [\<.xtc/.trr/...\>]`
+    * - `-f [\<.xtc/.trr/...\>] <cmdline.html#f-xtc-trr>`_
       - traj.xtc
       - Trajectory: xtc trr cpt gro g96 pdb tng
 
-    * - :ref:`-s [\<.tpr/.gro/...\>]`
+    * - `-s [\<.tpr/.gro/...\>] <cmdline.html#s-tpr-gro>`_
       - topol.tpr
       - Structure+mass(db): tpr gro g96 pdb brk ent
 
-    * - :ref:`-n [\<.ndx\>]`
+    * - `-n [\<.ndx\>] <cmdline.html#n-ndx>`_
       - index.ndx
       - Index file
 
-    * - :ref:`-feat [\<.xvg\>]`
+    * - `-feat [\<.xvg\>] <cmdline.html#feat-xvg>`_
       - feature.xvg
       - xvgr/xmgr file
 
@@ -79,23 +79,23 @@ Options
       - Default
       - File type
 
-    * - :ref:`-clid [\<.xvg\>]`
+    * - `-clid [\<.xvg\>] <cmdline.html#clid-xvg>`_
       - clid.xvg
       - xvgr/xmgr file (Can be used as both input and output)
 
-    * - :ref:`-g [\<.log\>]`
-      - :ref:cluster.log
+    * - `-g [\<.log\>] <cmdline.html#g-log>`_
+      - cluster.log
       - Log file
 
-    * - :ref:`-fout [\<.xtc/.trr/...\>]`
+    * - `-fout [\<.xtc/.trr/...\>] <cmdline.html#fout-xtc-trr>`_
       - trajout.xtc
       - Trajectory: xtc trr cpt gro g96 pdb tng
 
-    * - :ref:`-cpdb [\<.pdb\>]`
+    * - `-cpdb [\<.pdb\>] <cmdline.html#cpdb-pdb>`_
       - central.pdb
       - Protein data bank file
 
-    * - :ref:`-rmsd [\<.xvg\>]`
+    * - `-rmsd [\<.xvg\>] <cmdline.html#rmsd-xvg>`_
       - rmsd.xvg
       - xvgr/xmgr file
 
@@ -122,67 +122,67 @@ Options
       - 0
       - Only use frame when t MOD dt = first time (ps)
 
-    * - :ref:`-xvg \<keyword\>`
+    * - `-xvg \<keyword\> <cmdline.html#xvg-keyword>`_
       - xmgrace
       - xvg plot formatting: xmgrace, xmgr, none
 
-    * - :ref:`-method \<keyword\>`
+    * - `-method \<keyword\> <cmdline.html#method-keyword>`_
       - kmeans
       - Clustering methods. Accepted methods are:: kmeans, dbscan, gmixture
 
-    * - :ref:`-nfeature \<int\>`
+    * - `-nfeature \<int\> <cmdline.html#nfeature-int>`_
       - 10
       - Number of features to use for clustering
 
-    * - :ref:`-cmetric \<keyword\>`
+    * - `-cmetric \<keyword\> <cmdline.html#cmetric-keyword>`_
       - prior
       - Cluster metrics: Method to determine cluster number. Accepted
         methods are: prior, rmsd, ssr-sst, pFS, DBI
 
-    * - :ref:`-ncluster \<int\>`
+    * - `-ncluster \<int\> <cmdline.html#ncluster-int>`_
       - 5
       - Number of clusters to generate for prior method. Maximum number of
         cluster for ctrmsd method.
 
-    * - :ref:`-crmsthres \<real\>`
+    * - `-crmsthres \<real\> <cmdline.html#crmsthres-real>`_
       - 0.1
       - RMSD (nm) threshold between central structures for RMSD cluster metric
         method.
 
-    * - :ref:`-ssrchange \<real\>`
+    * - `-ssrchange \<real\> <cmdline.html#ssrchange-real>`_
       - 2
       - Thershold relative change % in SSR/SST ratio for ssr-sst cluster
         metric method.
 
-    * - :ref:`-db_eps \<real\>`
+    * - `-db_eps \<real\> <cmdline.html#db_eps-real>`_
       - 0.5
       - The maximum distance between two samples for them to be considered
         as in the same neighborhood.
 
-    * - :ref:`-db_min_samples \<int\>`
+    * - `-db_min_samples \<int\> <cmdline.html#db_min_samples-int>`_
       - 20
       - The number of samples (or total weight) in a neighborhood for a
         point to be considered as a core point. This includes the point
         itself.
 
-    * - :ref:`-nminfr \<int\>`
+    * - `-nminfr \<int\> <cmdline.html#nminfr-int>`_
       - 20
       - Number of minimum frames in a cluster to output it as trajectory
 
-    * - :ref:`-[no]fit`
+    * - `-[no]fit <cmdline.html#no-fit>`_
       - Enable
       - Enable fitting and superimposition of the atoms groups different from RMSD/clustering group before RMSD calculation.
 
-    * - :ref:`-[no]fit2central`
+    * - `-[no]fit2central <cmdline.html#no-fit2central>`_
       - Disable
       - Enable/Disable trajectory superimposition or fitting to central structure in the output trajectory
 
-    * - :ref:`-sort  \<keyword\>`
+    * - `-sort  \<keyword\> <cmdline.html#sort-keyword>`_
       - none
       - Sort trajectory according to these values. Accepted methods are:
         none, rmsd, features, user
 
-    * - :ref:`-plot  \<string\>`
+    * - `-plot  \<string\> <cmdline.html#plot-string>`_
       - pca_cluster.png
       - To plot features with clusters in this file.
 
