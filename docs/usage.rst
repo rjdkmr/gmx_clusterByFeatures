@@ -51,19 +51,19 @@ Options
       - Default
       - File type
 
-    * - :ref:`cmdline:-f [\<.xtc/.trr/...\>]`
+    * - :ref:`-f [\<.xtc/.trr/...\>]`
       - traj.xtc
       - Trajectory: xtc trr cpt gro g96 pdb tng
 
-    * - :ref:`cmdline:-s [\<.tpr/.gro/...\>]`
+    * - :ref:`-s [\<.tpr/.gro/...\>]`
       - topol.tpr
       - Structure+mass(db): tpr gro g96 pdb brk ent
 
-    * - :ref:`cmdline:-n [\<.ndx\>]`
+    * - :ref:`-n [\<.ndx\>]`
       - index.ndx
       - Index file
 
-    * - :ref:`cmdline:-feat [\<.xvg\>]`
+    * - :ref:`-feat [\<.xvg\>]`
       - feature.xvg
       - xvgr/xmgr file
 
@@ -79,23 +79,23 @@ Options
       - Default
       - File type
 
-    * - :ref:`cmdline:-clid [\<.xvg\>]`
+    * - :ref:`-clid [\<.xvg\>]`
       - clid.xvg
       - xvgr/xmgr file (Can be used as both input and output)
 
-    * - :ref:`cmdline:-g [\<.log\>]`
+    * - :ref:`-g [\<.log\>]`
       - :ref:cluster.log
       - Log file
 
-    * - :ref:`cmdline:-fout [\<.xtc/.trr/...\>]`
+    * - :ref:`-fout [\<.xtc/.trr/...\>]`
       - trajout.xtc
       - Trajectory: xtc trr cpt gro g96 pdb tng
 
-    * - :ref:`cmdline:-cpdb [\<.pdb\>]`
+    * - :ref:`-cpdb [\<.pdb\>]`
       - central.pdb
       - Protein data bank file
 
-    * - :ref:`cmdline:-rmsd [\<.xvg\>]`
+    * - :ref:`-rmsd [\<.xvg\>]`
       - rmsd.xvg
       - xvgr/xmgr file
 
@@ -122,67 +122,67 @@ Options
       - 0
       - Only use frame when t MOD dt = first time (ps)
 
-    * - :ref:`cmdline:-xvg \<keyword\>`
+    * - :ref:`-xvg \<keyword\>`
       - xmgrace
       - xvg plot formatting: xmgrace, xmgr, none
 
-    * - :ref:`cmdline:-method \<keyword\>`
+    * - :ref:`-method \<keyword\>`
       - kmeans
       - Clustering methods. Accepted methods are:: kmeans, dbscan, gmixture
 
-    * - :ref:`cmdline:-nfeature \<int\>`
+    * - :ref:`-nfeature \<int\>`
       - 10
       - Number of features to use for clustering
 
-    * - :ref:`cmdline:-cmetric \<keyword\>`
+    * - :ref:`-cmetric \<keyword\>`
       - prior
       - Cluster metrics: Method to determine cluster number. Accepted
         methods are: prior, rmsd, ssr-sst, pFS, DBI
 
-    * - :ref:`cmdline:-ncluster \<int\>`
+    * - :ref:`-ncluster \<int\>`
       - 5
       - Number of clusters to generate for prior method. Maximum number of
         cluster for ctrmsd method.
 
-    * - :ref:`cmdline:-crmsthres \<real\>`
+    * - :ref:`-crmsthres \<real\>`
       - 0.1
       - RMSD (nm) threshold between central structures for RMSD cluster metric
         method.
 
-    * - :ref:`cmdline:-ssrchange \<real\>`
+    * - :ref:`-ssrchange \<real\>`
       - 2
       - Thershold relative change % in SSR/SST ratio for ssr-sst cluster
         metric method.
 
-    * - :ref:`cmdline:-db_eps \<real\>`
+    * - :ref:`-db_eps \<real\>`
       - 0.5
       - The maximum distance between two samples for them to be considered
         as in the same neighborhood.
 
-    * - :ref:`cmdline:-db_min_samples \<int\>`
+    * - :ref:`-db_min_samples \<int\>`
       - 20
       - The number of samples (or total weight) in a neighborhood for a
         point to be considered as a core point. This includes the point
         itself.
 
-    * - :ref:`cmdline:-nminfr \<int\>`
+    * - :ref:`-nminfr \<int\>`
       - 20
       - Number of minimum frames in a cluster to output it as trajectory
 
-    * - :ref:`cmdline:-[no]fit`
+    * - :ref:`-[no]fit`
       - Enable
       - Enable fitting and superimposition of the atoms groups different from RMSD/clustering group before RMSD calculation.
 
-    * - :ref:`cmdline:-[no]fit2central`
+    * - :ref:`-[no]fit2central`
       - Disable
       - Enable/Disable trajectory superimposition or fitting to central structure in the output trajectory
 
-    * - :ref:`cmdline:-sort  \<keyword\>`
+    * - :ref:`-sort  \<keyword\>`
       - none
       - Sort trajectory according to these values. Accepted methods are:
         none, rmsd, features, user
 
-    * - :ref:`cmdline:-plot  \<string\>`
+    * - :ref:`-plot  \<string\>`
       - pca_cluster.png
       - To plot features with clusters in this file.
 
