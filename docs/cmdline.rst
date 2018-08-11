@@ -328,7 +328,7 @@ Conditions:
   2. For ``-cmetric rmsd``, it is considered as largest number of clusters to
      be generated and iteratively number of clusters are reduced to check whether
      RMSD between central structures are **not** below RMSD threshold
-     (`-crmsthres \<real\> <#crmsthres-real>`_).
+     (``-crmsthres <real>``).
 
   3. For ``-cmetric ssr-sst``, ``-cmetric pFS`` and ``-cmetric DBI``, it is
      considered as maximum number of clusters to generated. At first, two
@@ -336,7 +336,9 @@ Conditions:
      one. When maximum number of clusters is reached, these three cluster-metrics
      are calculated and finally, number of clusters is selected.
 
+
 ******
+
 
 ``-crmsthres <real>``
 ~~~~~~~~~~~~~~~~~~~~~
@@ -351,7 +353,9 @@ It is assumed that when RMSD between two central structures are within the thres
 central structures are similar enough to merge the two clusters as a single cluster.
 However, it is **not** necessary that these two clusters will merge in next iteration.
 
+
 ******
+
 
 ``-ssrchange <real>``
 ~~~~~~~~~~~~~~~~~~~~~
@@ -360,7 +364,9 @@ automatically. This threshold gives potential position of Elbow in |elbow|.
 
 .. note::This option is only used when ``-cmetric ssr-sst`` is provided as input.
 
+
 ******
+
 
 ``-db_eps <real>``
 ~~~~~~~~~~~~~~~~~~~~~
@@ -370,10 +376,13 @@ same neighborhood.
 
 .. seealso: `scikit-learn DBSCAN class <http://scikit-learn.org/stable/modules/generated/sklearn.cluster.DBSCAN.html#sklearn.cluster.DBSCAN>`_
 
+
 ******
+
 
 ``-db_min_samples <int>``
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
 
 The number of samples (or total weight) in a neighborhood for a point to be
 considered as a core point. This includes the point
@@ -381,7 +390,9 @@ itself.
 
 .. seealso: `scikit-learn DBSCAN class <http://scikit-learn.org/stable/modules/generated/sklearn.cluster.DBSCAN.html#sklearn.cluster.DBSCAN>`_
 
+
 ******
+
 
 ``-nminfr <int>``
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -389,7 +400,9 @@ itself.
 Number of minimum frames in a cluster to output it as trajectory. If number
 of frames is less than this number, the cluster will be ignored.
 
+
 ******
+
 
 ``-[no]fit``
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -399,7 +412,9 @@ group before RMSD calculation.
 If Enabled, index group for fitting will be prompted. Otherwise, fitting will be
 performed with RMSD/clustering group.
 
+
 ******
+
 
 ``-[no]fit2central``
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -409,7 +424,9 @@ the output trajectory. Atoms group used for fitting depends on ``-[no]fit``
 option. If ``-nofit``, second input index group (RMSD/clustering group) will
 be used for fitting otherwise third index group will be used for fitting.
 
+
 ******
+
 
 ``-sort <keyword>``
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -436,7 +453,9 @@ Accepted methods are:
 
     Sort trajectory using values supplied by user. Not yet implemented.
 
+
 ******
+
 
 ``-plot <string>``
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~
