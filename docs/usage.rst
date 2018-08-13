@@ -110,15 +110,15 @@ Options
       - Default
       - Description
 
-    * - ``-b``
+    * - ``-b <real>``
       - 0
       - First frame (ps) to read from trajectory
 
-    * - ``-e``
+    * - ``-e <real>``
       - 0
       - Last frame (ps) to read from trajectory
 
-    * - ``-dt``
+    * - ``-dt <real>``
       - 0
       - Only use frame when t MOD dt = first time (ps)
 
@@ -154,12 +154,12 @@ Options
       - Thershold relative change % in SSR/SST ratio for ssr-sst cluster
         metric method.
 
-    * - `-db_eps \<real\> <cmdline.html#db_eps-real>`_
+    * - `-db_eps \<real\> <cmdline.html#db-eps-real>`_
       - 0.5
       - The maximum distance between two samples for them to be considered
         as in the same neighborhood.
 
-    * - `-db_min_samples \<int\> <cmdline.html#db_min_samples-int>`_
+    * - `-db_min_samples \<int\> <cmdline.html#db-min-samples-int>`_
       - 20
       - The number of samples (or total weight) in a neighborhood for a
         point to be considered as a core point. This includes the point

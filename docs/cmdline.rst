@@ -238,14 +238,14 @@ Presently following methods are implemented:
 
      |kmeans|- It needs cluster number as input (``-ncluster <int>``).
      Therefore, one should know beforehand how many cluster is there in data.
-     To automatically determine the cluster number, `-cmetric \<keyword\> <#cmetric-keyword>`_
+     To automatically determine the cluster number, `-cmetric <#cmetric-keyword>`_
      For more details about k-means method, see |kmeans-detail|.
 
   2. ``-method dbscan``
 
      |DBSCAN| - It does not require cluster number beforehand.
      The clusters are controlled by two other input options:
-     `-db_eps \<real\> <#db_eps-real>`_ and `-db_min_samples \<int\> <#db_min_samples-int>`_.
+     `-db_eps <cmdline.html#db-eps-real>`_ and `-db_min_samples <#db-min-samples-int>`_.
      For more details about DBSCAN method, see |dbscan-detail|.
 
   3. ``-method gmixture``
@@ -253,7 +253,7 @@ Presently following methods are implemented:
      |gmixture| - It also needs cluster number as input
      (``-ncluster <int>``).
      Therefore, one should know beforehand how many cluster is there in data.
-     To automatically determine the cluster number, see `-cmetric \<keyword\> <#cmetric-keyword>`_
+     To automatically determine the cluster number, see `-cmetric <#cmetric-keyword>`_
      For more details about k-means method, see |gmixture-detail|.
 
 ******
@@ -261,7 +261,7 @@ Presently following methods are implemented:
 ``-nfeature <int>``
 ~~~~~~~~~~~~~~~~~~~
 
-Number of features to be read from `-feat [\<.xvg\>] <#feat-xvg>`_ file.
+Number of features to be read from `-feat <#feat-xvg>`_ file.
 
 If file contains less than requested number of features, all features will be read.
 
@@ -287,12 +287,12 @@ Presently following cluster metrics are implemented:
   2. ``-cmetric rmsd``
 
      Root Mean Square deviation between central structures of clusters. It uses
-     `-crmsthres \<real\> <#crmsthres-real>`_ option for RMSD
+     `-crmsthres <#crmsthres-real>`_ option for RMSD
      threshold/cutoff.
 
      .. note:: It requires trajectory file as input.
                Otherwise, ``-cmetric ssr-sst`` will be used for cluster metric with
-               default `-ssrchange \<real\> <#ssrchange-real>`_ value.
+               default `-ssrchange <#ssrchange-real>`_ value.
 
   3. ``-cmetric ssr-sst``
 
@@ -316,7 +316,7 @@ Presently following cluster metrics are implemented:
 ``-ncluster <int>``
 ~~~~~~~~~~~~~~~~~~~
 
-It takes the number of clusters. Its usage depends on `-cmetric \<keyword\> <#cmetric-keyword>`_.
+It takes the number of clusters. Its usage depends on `-cmetric <#cmetric-keyword>`_.
 
 
 .. note:: It is only applicable when ``-method kmeans`` or ``-method gmixture``
