@@ -58,8 +58,8 @@ before_install:
     echo "Selected Python $PYVER"
     python --version
 
-    export CC=gcc
-    export CXX=g++
+    export CC=gcc-5
+    export CXX=g++-5
 
   fi
 install:
@@ -86,6 +86,7 @@ before_script:
 - |
   if [[ -z ${DOCKER_IMAGE} ]]; then
      bash build_in_travis.sh $TRAVIS_OS_NAME
+     pkg-config --list-all
      pip install -ve .
   fi
   
