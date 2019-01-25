@@ -32,38 +32,33 @@
  *
  */
 
-#ifndef LOGSTREAM_H
-#define LOGSTREAM_H
+#include <pybind11/pybind11.h>
+#include <pybind11/stl.h>
 
-#include <cstdio>
-#include <sstream>
-#include <iomanip>
-#include <iostream>
+#include <string>
+#include <vector>
 
-// LOG output and file handler ///////
-class LogStream
-{
 
-public:
-    FILE *flog;
-    const char *fname;
-    int default_precision;
-    int precision;
-    void setprecision(int n);
-    void resetprecision();
-    LogStream(const char *fname);
-    ~LogStream(void);
-};
+#include "gromacs/commandline/cmdlineinit.h"
 
-template <class T>
-LogStream& operator<< (LogStream& st, T val)
-{
-  std::stringstream ss;
+namespace py = pybind11;
 
-  ss << std::setprecision(st.precision) << std::fixed << val;
-  fprintf(st.flog, "%s", ss.str().c_str());
-  std::cout<<ss.str();
-  return st;
+int gmx_clusterByFeatures(int argc,char *argv[]);
+
+void wrapped_gmx_clusterByFeatures(std::vector<std::string> argument_vector) {
+    char *argv[argument_vector.size()];
+    for(size_t n =0; n<argument_vector.size(); n++)
+        argv[n] = &argument_vector.at(n)[0];
+    
+    gmx_run_cmain(argument_vector.size(), argv, &gmx_clusterByFeatures);
 }
 
-#endif // LOGSTREAM_H
+void wrap_gmx_clusterByFeatures(py::module &m) {
+    m.def("cluster", &wrapped_gmx_clusterByFeatures);
+}
+
+
+PYBIND11_MODULE(gmx_clusterByFeatures, m) 
+{
+    wrap_gmx_clusterByFeatures(m);
+}

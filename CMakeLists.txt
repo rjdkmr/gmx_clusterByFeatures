@@ -1,5 +1,4 @@
 cmake_minimum_required(VERSION 2.8)
-project(gmx_clusterByFeatures CXX)
 
 set(gmx_clusterByFeatures_MAJOR_VERSION 1)
 set(gmx_clusterByFeatures_MINOR_VERSION 0)
@@ -32,7 +31,9 @@ endforeach()
 # Cmake modules/macros are in a subdirectory to keep this file cleaner
 list(APPEND CMAKE_MODULE_PATH "${CMAKE_CURRENT_SOURCE_DIR}/cmake")
 
-#### PYTHON CHECKING #####
+##############################################################
+################### PYTHON CHECKING #########################
+##############################################################
 macro(check_python_module module)
     execute_process(COMMAND "${PYTHON_EXECUTABLE}" "-c" "import ${module}; print(${module}.__version__)" RESULT_VARIABLE FOUND_MODULE
                     OUTPUT_VARIABLE MODULE_VERSION
@@ -82,8 +83,7 @@ add_definitions( ${GROMACS_DEFINITIONS} )
 ##############################################################
 
 ##############################################################
-# After gromacs2016, it uses c++11, and therefore it must be compiled with c++11 compiler
-
+# checking for C++11 or newer
 include(CheckCXXCompilerFlag)
 CHECK_CXX_COMPILER_FLAG("-std=c++11" COMPILER_SUPPORTS_CXX11)
 CHECK_CXX_COMPILER_FLAG("-std=c++0x" COMPILER_SUPPORTS_CXX0X)
@@ -92,11 +92,42 @@ if(COMPILER_SUPPORTS_CXX11)
 elseif(COMPILER_SUPPORTS_CXX0X)
     set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++0x")
 else()
-	message(FATAL_ERROR "This version of GROMACS requires C++11-compatible standard library. Please use a newer compiler, or a newer standard library, or use the GROMACS 5.1.x release. See the installation guide for details.")
+    message(FATAL_ERROR "C++11 complier not found. Please use a newer compiler, or a newer standard library.")
 endif()
+set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -fvisibility=hidden")
 
 
 ##############################################################
+# Add pybind11
+set(PYBIND11_CPP_STANDARD -std=c++11)
+add_subdirectory(pybind11)
+
+##############################################################
+# Python module compilation and installation path
+if (NOT PYTHON_INSTDIR)
+    # Determine correct installation directory for Python bindings
+    # From http://plplot.svn.sourceforge.net/viewvc/plplot/trunk/cmake/modules/python.cmake?revision=11014
+    execute_process(
+        COMMAND
+        ${PYTHON_EXECUTABLE} -c "from __future__ import print_function; from distutils import sysconfig; print(sysconfig.get_python_lib(1,0,prefix='${CMAKE_INSTALL_PREFIX}'))"
+        OUTPUT_VARIABLE PYTHON_INSTDIR
+        OUTPUT_STRIP_TRAILING_WHITESPACE
+      )
+endif (NOT PYTHON_INSTDIR)
+message("Python Install directory ${PYTHON_INSTDIR}")
+
+INSTALL(DIRECTORY gmx_clusterByFeatures DESTINATION ${PYTHON_INSTDIR}
+COMPONENT python
+PATTERN ".svn" EXCLUDE
+PATTERN "test_data" EXCLUDE
+PATTERN "testData" EXCLUDE
+PATTERN "test_list*" EXCLUDE
+PATTERN "CMake*" EXCLUDE
+PATTERN "Basement" EXCLUDE
+PATTERN "UnitTest*" EXCLUDE
+)
+set(gmx_clusterByFeatures_PythonDir "${PYTHON_INSTDIR}/gmx_clusterByFeatures")
+set(gmx_clusterByFeatures_PYTHON_OUTPUT_DIRECTORY "${CMAKE_SOURCE_DIR}/gmx_clusterByFeatures")
 
 # Add sub-directories
 add_subdirectory(src)

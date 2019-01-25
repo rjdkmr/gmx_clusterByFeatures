@@ -1,0 +1,7 @@
+pkgconfig
+pybind11
+numpy
+scikit-learn
+scipy
+matplotlib
+

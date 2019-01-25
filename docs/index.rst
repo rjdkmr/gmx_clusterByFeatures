@@ -15,4 +15,4 @@ Contents
    Introduction <intro>
    Download and Installation <install>
    How to use gmx_clusterByFeatures? <usage>
-   Command line options in details <cmdline>
+   Working Examples <examples>

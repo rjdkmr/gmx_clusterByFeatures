@@ -1,0 +1,126 @@
+language: python
+sudo: false
+
+python:
+- 3.6
+
+os:
+- linux
+- osx
+
+matrix:
+  exclude:
+  - os: osx
+    python: 3.6
+  include:
+  - sudo: required
+    python: 3.6
+    services:
+    - docker
+    env: DOCKER_IMAGE=quay.io/pypa/manylinux1_x86_64
+  - os: osx
+    python: 3.4
+    language: generic
+    env: PYTHON=3.4
+  - os: osx
+    python: 3.5
+    language: generic
+    env: PYTHON=3.5
+  - os: osx
+    python: 3.6
+    language: generic
+    env: PYTHON=3.6
+  allow_failures:
+  - os: osx
+
+env:
+  global:
+    # $PYPIPASSWORD
+    secure: qo57dxY6zF76pgz34Qq5a4W0o/ra9hMCAg6xivX7XOehE6vyN/tQkm5V9ZknvXEnwHZDDPu3568Tmdm4D59FtNsOedZHNrtroCKnOZnRZfsWhQYDzK7/7QnlqWBbPRdw9AgdipND3RK85gySsne7SUlDRrF2DRvKefxgeXPysR8URRHDbcCPxFDkdKbpXOEbn2ur8hC1ipKwqxEWkK5fQEmayYkNQOFmnjyRukGoH5JT48QOMJUsDWLfrDq6kpyAI3nk4RNw32tgavOQ28UCefj8gf/JXbsqVq8hW/L4LQLN7eai97hqz3Ew4MsqleDDroY88axTkMJG/dBg55YASs7ZwJYaIMBrryAAmXj+uB4TzDN/uKdZpkPek6WzuLKmcOb7K1WCYuqTPXbEdsJSkKtxz9xFGF9P1/jKFcQK0t+RalvL+i11hGsrkDfNu4xehmdKHzKiyUcH7wxOWc3iG4kbmmYUMY0Ynf+zSCE/GJ2ABRp24k1dfwJnd1WflqhGyIcd3jrzGX7zEI4TWPA/37XYx9S6fG7MdX2vbJliRGxzWWUKXECcSRqZH8bx3gdUeM00zbBS9v7xfYVcu9c3VxhxOz3U5XKzbozeffysOhpRuxMAze6M+fH6pF/Yq335qB699Qm4JctP30itXTH463fpc4L1/kQ+YoRJ16VFjSs=
+
+before_install:
+- |
+  if [[ $TRAVIS_OS_NAME != 'osx' ]]; then
+    sudo apt-get update -qq
+  else
+    brew update
+    brew cask uninstall oclint
+    brew install gcc5
+    brew outdated pyenv || brew upgrade pyenv
+    eval "$(pyenv init -)"
+
+    PYVER=${PYTHON}
+    # Install the latest release of the specified Python version using pyenv.
+    PYVER="$(pyenv install --list | grep -E "^\\s*$PYVER" | sort -n -t. -k3 | tail -n1)"
+    pyenv install $PYVER
+    pyenv global $PYVER
+    echo "Selected Python $PYVER"
+    python --version
+
+    export CC=gcc
+    export CXX=g++
+
+  fi
+install:
+- python -m pip install --upgrade pip
+- python -m pip install --upgrade wheel
+- python -m pip install pkgconfig
+- python -m pip install pybind11
+- |
+  if [[ $TRAVIS_OS_NAME != 'osx' ]]; then
+    python -m pip install auditwheel
+    sudo apt-get install libeigen3-dev
+    sudo apt-get install libfftw3* libopenblas* liblapack3 liblapack-dev 
+    sudo apt-get install libatlas3-base libatlas-base-dev
+    sudo apt-get curl wget
+  else
+    brew install eigen
+  fi
+- |
+  if [[ -n "$DOCKER_IMAGE" ]]; then
+    docker pull $DOCKER_IMAGE
+  fi
+
+before_script:
+- |
+  if [[ -z ${DOCKER_IMAGE} ]]; then
+     bash build_in_travis.sh
+     python -m pip install -ve .
+  fi
+  
+script:
+- |
+  if [[ -z ${DOCKER_IMAGE} ]]; then
+      python -c "import gmx_clusterByFeatures; print('=====\nTEST -- pyOBabel.openbabel version: ', pyOBabel.version_OB(), '\n=====')"
+  else
+     docker run --rm -v `pwd`:/io ${DOCKER_IMAGE} /io/build_in_docker.sh
+  fi
+- |
+  if [[ -n ${DOCKER_IMAGE} ]]; then
+      ls wheelhouse/*
+  fi
+#  
+# after_success:
+# - |
+#  echo "[distutils]"                                  > ~/.pypirc
+#  echo "index-servers ="                             >> ~/.pypirc
+#  echo "    pypi"                                    >> ~/.pypirc
+#  echo "[pypi]"                                      >> ~/.pypirc
+#  echo "    username: rjdkmr"                         >> ~/.pypirc
+#  echo "    password: $PYPIPASSWORD"                  >> ~/.pypirc
+#  echo "[server-login]"                              >> ~/.pypirc
+#  echo "    username: rjdkmr"                         >> ~/.pypirc
+#  echo "    password: $PYPIPASSWORD"                  >> ~/.pypirc
+#- |
+#  pip install --upgrade twine
+#  export TWINE_USERNAME=rjdkmr
+#  export TWINE_PASSWORD=$PYPIPASSWORD
+#  if [[ $TRAVIS_OS_NAME != 'osx' ]]; then
+#    if [[ -n ${DOCKER_IMAGE} ]]; then
+#      twine upload -u rjdkmr -p $PYPIPASSWORD --skip-existing  wheelhouse/*manylinux1_x86_64.whl
+#    fi
+#  else
+#   pip wheel -w wheelhouse/ --no-deps --no-cache-dir .
+#   twine upload -u rjdkmr -p $PYPIPASSWORD --skip-existing  wheelhouse/*.whl
+#  fi
+

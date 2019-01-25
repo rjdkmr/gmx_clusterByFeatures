@@ -1,14 +1,58 @@
+/*
+ * This file is part of gmx_clusterByFeatures
+ *
+ * Author: Rajendra Kumar
+ * Copyright (C) 2018  Rajendra Kumar
+ *
+ * g_coordNdata is a free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ *
+ * g_coordNdata is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with g_coordNdata.  If not, see <http://www.gnu.org/licenses/>.
+ *
+ * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
+ * "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
+ * LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR
+ * A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT
+ * OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL,
+ * SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED
+ * TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR
+ * PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF
+ * LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING
+ * NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
+ * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+ *
+ *
+ */
+
+#include <pybind11/eval.h>
+
 #include <string>
 #include <vector>
 #include <iostream>
 #include <sstream>
 
-#include "python_helper.h"
+
 #include "do_cluster.h"
 
-PythonInterpreter* PythonCode::python;
+namespace py = pybind11;
 
-std::string PythonCode::importModules() {
+py::object PyCluster::scope;
+
+void PyCluster::InitPythonAndLoadFunc(){
+    py::object scope = py::module::import("__main__").attr("__dict__");
+    py::exec(PyCluster::PyDoClusteringClusteringClassCode(), scope);
+    PyCluster::scope = scope;
+}
+
+std::string PyCluster::PyDoClusteringClusteringClassCode() {
 
     std::string code = R"~(import numpy as np
 from sklearn import cluster as getCluster
@@ -16,13 +60,6 @@ from sklearn import mixture
 import re, os, sys
 import shlex, subprocess, shutil
 
-)~";
-     return code;
-}
-
-std::string PythonCode::DoClusteringClass() {
-
-    std::string code = R"~(
 class DoClustering:
     algo = 'kmeans'
     dbscan_eps = 0.5
@@ -194,15 +231,8 @@ class DoClustering:
 }
 
 
-void PythonCode::InitPythonAndLoadFunc(){
 
-    PythonInterpreter* python = new  PythonInterpreter();
-    python->run_string(PythonCode::importModules());
-    python->run_string(PythonCode::DoClusteringClass());
-    PythonCode::python = python;
-}
-
-void PythonCode::initializeClustering(const char* filename, int nFeatures, const char* algo, float dbscan_eps, int dbscan_min_samples) {
+void PyCluster::initializeClustering(const char* filename, int nFeatures, const char* algo, float dbscan_eps, int dbscan_min_samples) {
     std::stringstream code;
     code<<"doCluster = DoClustering( ";
     code<<"\'"<<filename<<"\', ";
@@ -211,85 +241,66 @@ void PythonCode::initializeClustering(const char* filename, int nFeatures, const
     code<<"dbscan_eps="<<dbscan_eps<<", ";
     code<<"dbscan_min_samples="<<dbscan_min_samples;
     code<<")";
-    PythonCode::python->run_string(code.str());
+    py::exec(code.str(), PyCluster::scope);
 }
 
-void PythonCode::performClustering(int n_clusters){
+void PyCluster::performClustering(int n_clusters){
     std::stringstream code;
     code<<"doCluster.calculate_clusters("<<n_clusters<<")";
-    PythonCode::python->run_string(code.str());
+    py::exec(code.str(), PyCluster::scope);
 }
 
-std::vector< int > PythonCode::getClusterLabels(int n_clusters){
+std::vector< int > PyCluster::getClusterLabels(int n_clusters){
     std::vector< int > labels;
-    PyObject* pyList;
+    py::list pyList;
 
     // Run the code and return python list
-    pyList = PythonCode::python->run_string_get_obj("doCluster.get_labels( " + std::to_string(n_clusters) + " ) \n" );
+    pyList = py::eval("doCluster.get_labels( " + std::to_string(n_clusters) + " ) \n", PyCluster::scope);
 
     if (pyList==NULL)   {
         std::cout<<"ERROR: Error in python execution. No python object returned from getClusterLabels(). \n";
         exit(1);
     }
 
-    if (!PyList_Check(pyList))  {
-        std::cout<<"ERROR: Retrun python object is not a Python list.";
-        exit(1);
-    }
-
     // Read Python list and convert back it to C++ vector
-    Py_ssize_t n;
-    n = PyList_Size(pyList);
-    for(Py_ssize_t i = 0; i<n; i++) {
-        labels.push_back( (int)PyLong_AsLong( PyList_GET_ITEM(pyList, i) ) );
+    for (size_t i =0; i<pyList.size(); i++){
+        labels.push_back( pyList[i].cast<int>() );
     }
 
-    Py_DECREF(pyList);
     return labels;
 }
 
-void PythonCode::getSsrSstStats(int n_clusters, double *ratio, double *pFS) {
-    PyObject *pyReturnValues, *pyRatio, *pyPFS;
-    Py_ssize_t i = 0;
+void PyCluster::getSsrSstStats(int n_clusters, double *ratio, double *pFS) {
+    py::tuple pyReturnValues;
 
     // Run the code and return python tuple
-    pyReturnValues = PythonCode::python->run_string_get_obj("doCluster.get_ssr_sst_stats( " + std::to_string(n_clusters) + " ) \n" );
+    pyReturnValues = py::eval("doCluster.get_ssr_sst_stats( " + std::to_string(n_clusters) + " ) \n", PyCluster::scope );
 
     if (pyReturnValues==NULL)   {
         std::cout<<"ERROR: Error in python execution. No python object returned from getSsrSstStats().\n";
         exit(1);
     }
 
-    if (!PyTuple_Check(pyReturnValues))  {
-        std::cout<<"ERROR: Retrun python object is not a Python tuple.";
-        exit(1);
-    }
-
-    // Read Python tuple and convert back it to C++ double
-    pyRatio = PyTuple_GetItem(pyReturnValues, i++);
-    pyPFS = PyTuple_GetItem(pyReturnValues, i++);
-
-    *ratio = PyFloat_AsDouble(pyRatio);
-    *pFS = PyFloat_AsDouble(pyPFS);
+    *ratio = pyReturnValues[0].cast<float>() ;
+    *pFS = pyReturnValues[1].cast<float>() ;
 
     //std::cout<<*ratio<<" "<<*pFS<<"\n";
-
-    Py_DECREF(pyReturnValues);
 }
 
-void PythonCode::plotFeaturesClusters( int n_clusters, const char *plotfile,
+void PyCluster::plotFeaturesClusters( int n_clusters, const char *plotfile,
                                      std::vector< long > central_id,
                                      int fsize, float width, float height) {
     std::stringstream code;
 
     // First assign central_id variable
     code<<"central_id = [ ";
-    for (int i=0; i<central_id.size(); i++)
+    for (size_t i=0; i<central_id.size(); i++)
         code<<central_id[i]<<", ";
     code<<" ]";
-    PythonCode::python->run_string(code.str());
+    py::exec(code.str(), PyCluster::scope);
 
-    std::stringstream().swap(code); // clear the stringstream
+    code.str(""); // clear the stringstream
+    code.clear();
 
     code<<"doCluster.plotFeaturesClusters("<<n_clusters<<", ";
     code<<" \'"<<plotfile<<"\', ";
@@ -298,5 +309,5 @@ void PythonCode::plotFeaturesClusters( int n_clusters, const char *plotfile,
     code<<"width="<<width<<", ";
     code<<"height="<<height;
     code<<")";
-    PythonCode::python->run_string(code.str());
+    py::exec(code.str(), PyCluster::scope);
 }
