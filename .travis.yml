@@ -72,7 +72,7 @@ install:
     sudo apt-get install libeigen3-dev
     sudo apt-get install libfftw3* libopenblas* liblapack3 liblapack-dev 
     sudo apt-get install libatlas3-base libatlas-base-dev
-    sudo apt-get curl wget
+    sudo apt-get install curl wget
   else
     brew install eigen
   fi
