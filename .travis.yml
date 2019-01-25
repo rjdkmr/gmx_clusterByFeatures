@@ -46,6 +46,7 @@ before_install:
     brew update
     brew cask uninstall oclint
     brew install gcc5
+    brew install fftw
     brew outdated pyenv || brew upgrade pyenv
     eval "$(pyenv init -)"
 
@@ -85,7 +86,7 @@ before_script:
 - |
   if [[ -z ${DOCKER_IMAGE} ]]; then
      bash build_in_travis.sh $TRAVIS_OS_NAME
-     python -m pip install -ve .
+     pip install -ve .
   fi
   
 script:
