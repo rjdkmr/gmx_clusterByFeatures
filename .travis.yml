@@ -86,7 +86,7 @@ before_script:
 - |
   if [[ -z ${DOCKER_IMAGE} ]]; then
      bash build_in_travis.sh $TRAVIS_OS_NAME
-     pkg-config --list-all
+     export GMX_PATH=/usr/local/gromacs
      pip install -ve .
   fi
   
