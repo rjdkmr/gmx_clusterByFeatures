@@ -45,7 +45,7 @@ before_install:
   else
     brew update
     brew cask uninstall oclint
-    brew install gcc@7
+    brew install gcc@6
     brew install fftw
     brew outdated pyenv || brew upgrade pyenv
     eval "$(pyenv init -)"
@@ -58,8 +58,8 @@ before_install:
     echo "Selected Python $PYVER"
     python --version
 
-    export CC=gcc-7
-    export CXX=g++-7
+    export CC=gcc-6
+    export CXX=g++-6
 
   fi
 install:
@@ -76,6 +76,7 @@ install:
     sudo apt-get install curl wget
   else
     brew install eigen
+    python -m pip install delocate
   fi
 - |
   if [[ -n "$DOCKER_IMAGE" ]]; then
@@ -88,6 +89,11 @@ before_script:
      bash build_in_travis.sh $TRAVIS_OS_NAME
      export GMX_PATH=/usr/local/gromacs
      pip install -ve .
+     if [[ $TRAVIS_OS_NAME == 'osx' ]]; then
+       pip wheel -w wheels/ --no-deps --no-cache-dir .
+       delocate-listdeps wheels/*.whl
+       delocate-wheel -w fixed_wheels -v wheels/*.whl
+       delocate-listdeps fixed_wheels/*.whl
   fi
   
 script:
