@@ -94,6 +94,7 @@ before_script:
        delocate-listdeps wheels/*.whl
        delocate-wheel -w fixed_wheels -v wheels/*.whl
        delocate-listdeps fixed_wheels/*.whl
+     fi
   fi
   
 script:
