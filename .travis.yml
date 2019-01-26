@@ -45,6 +45,7 @@ before_install:
   else
     brew update
     brew cask uninstall oclint
+    brew install libomp
     #brew install gcc@7
     brew install fftw
     brew outdated pyenv || brew upgrade pyenv
