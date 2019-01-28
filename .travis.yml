@@ -22,14 +22,17 @@ matrix:
     python: 3.4
     language: generic
     env: PYTHON=3.4
+    osx_image: xcode10
   - os: osx
     python: 3.5
     language: generic
     env: PYTHON=3.5
+    osx_image: xcode10
   - os: osx
     python: 3.6
     language: generic
     env: PYTHON=3.6
+    osx_image: xcode10
   allow_failures:
   - os: osx
 
