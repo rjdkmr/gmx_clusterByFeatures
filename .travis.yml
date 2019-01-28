@@ -49,6 +49,11 @@ before_install:
     brew install gcc --with-system-zlib
     ls -lrt $(brew --prefix gcc)/
     ls -lrt $(brew --prefix gcc)/include
+    ls -lrt $(brew --prefix gcc)/include/c++
+    ls -lrt $(brew --prefix gcc)/lib
+    ls -lrt $(brew --prefix gcc)/lib/c++
+    updatedb
+    locate chrono
     brew install fftw
     brew outdated pyenv || brew upgrade pyenv
     eval "$(pyenv init -)"
