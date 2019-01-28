@@ -193,15 +193,16 @@ class BuildExt(build_ext):
         'unix': [],
     }
 
-    if sys.platform == 'darwin':
-        # Only in case of clang, so check for this flag
-        if has_flag(self.compiler, '-stdlib=libc++'):
-            c_opts['unix'] += ['-stdlib=libc++', '-mmacosx-version-min=10.7']
-    
     if sys.platform == 'linux':
         c_opts['unix'] += [ '-static-libstdc++'] # Got From https://github.com/pypa/manylinux/issues/118
 
     def build_extensions(self):
+        # Check for -stdlib=libc++ on macos-clang
+        if sys.platform == 'darwin':
+            # Only in case of clang, so check for this flag
+            if has_flag(self.compiler, '-stdlib=libc++'):
+                self.c_opts['unix'] += ['-stdlib=libc++', '-mmacosx-version-min=10.7']
+
         ct = self.compiler.compiler_type
         opts = self.c_opts.get(ct, [])
         if ct == 'unix':
