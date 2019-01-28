@@ -50,10 +50,7 @@ before_install:
     ls -lrt $(brew --prefix gcc)/
     ls -lrt $(brew --prefix gcc)/include
     ls -lrt $(brew --prefix gcc)/include/c++
-    ls -lrt $(brew --prefix gcc)/lib
-    ls -lrt $(brew --prefix gcc)/lib/c++
-    updatedb
-    locate chrono
+    ls -lrt $(brew --prefix gcc)/include/c++/8.2.0
     brew install fftw
     brew outdated pyenv || brew upgrade pyenv
     eval "$(pyenv init -)"
