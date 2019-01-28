@@ -78,6 +78,8 @@ install:
     brew install eigen
     brew install cmake
     python -m pip install delocate
+    export CC=gcc-7
+    export CXX=g++-7
   fi
 - |
   if [[ -n "$DOCKER_IMAGE" ]]; then
@@ -87,8 +89,6 @@ install:
 before_script:
 - |
   if [[ -z ${DOCKER_IMAGE} ]]; then
-     export CC=gcc-7
-     export CXX=g++-7
      bash build_in_travis.sh $TRAVIS_OS_NAME
      
      export GMX_PATH=/usr/local/gromacs
