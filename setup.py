@@ -152,8 +152,7 @@ def get_extensions():
         libraries=gromacs_flags['libs'],
         runtime_library_dirs = [gromacs_flags['lib_dir']],
         language='c++',
-        extra_compile_args=[ '-static-libstdc++'], # Got From https://github.com/pypa/manylinux/issues/118
-        extra_link_args= gromacs_flags['ldflags'] + ['-static-libstdc++'],
+        extra_link_args= gromacs_flags['ldflags'],
         ),]
 
 
@@ -195,7 +194,12 @@ class BuildExt(build_ext):
     }
 
     if sys.platform == 'darwin':
-        c_opts['unix'] += ['-stdlib=libc++', '-mmacosx-version-min=10.7']
+        # Only in case of clang, so check for this flag
+        if has_flag(self.compiler, '-stdlib=libc++'):
+            c_opts['unix'] += ['-stdlib=libc++', '-mmacosx-version-min=10.7']
+    
+    if sys.platform == 'linux':
+        c_opts['unix'] += [ '-static-libstdc++'] # Got From https://github.com/pypa/manylinux/issues/118
 
     def build_extensions(self):
         ct = self.compiler.compiler_type
@@ -209,6 +213,8 @@ class BuildExt(build_ext):
             opts.append('/DVERSION_INFO=\\"%s\\"' % self.distribution.get_version())
         for ext in self.extensions:
             ext.extra_compile_args += opts
+            if sys.platform == 'linux':
+                ext.extra_link_args += ['-static-libstdc++']
 
         # Remove "-Wstrict-prototypes" flags
         customize_compiler(self.compiler)
