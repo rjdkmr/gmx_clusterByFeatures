@@ -49,6 +49,8 @@ before_install:
     brew install gcc --with-system-zlib
     brew install fftw
     brew outdated pyenv || brew upgrade pyenv
+    brew upgrade cmake
+    brew cleanup
     eval "$(pyenv init -)"
 
     PYVER=${PYTHON}
