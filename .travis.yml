@@ -46,8 +46,9 @@ before_install:
     brew update
     brew cask uninstall oclint
     brew install gsl
-    brew install gcc@7 --with-system-zlib
-    ls -lrt $(brew --prefix gcc@7)
+    brew install gcc --with-system-zlib
+    ls -lrt $(brew --prefix gcc)/
+    ls -lrt $(brew --prefix gcc)/include
     brew install fftw
     brew outdated pyenv || brew upgrade pyenv
     eval "$(pyenv init -)"
@@ -78,8 +79,8 @@ install:
     brew install eigen
     brew install cmake
     python -m pip install delocate
-    export CC=gcc-7
-    export CXX=g++-7
+    export CC=gcc-8
+    export CXX=g++-8
   fi
 - |
   if [[ -n "$DOCKER_IMAGE" ]]; then
