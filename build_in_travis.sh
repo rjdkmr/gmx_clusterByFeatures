@@ -27,7 +27,7 @@ cd build
 if [[ $1 != 'osx' ]]; then
   cmake .. -DGMX_GPU=off -DBUILD_SHARED_LIBS=ON -DGMX_PREFER_STATIC_LIBS=ON -DCMAKE_CXX_FLAGS="-static-libstdc++" -DGMX_SIMD=SSE2
 else
-  cmake .. -DGMX_GPU=off -DGMX_SIMD=SSE2 -DCMAKE_CXX_FLAGS="-I$(brew --prefix gcc)/include/c++/8.2.0"
+  cmake ..
 fi
 make -j2 && sudo make install
 cd ..

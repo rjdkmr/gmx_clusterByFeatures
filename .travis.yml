@@ -47,10 +47,6 @@ before_install:
     brew cask uninstall oclint
     brew install gsl
     brew install gcc --with-system-zlib
-    ls -lrt $(brew --prefix gcc)/
-    ls -lrt $(brew --prefix gcc)/include
-    ls -lrt $(brew --prefix gcc)/include/c++
-    ls -lrt $(brew --prefix gcc)/include/c++/8.2.0
     brew install fftw
     brew outdated pyenv || brew upgrade pyenv
     eval "$(pyenv init -)"
