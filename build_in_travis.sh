@@ -27,11 +27,7 @@ cd build
 if [[ $1 != 'osx' ]]; then
   cmake .. -DGMX_GPU=off -DBUILD_SHARED_LIBS=ON -DGMX_PREFER_STATIC_LIBS=ON -DCMAKE_CXX_FLAGS="-static-libstdc++" -DGMX_SIMD=SSE2
 else
-  cmake .. -DGMX_GPU=off -DGMX_SIMD=SSE2 \
-           -DOpenMP_CXX_FLAGS="-Xpreprocessor -fopenmp -I$(brew --prefix libomp)/include" \
-           -DOpenMP_CXX_LIB_NAMES="omp" -DOpenMP_omp_LIBRARY=$(brew --prefix libomp)/lib/libomp.dylib \
-           -DOpenMP_C_FLAGS="-Xpreprocessor -fopenmp -I$(brew --prefix libomp)/include" \
-           -DOpenMP_C_LIB_NAMES="omp"
+  cmake .. -DGMX_GPU=off -DGMX_SIMD=SSE2 -DCMAKE_CXX_FLAGS="-I$(brew --prefix gcc@7)/include" -DCMAKE_C_FLAGS="-I$(brew --prefix gcc@7)/include" -DCMAKE_LD_FLAGS="-L$(brew --prefix gcc@7)/lib"
 fi
 make -j2 && sudo make install
 cd ..

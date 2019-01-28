@@ -45,9 +45,9 @@ before_install:
   else
     brew update
     brew cask uninstall oclint
-    brew install libomp
     brew install gsl
-    #brew install gcc@7
+    brew install gcc@7 --with-system-zlib
+    ls -lrt $(brew --prefix gcc@7)
     brew install fftw
     brew outdated pyenv || brew upgrade pyenv
     eval "$(pyenv init -)"
@@ -60,8 +60,6 @@ before_install:
     echo "Selected Python $PYVER"
     python --version
 
-    # export CC=gcc-7
-    # export CXX=g++-7
 
   fi
 install:
@@ -89,7 +87,10 @@ install:
 before_script:
 - |
   if [[ -z ${DOCKER_IMAGE} ]]; then
+     export CC=gcc-7
+     export CXX=g++-7
      bash build_in_travis.sh $TRAVIS_OS_NAME
+     
      export GMX_PATH=/usr/local/gromacs
      pip install -ve .
      if [[ $TRAVIS_OS_NAME == 'osx' ]]; then
