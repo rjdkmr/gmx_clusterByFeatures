@@ -21,9 +21,11 @@ matrix:
   - os: osx
     python: 3.7
     osx_image: xcode10
+    language: generic
   - os: osx
     python: 3.7
     osx_image: xcode9.2
+    language: generic
   allow_failures:
   - os: osx
 
