@@ -105,7 +105,8 @@ install:
     sudo apt-get install libatlas3-base libatlas-base-dev
     sudo apt-get install curl wget
   else
-    python -m pip install delocate
+    pip install delocate
+    pip install pyopenssl six cryptography
     export CC=gcc-8
     export CXX=g++-8
   fi
