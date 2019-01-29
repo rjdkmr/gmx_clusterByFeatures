@@ -2,7 +2,7 @@ language: python
 sudo: false
 
 python:
-- 3.7
+- 3.6
 
 os:
 - linux
@@ -11,19 +11,19 @@ os:
 matrix:
   exclude:
   - os: osx
-    python: 3.7
+    python: 3.6
   include:
   - sudo: required
-    python: 3.7
+    python: 3.6
     services:
     - docker
     env: DOCKER_IMAGE=quay.io/pypa/manylinux1_x86_64
   - os: osx
-    python: 3.7
+    python: 3.6
     osx_image: xcode10
     language: generic
   - os: osx
-    python: 3.7
+    python: 3.6
     osx_image: xcode9.2
     language: generic
   allow_failures:
@@ -67,7 +67,7 @@ before_install:
       pyenv install $PYVER
       pyenv global $PYVER
       PYTHONS+=($PYVER)
-      printf "%s\n" $(python --version) | printf "Selected "
+      $(python --version)
       python -m pip install --upgrade pip
       python -m pip install --upgrade $pymodules
       python -m pip install delocate
@@ -96,11 +96,13 @@ before_script:
        for PYTHON in ${PYTHONS[@]}
        do
          pyenv global $PYTHON
-         printf "%s\n" $(python --version) | printf "Selected "
-         python -m pip install -ve .
-         install_name_tool -change @rpath/libgromacs.2.dylib /usr/local/gromacs/lib/libgromacs.dylib gmx_clusterByFeatures/*.so
+         $(python --version)
+         python -m setup.py build
+         # install_name_tool -change @rpath/libgromacs.2.dylib /usr/local/gromacs/lib/libgromacs.dylib gmx_clusterByFeatures/*.so
          install_name_tool -change @rpath/libgromacs.2.dylib /usr/local/gromacs/lib/libgromacs.dylib build/lib.*/gmx_clusterByFeatures/*.so
-         pip wheel -w wheels/ --no-deps --no-cache-dir .
+         python -m pip wheel -w wheels/ --no-deps --no-cache-dir .
+         python -m pip install gmx_clusterByFeatures --no-index -f wheels/
+         rm -rf build
        done
      else
        python -m pip install -ve .
@@ -114,7 +116,7 @@ script:
       for PYTHON in ${PYTHONS[@]}
       do
         pyenv global $PYTHON
-        printf "%s\n" $(python --version) | printf "Selected "
+        $(python --version)
         python -c "import gmx_clusterByFeatures; print('=====\nTEST -- gmx_clusterByFeatures GROMACS version: ', gmx_clusterByFeatures.gmx_version, '\n=====')"
       done
     else
