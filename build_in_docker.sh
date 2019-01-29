@@ -77,10 +77,10 @@ for whl in /io/wheelhouse/*.whl; do
     auditwheel repair "$whl" -w /io/wheelhouse/
 done
 
-: '
+
 # Install packages and test
 for PYBIN in /opt/python/*/bin/; do
-    "${PYBIN}pip" install pyOBabel --no-index -f /io/wheelhouse
-    "${PYBIN}python" -c "import pyOBabel; print('=====\nTEST -- pyOBabel.openbabel version: ', pyOBabel.version_OB(), '\n=====')"
+    "${PYBIN}pip" install gmx_clusterByFeatures --no-index -f /io/wheelhouse
+    "${PYBIN}python" -c "import gmx_clusterByFeatures; print('=====\nTEST -- gmx_clusterByFeatures GROMACS version: ', gmx_clusterByFeatures.gmx_version, '\n=====')"
 done
-'
+

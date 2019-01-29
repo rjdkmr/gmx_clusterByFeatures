@@ -122,8 +122,9 @@ before_script:
      export GMX_PATH=/usr/local/gromacs
      pip install -ve .
      if [[ $TRAVIS_OS_NAME == 'osx' ]]; then
-       export LD_LIBRARY_PATH=/usr/local/gromacs/lib:$LD_LIBRARY_PATH
        pip wheel -w wheels/ --no-deps --no-cache-dir .
+       export LD_LIBRARY_PATH="${LD_LIBRARY_PATH}:/usr/local/gromacs/lib"
+       export DYLD_LIBRARY_PATH="${DYLD_LIBRARY_PATH}:/usr/local/gromacs/lib"
        delocate-listdeps wheels/*.whl
        delocate-wheel -w fixed_wheels -v wheels/*.whl
        delocate-listdeps fixed_wheels/*.whl
@@ -144,22 +145,20 @@ script:
  
 # after_success:
 - |
-  echo "[distutils]"                                  > ~/.pypirc
-  echo "index-servers ="                             >> ~/.pypirc
-  echo "    pypi"                                    >> ~/.pypirc
-  echo "[pypi]"                                      >> ~/.pypirc
-  echo "    username: rjdkmr"                         >> ~/.pypirc
-  echo "    password: $PYPIPASSWORD"                  >> ~/.pypirc
-  echo "[server-login]"                              >> ~/.pypirc
-  echo "    username: rjdkmr"                         >> ~/.pypirc
-  echo "    password: $PYPIPASSWORD"                  >> ~/.pypirc
+    echo "[distutils]"                                  > ~/.pypirc
+    echo "index-servers ="                             >> ~/.pypirc
+    echo "    pypi"                                    >> ~/.pypirc
+    echo "[pypi]"                                      >> ~/.pypirc
+    echo "    username: rjdkmr"                        >> ~/.pypirc
+    echo "    password: $PYPIPASSWORD"                 >> ~/.pypirc
+    
 - |
   pip install --upgrade twine
   export TWINE_USERNAME=rjdkmr
   export TWINE_PASSWORD=$PYPIPASSWORD
   if [[ $TRAVIS_OS_NAME != 'osx' ]]; then
     if [[ -n ${DOCKER_IMAGE} ]]; then
-      twine upload -u rjdkmr -p $PYPIPASSWORD --skip-existing  wheelhouse/*manylinux1_x86_64.whl
+      twine upload --skip-existing  wheelhouse/*manylinux1_x86_64.whl
     fi
   #else
    #twine upload -u rjdkmr -p $PYPIPASSWORD --skip-existing  fixed_wheels/*.whl
