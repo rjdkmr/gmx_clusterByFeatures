@@ -40,6 +40,7 @@
 
 
 #include "gromacs/commandline/cmdlineinit.h"
+#include "gromacs/utility/baseversion.h"
 
 namespace py = pybind11;
 
@@ -54,6 +55,7 @@ void wrapped_gmx_clusterByFeatures(std::vector<std::string> argument_vector) {
 }
 
 void wrap_gmx_clusterByFeatures(py::module &m) {
+    m.def("gmx_version", &gmx_version);
     m.def("cluster", &wrapped_gmx_clusterByFeatures);
 }
 

@@ -78,6 +78,7 @@ before_install:
     brew install fftw
     brew outdated pyenv || brew upgrade pyenv
     brew upgrade cmake
+    brew install eigen
     brew cleanup
     eval "$(pyenv init -)"
 
@@ -104,8 +105,6 @@ install:
     sudo apt-get install libatlas3-base libatlas-base-dev
     sudo apt-get install curl wget
   else
-    brew install eigen
-    brew install cmake
     python -m pip install delocate
     export CC=gcc-8
     export CXX=g++-8
@@ -123,6 +122,7 @@ before_script:
      export GMX_PATH=/usr/local/gromacs
      pip install -ve .
      if [[ $TRAVIS_OS_NAME == 'osx' ]]; then
+       export LD_LIBRARY_PATH=/usr/local/gromacs/lib:$LD_LIBRARY_PATH
        pip wheel -w wheels/ --no-deps --no-cache-dir .
        delocate-listdeps wheels/*.whl
        delocate-wheel -w fixed_wheels -v wheels/*.whl
@@ -133,7 +133,7 @@ before_script:
 script:
 - |
   if [[ -z ${DOCKER_IMAGE} ]]; then
-      python -c "import gmx_clusterByFeatures; print('=====\nTEST -- pyOBabel.openbabel version: ', pyOBabel.version_OB(), '\n=====')"
+      python -c "import gmx_clusterByFeatures; print('=====\nTEST -- gmx_clusterByFeatures GROMACS version: ', gmx_clusterByFeatures.gmx_version, '\n=====')"
   else
      docker run --rm -v `pwd`:/io ${DOCKER_IMAGE} /io/build_in_docker.sh
   fi
@@ -141,28 +141,27 @@ script:
   if [[ -n ${DOCKER_IMAGE} ]]; then
       ls wheelhouse/*
   fi
-#  
+ 
 # after_success:
-# - |
-#  echo "[distutils]"                                  > ~/.pypirc
-#  echo "index-servers ="                             >> ~/.pypirc
-#  echo "    pypi"                                    >> ~/.pypirc
-#  echo "[pypi]"                                      >> ~/.pypirc
-#  echo "    username: rjdkmr"                         >> ~/.pypirc
-#  echo "    password: $PYPIPASSWORD"                  >> ~/.pypirc
-#  echo "[server-login]"                              >> ~/.pypirc
-#  echo "    username: rjdkmr"                         >> ~/.pypirc
-#  echo "    password: $PYPIPASSWORD"                  >> ~/.pypirc
-#- |
-#  pip install --upgrade twine
-#  export TWINE_USERNAME=rjdkmr
-#  export TWINE_PASSWORD=$PYPIPASSWORD
-#  if [[ $TRAVIS_OS_NAME != 'osx' ]]; then
-#    if [[ -n ${DOCKER_IMAGE} ]]; then
-#      twine upload -u rjdkmr -p $PYPIPASSWORD --skip-existing  wheelhouse/*manylinux1_x86_64.whl
-#    fi
-#  else
-#   pip wheel -w wheelhouse/ --no-deps --no-cache-dir .
-#   twine upload -u rjdkmr -p $PYPIPASSWORD --skip-existing  wheelhouse/*.whl
-#  fi
+- |
+  echo "[distutils]"                                  > ~/.pypirc
+  echo "index-servers ="                             >> ~/.pypirc
+  echo "    pypi"                                    >> ~/.pypirc
+  echo "[pypi]"                                      >> ~/.pypirc
+  echo "    username: rjdkmr"                         >> ~/.pypirc
+  echo "    password: $PYPIPASSWORD"                  >> ~/.pypirc
+  echo "[server-login]"                              >> ~/.pypirc
+  echo "    username: rjdkmr"                         >> ~/.pypirc
+  echo "    password: $PYPIPASSWORD"                  >> ~/.pypirc
+- |
+  pip install --upgrade twine
+  export TWINE_USERNAME=rjdkmr
+  export TWINE_PASSWORD=$PYPIPASSWORD
+  if [[ $TRAVIS_OS_NAME != 'osx' ]]; then
+    if [[ -n ${DOCKER_IMAGE} ]]; then
+      twine upload -u rjdkmr -p $PYPIPASSWORD --skip-existing  wheelhouse/*manylinux1_x86_64.whl
+    fi
+  #else
+   #twine upload -u rjdkmr -p $PYPIPASSWORD --skip-existing  fixed_wheels/*.whl
+  fi
 
