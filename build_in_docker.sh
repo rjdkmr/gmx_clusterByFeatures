@@ -79,7 +79,7 @@ done
 
 
 # Install packages and test
-for PYBIN in /opt/python/*/bin/; do
+for PYBIN in /opt/python/cp3*/bin/; do
     "${PYBIN}pip" install gmx_clusterByFeatures --no-index -f /io/wheelhouse
     "${PYBIN}python" -c "import gmx_clusterByFeatures; print('=====\nTEST -- gmx_clusterByFeatures GROMACS version: ', gmx_clusterByFeatures.gmx_version, '\n=====')"
 done
