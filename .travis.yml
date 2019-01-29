@@ -74,7 +74,7 @@ before_install:
     brew update
     brew cask uninstall oclint
     brew install gsl
-    brew install gcc --with-system-zlib
+    brew install gcc@8 --with-system-zlib
     brew install fftw
     brew outdated pyenv || brew upgrade pyenv
     brew upgrade cmake
@@ -118,16 +118,11 @@ before_script:
 - |
   if [[ -z ${DOCKER_IMAGE} ]]; then
      bash build_in_travis.sh $TRAVIS_OS_NAME
-     
      export GMX_PATH=/usr/local/gromacs
      pip install -ve .
      if [[ $TRAVIS_OS_NAME == 'osx' ]]; then
        export LD_LIBRARY_PATH=/usr/local/gromacs/lib
-       install_name_tool -change @rpath/libgromacs.2.dylib /usr/local/gromacs/lib/libgromacs.dylib build/lib.*/gmx_clusterByFeatures/*.so
-       pip wheel -w wheels/ --no-deps --no-cache-dir .
-       delocate-listdeps wheels/*.whl
-       delocate-wheel -w fixed_wheels -v wheels/*.whl
-       delocate-listdeps fixed_wheels/*.whl
+       install_name_tool -change @rpath/libgromacs.2.dylib /usr/local/gromacs/lib/libgromacs.dylib gmx_clusterByFeatures/*.so
      fi
   fi
   
@@ -160,7 +155,12 @@ script:
     if [[ -n ${DOCKER_IMAGE} ]]; then
       twine upload --skip-existing  wheelhouse/*manylinux1_x86_64.whl
     fi
-  #else
-   #twine upload -u rjdkmr -p $PYPIPASSWORD --skip-existing  fixed_wheels/*.whl
+  else
+    install_name_tool -change @rpath/libgromacs.2.dylib /usr/local/gromacs/lib/libgromacs.dylib build/lib.*/gmx_clusterByFeatures/*.so
+    pip wheel -w wheels/ --no-deps --no-cache-dir .
+    delocate-listdeps wheels/*.whl
+    delocate-wheel -w fixed_wheels -v wheels/*.whl
+    delocate-listdeps fixed_wheels/*.whl
+    twine upload --skip-existing  fixed_wheels/*.whl
   fi
 
