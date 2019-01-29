@@ -1,28 +1,22 @@
 #!/usr/bin/env python
 #
-# This file is part of pyOBabel
+# This file is part of gmx_clusterByFeatures
 #
 # Author: Rajendra Kumar
 #
-# pyOBabel is a python binding to openbabel chemical toolbox (http://openbabel.org).
-# Please cite the original publication of the openbabel:
-# O'Boyle et al (2011)
-# Open Babel: An open chemical toolbox
-# Journal of Cheminformatics 2011 3:33
-# https://doi.org/10.1186/1758-2946-3-33 .
 #
-# pyOBabel is a free software: you can redistribute it and/or modify
+# gmx_clusterByFeatures is a free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
 # the Free Software Foundation, either version 3 of the License, or
 # (at your option) any later version.
 #
-# pyOBabel is distributed in the hope that it will be useful,
+# gmx_clusterByFeatures is distributed in the hope that it will be useful,
 # but WITHOUT ANY WARRANTY; without even the implied warranty of
 # MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 # GNU General Public License for more details.
 #
 # You should have received a copy of the GNU General Public License
-# along with pyOBabel.  If not, see <http://www.gnu.org/licenses/>.
+# along with gmx_clusterByFeatures.  If not, see <http://www.gnu.org/licenses/>.
 #
 # THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
 # "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
@@ -49,7 +43,9 @@ import setuptools
 import os
 
 here = os.path.abspath(os.path.dirname(__file__))
-
+with open(os.path.join(here, 'README.rst'), encoding='utf-8') as f:
+    long_description = f.read()
+exec(open('gmx_clusterByFeatures/_version.py').read())
 gromacs_flags = None
 extensions = None 
         
@@ -225,27 +221,26 @@ class BuildExt(build_ext):
         build_ext.build_extensions(self)
 
 
-def read(fname):
-    return open(os.path.join(os.path.dirname(__file__), fname)).read()
-
 
 extract_gromacs_flags()
 get_extensions()
 setup(
     name='gmx_clusterByFeatures',
-    version='0.1.0',
+    version=__version__,
     ext_modules=extensions,
     cmdclass={'build_ext': BuildExt},
     install_requires=['pkgconfig>=1.3', 'pybind11>=2.2'],
     entry_points={'console_scripts': [ 'gmx_clusterByFeatures=gmx_clusterByFeatures:main.main',], },
     packages=find_packages(),
+    include_package_data=True,
     # metadata for upload to pypi
     author = "Rajendra Kumar",	
     author_email = "rjdkmr@gmail.com",
-    url = 'https://github.com/rjdkmr/pyOBabel',
-    description = "A python binding to openbabel chemical toolbox (http://openbabel.org)",
-    long_description = read('README.rst'),
-    keywords = ["Molecular Modeling", "Chemoinformatics", "Computational Chemistry", "Computational Drug Design"],
+    url = 'https://github.com/rjdkmr/gmx_clusterByFeatures',
+    description = "Features Based Conformational Clustering of Molecular Dynamics trajectories. ",
+    long_description = long_description,
+    long_description_content_type = 'text/x-rst',
+    keywords = ["Molecular Modeling", "Molecular Dynamics Simulations", "Computational Chemistry", "Computational Biophysics"],
     license = 'GNU General Public License v3 (GPLv3)',
     classifiers = [
         'Environment :: Console',
