@@ -67,20 +67,22 @@ def check_gromacs_dirs():
     cppflags_t = pkgconfig.re.split('\s+', pkgconfig.cflags('libgromacs'))
     out['cppflags'] = ''
     out['ldflags'] = []
+    out['include'] = []
+    out['lib_dirs'] = []
+    out['libs'] = []
     
     # Extract include directory and CXXFLAGS
     for flags in cppflags_t:
         if '-I' in flags:
-            out['include'] = flags[2:]
+            out['include'].append(flags[2:])
         else:
             out['cppflags'] += flags + ' '
             
     # Extract lib directory and LDFLAGS
     ldflags_t = pkgconfig.re.split('\s+', pkgconfig.libs('libgromacs'))
-    out['libs'] = []
     for flags in ldflags_t:
         if '-L' in flags:
-            out['lib_dir'] = flags[2:]
+            out['lib_dirs'].append(flags[2:])
         elif '-l' in flags:
             out['libs'].append(flags[2:])
         else:
@@ -142,15 +144,11 @@ def get_extensions():
             'src/logstream.cpp',
             'src/do_cluster.cpp',
             ],
-        include_dirs=[
-            get_pybind_include(),
-            get_pybind_include(user=True),
-            gromacs_flags['include'],
-            'src',
-            ],
-        library_dirs=[gromacs_flags['lib_dir']],
+        include_dirs=[ get_pybind_include(), get_pybind_include(user=True), 
+                      'src', ] + gromacs_flags['include'],
+        library_dirs=gromacs_flags['lib_dirs'],
         libraries=gromacs_flags['libs'],
-        runtime_library_dirs = [gromacs_flags['lib_dir']],
+        runtime_library_dirs = gromacs_flags['lib_dirs'],
         language='c++',
         extra_link_args= gromacs_flags['ldflags'],
         ),]
