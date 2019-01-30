@@ -4,18 +4,18 @@
  * Author: Rajendra Kumar
  * Copyright (C) 2018  Rajendra Kumar
  *
- * g_coordNdata is a free software: you can redistribute it and/or modify
+ * gmx_clusterByFeatures is a free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation, either version 3 of the License, or
  * (at your option) any later version.
  *
- * g_coordNdata is distributed in the hope that it will be useful,
+ * gmx_clusterByFeatures is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
  *
  * You should have received a copy of the GNU General Public License
- * along with g_coordNdata.  If not, see <http://www.gnu.org/licenses/>.
+ * along with gmx_clusterByFeatures.  If not, see <http://www.gnu.org/licenses/>.
  *
  * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
  * "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
