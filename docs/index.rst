@@ -7,6 +7,16 @@ be any quantity as a function of time such as Projections of egienvector from
 PCA or dihedral-PCA, distances, angles, channel radius etc.
 
 
+Installation on Linux and MacOS
+-------------------------------
+
+.. code-block:: bash
+
+    sudo pip3 install gmx-clusterByFeatrues
+
+No dependency on GROMACS. Just install it and use it.
+
+
 Contents
 --------
 .. toctree::

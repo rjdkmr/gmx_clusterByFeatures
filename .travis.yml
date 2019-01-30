@@ -113,12 +113,15 @@ script:
 - |
   if [[ -z ${DOCKER_IMAGE} ]]; then
     if [[ $TRAVIS_OS_NAME == 'osx' ]]; then
+      export SRC_DIR=`pwd`
+      cd $HOME
       for PYTHON in ${PYTHONS[@]}
       do
         pyenv global $PYTHON
         echo $(python --version)
         python -c "import gmx_clusterByFeatures; print('=====\nTEST -- gmx_clusterByFeatures GROMACS version: ', gmx_clusterByFeatures.gmx_version, '\n=====')"
       done
+      cd $SRC_DIR
     else
       python -c "import gmx_clusterByFeatures; print('=====\nTEST -- gmx_clusterByFeatures GROMACS version: ', gmx_clusterByFeatures.gmx_version, '\n=====')"
     fi

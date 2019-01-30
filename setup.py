@@ -229,7 +229,7 @@ setup(
     version=__version__,
     ext_modules=extensions,
     cmdclass={'build_ext': BuildExt},
-    install_requires=['pkgconfig>=1.3', 'pybind11>=2.2'],
+    install_requires=['pkgconfig>=1.3', 'pybind11>=2.2', 'numpy>=1.6',  'scipy>=0.9', 'matplotlib>=1.1.0', 'scikit-learn>=0.19.0'],
     entry_points={'console_scripts': [ 'gmx_clusterByFeatures=gmx_clusterByFeatures:main.main',], },
     packages=find_packages(),
     include_package_data=True,

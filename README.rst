@@ -19,6 +19,13 @@
   <a href="https://en.wikipedia.org/wiki/Davies%E2%80%93Bouldin_index" target="_blank">DBI : Davies–Bouldin index</a>
 
 
+.. image:: https://travis-ci.org/rjdkmr/gmx_clusterByFeatures.svg?branch=master
+    :target: https://travis-ci.org/rjdkmr/gmx_clusterByFeatures
+
+.. image:: https://readthedocs.org/projects/gmx-clusterbyfeatures/badge/?version=latest
+    :target: https://gmx-clusterbyfeatures.readthedocs.io/en/latest/?badge=latest
+    :alt: Documentation Status
+
 gmx_clusterByFeatures
 =====================
 It can be used to cluster the conformations of a molecule in a molecular dynamics
@@ -46,3 +53,12 @@ To determine the number of clustering, following metrics are implemented:
   * SSR/SST ratio ( |elbow| ) : Relative change in SSR/SST ratio in percentage.
   * pFS : Psuedo F-statatics determined from SSR/SST ratio.
   * |DBI|
+
+Installation on Linux and MacOS
+-------------------------------
+
+.. code-block:: bash
+
+    sudo pip3 install gmx-clusterByFeatrues
+
+No dependency on GROMACS. Just install it and use it.

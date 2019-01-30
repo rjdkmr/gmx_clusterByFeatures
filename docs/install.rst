@@ -59,7 +59,7 @@ On Linux
 1. Python3 is available through package managers such as **yum** (Fedora, CentOs), **YaST** (OpenSuse) and **apt-get**
    (Ubuntu, Linux Mint). For example on ubuntu: run ``sudo apt-get install python3`` command to install Python3.
 
-2. Install **gmx_clusterByFeatrues** by ``pip3 install gmx-clusterByFeatrues`` command.
+2. Install **gmx_clusterByFeatrues** by ``sudo pip3 install gmx-clusterByFeatrues`` command.
 
 
 
