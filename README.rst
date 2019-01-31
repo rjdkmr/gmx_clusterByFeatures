@@ -30,7 +30,7 @@ gmx_clusterByFeatures
 =====================
 It can be used to cluster the conformations of a molecule in a molecular dynamics
 trajectory using collection of features. The features could be any quantity as a
-function of time such as Projections of egienvector from PCA or dihedral-PCA,
+function of time such as Projections of eigenvector from PCA or dihedral-PCA,
 distances, angles, channel radius etc.
 
 **See details at:** `gmx_clusterByFeatures homepage <https://gmx-clusterbyfeatures.readthedocs.io>`_
