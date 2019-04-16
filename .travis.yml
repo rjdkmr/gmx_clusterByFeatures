@@ -71,25 +71,25 @@ before_install:
     brew upgrade cmake
     brew install eigen
     brew cleanup
-    pyenv init - | source
-
+    if [[ $MACOS == 'mojave' ]]; then
+        echo $(brew --prefix zlib)
+        echo $(brew --prefix openssl)
+        export CFLAGS="-I$(brew --prefix readline)/include -I$(brew --prefix openssl)/include -I$(brew --prefix zlib)/include -I$(xcrun --show-sdk-path)/usr/include"
+        export LDFLAGS="-L$(brew --prefix readline)/lib -L$(brew --prefix openssl)/lib -L$(brew --prefix zlib)/lib"
+        PYTHON_CONFIGURE_OPTS=--enable-unicode=ucs2
+     fi
+     
+    eval "$(pyenv init -)"
     PYVERS=("3.4" "3.5" "3.6" "3.7")
     PYTHONS=()
     for PYVER in ${PYVERS[@]}
     do
-      if [[ $MACOS == 'mojave' ]]; then
-        echo $(brew --prefix zlib)
-        echo $(brew --prefix openssl@1.1)
-        export CFLAGS="-I$(brew --prefix readline)/include -I$(brew --prefix openssl)/include -I$(brew --prefix zlib)/include -I$(xcrun --show-sdk-path)/usr/include"
-        export LDFLAGS="-L$(brew --prefix readline)/lib -L$(brew --prefix openssl)/lib -L$(brew --prefix zlib)/lib"
-        PYTHON_CONFIGURE_OPTS=--enable-unicode=ucs2
-      fi
-
       # Install the latest release of the specified Python version using pyenv.
       PYVER="$(pyenv install --list | grep -E "^\\s*$PYVER" | sort -n -t. -k3 | tail -n1)"
       pyenv install $PYVER
       pyenv global $PYVER
       PYTHONS+=($PYVER)
+      echo $PYVER
       echo $(python --version)
       python -m pip install --upgrade pip
       python -m pip install --upgrade $pymodules
