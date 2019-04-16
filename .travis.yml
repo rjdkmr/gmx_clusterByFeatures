@@ -74,8 +74,8 @@ before_install:
     PYTHONS=()
     
     if [[ $MACOS == 'mojave' ]]; then
-      CFLAGS="-I$(brew --prefix readline)/include -I$(brew --prefix openssl)/include -I$(xcrun --show-sdk-path)/usr/include"
-      LDFLAGS="-L$(brew --prefix readline)/lib -L$(brew --prefix openssl)/lib"
+      CFLAGS="-I$(brew --prefix readline)/include -I$(brew --prefix openssl)/include -I$(brew --prefix zlib)/include -I$(xcrun --show-sdk-path)/usr/include"
+      LDFLAGS="-L$(brew --prefix readline)/lib -L$(brew --prefix openssl)/lib -L$(brew --prefix zlib)/lib"
       PYTHON_CONFIGURE_OPTS=--enable-unicode=ucs2
     fi
 
