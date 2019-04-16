@@ -22,17 +22,17 @@ matrix:
     python: 3.6
     osx_image: xcode10.2
     language: generic
-    env: MACOS='mojave'
+    env: MACOS=mojave
   - os: osx
     python: 3.6
     osx_image: xcode10
     language: generic
-    env: MACOS='high_sierra'
+    env: MACOS=high_sierra
   - os: osx
     python: 3.6
     osx_image: xcode9.2
     language: generic
-    env: MACOS='sierra'
+    env: MACOS=sierra
   allow_failures:
   - os: osx
 
