@@ -59,7 +59,8 @@ before_install:
       brew install zlib
       brew install gcc@8
       brew uninstall openssl@1.1
-      brew install openssl@1.1
+      brew uninstall openssl
+      brew install openssl
     else
       brew cask uninstall oclint
       brew install gcc@8 --with-system-zlib
@@ -70,7 +71,7 @@ before_install:
     brew upgrade cmake
     brew install eigen
     brew cleanup
-    eval "$(pyenv init -)"
+    pyenv init -
 
     PYVERS=("3.4" "3.5" "3.6" "3.7")
     PYTHONS=()
@@ -79,8 +80,8 @@ before_install:
       if [[ $MACOS == 'mojave' ]]; then
         echo $(brew --prefix zlib)
         echo $(brew --prefix openssl@1.1)
-        export CFLAGS="-I$(brew --prefix readline)/include -I$(brew --prefix openssl@1.1)/include -I$(brew --prefix zlib)/include -I$(xcrun --show-sdk-path)/usr/include"
-        export LDFLAGS="-L$(brew --prefix readline)/lib -L$(brew --prefix openssl@1.1)/lib -L$(brew --prefix zlib)/lib"
+        export CFLAGS="-I$(brew --prefix readline)/include -I$(brew --prefix openssl)/include -I$(brew --prefix zlib)/include -I$(xcrun --show-sdk-path)/usr/include"
+        export LDFLAGS="-L$(brew --prefix readline)/lib -L$(brew --prefix openssl)/lib -L$(brew --prefix zlib)/lib"
         PYTHON_CONFIGURE_OPTS=--enable-unicode=ucs2
       fi
 
