@@ -71,7 +71,7 @@ before_install:
     brew upgrade cmake
     brew install eigen
     brew cleanup
-    pyenv init -
+    pyenv init - | source
 
     PYVERS=("3.4" "3.5" "3.6" "3.7")
     PYTHONS=()
