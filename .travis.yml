@@ -72,15 +72,15 @@ before_install:
 
     PYVERS=("3.4" "3.5" "3.6" "3.7")
     PYTHONS=()
-    
-    if [[ $MACOS == 'mojave' ]]; then
-      CFLAGS="-I$(brew --prefix readline)/include -I$(brew --prefix openssl)/include -I$(brew --prefix zlib)/include -I$(xcrun --show-sdk-path)/usr/include"
-      LDFLAGS="-L$(brew --prefix readline)/lib -L$(brew --prefix openssl)/lib -L$(brew --prefix zlib)/lib"
-      PYTHON_CONFIGURE_OPTS=--enable-unicode=ucs2
-    fi
-
     for PYVER in ${PYVERS[@]}
     do
+      if [[ $MACOS == 'mojave' ]]; then
+        echo $(brew --prefix zlib)
+        export CFLAGS="-I$(brew --prefix readline)/include -I$(brew --prefix openssl)/include -I$(brew --prefix zlib)/include -I$(xcrun --show-sdk-path)/usr/include"
+        export LDFLAGS="-L$(brew --prefix readline)/lib -L$(brew --prefix openssl)/lib -L$(brew --prefix zlib)/lib"
+        PYTHON_CONFIGURE_OPTS=--enable-unicode=ucs2
+      fi
+
       # Install the latest release of the specified Python version using pyenv.
       PYVER="$(pyenv install --list | grep -E "^\\s*$PYVER" | sort -n -t. -k3 | tail -n1)"
       pyenv install $PYVER
