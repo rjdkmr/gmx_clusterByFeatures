@@ -20,6 +20,10 @@ matrix:
     env: DOCKER_IMAGE=quay.io/pypa/manylinux1_x86_64
   - os: osx
     python: 3.6
+    osx_image: xcode10.2
+    language: generic
+  - os: osx
+    python: 3.6
     osx_image: xcode10
     language: generic
   - os: osx
