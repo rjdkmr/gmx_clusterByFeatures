@@ -58,7 +58,6 @@ before_install:
     if [[ $MACOS == 'mojave' ]]; then
       brew install zlib
       brew install gcc@8
-      xcode-select --install
     else
       brew cask uninstall oclint
       brew install gcc@8 --with-system-zlib
@@ -73,6 +72,13 @@ before_install:
 
     PYVERS=("3.4" "3.5" "3.6" "3.7")
     PYTHONS=()
+    
+    if [[ $MACOS == 'mojave' ]]; then
+      CFLAGS="-I$(brew --prefix readline)/include -I$(brew --prefix openssl)/include -I$(xcrun --show-sdk-path)/usr/include"
+      LDFLAGS="-L$(brew --prefix readline)/lib -L$(brew --prefix openssl)/lib"
+      PYTHON_CONFIGURE_OPTS=--enable-unicode=ucs2
+    fi
+
     for PYVER in ${PYVERS[@]}
     do
       # Install the latest release of the specified Python version using pyenv.
