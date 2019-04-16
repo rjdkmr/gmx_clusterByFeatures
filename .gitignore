@@ -25,6 +25,7 @@ __pycache__/
 
 # Distribution / packaging
 .Python
+*.pyhex
 env/
 build/
 develop-eggs/

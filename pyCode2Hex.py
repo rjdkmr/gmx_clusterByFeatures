@@ -1,3 +1,4 @@
+#!/usr/bin/env python
 #
 # This file is part of gmx_clusterByFeatures
 #
@@ -31,10 +32,28 @@
 #
 #============================================================================
 
-try:
-    from .gmx_clusterByFeatures import gmx_version
-    gmx_version = gmx_version()
-except:
-    pass
+import sys
+import binascii
 
-__version__ = "0.1.5"
+def main():
+    pyCode2Hex(sys.argv[1], sys.argv[2])
+    
+def pyCode2Hex(filename, outfile):
+    """ Convert lines in  a file to hex sequences.
+    These lines can be read as strings in C++.
+    """
+    fout = open(outfile, 'w')
+    counter = 0
+    with open(filename, 'rb') as f:
+        for w in f.read():
+            if counter == 12:
+                fout.write('\n')
+                counter = 0
+            fout.write("0x{:02x}, ".format(w))
+            counter += 1
+            
+    # Add NULL charecter at the end
+    fout.write("0x{:02x}".format(ord('\0')))
+
+if __name__=="__main__":
+    main()

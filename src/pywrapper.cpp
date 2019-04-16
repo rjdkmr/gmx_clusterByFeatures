@@ -37,6 +37,10 @@
 
 #include <string>
 #include <vector>
+#include <cstdlib>
+#include <cstdio>
+#include <unistd.h>
+#include <signal.h>
 
 
 #include "gromacs/commandline/cmdlineinit.h"
@@ -45,18 +49,74 @@
 namespace py = pybind11;
 
 int gmx_clusterByFeatures(int argc,char *argv[]);
+int gmx_distMat(int argc,char *argv[]);
+int gmx_hole (int argc,char *argv[]);
 
-void wrapped_gmx_clusterByFeatures(std::vector<std::string> argument_vector) {
+void exit_handler(int s){
+    printf(" Caught KeyboardInterrupt in C++\n");
+    exit(1);
+}
+
+void register_ctrl_c_signal() {
+    struct sigaction sigIntHandler;
+    sigIntHandler.sa_handler = exit_handler;
+    sigemptyset(&sigIntHandler.sa_mask);
+    sigIntHandler.sa_flags = 0;
+    sigaction(SIGINT, &sigIntHandler, NULL);
+}
+
+template<typename F>
+void wrapped_gmx_function(std::vector<std::string> argument_vector, F *func) {
+    /* Acquire GIL before calling Python code */
+    py::gil_scoped_acquire acquire;
+
     char *argv[argument_vector.size()];
     for(size_t n =0; n<argument_vector.size(); n++)
         argv[n] = &argument_vector.at(n)[0];
     
+    gmx_run_cmain(argument_vector.size(), argv, func);
+    
+}
+
+/*
+void wrapped_gmx_clusterByFeatures(std::vector<std::string> argument_vector) {
+    char *argv[argument_vector.size()];
+    for(size_t n =0; n<argument_vector.size(); n++)
+        argv[n] = &argument_vector.at(n)[0];
+        
     gmx_run_cmain(argument_vector.size(), argv, &gmx_clusterByFeatures);
 }
 
+void wrapped_gmx_distMat(std::vector<std::string> argument_vector) {
+    // Acquire GIL before calling Python code
+    py::gil_scoped_acquire acquire;
+
+    char *argv[argument_vector.size()];
+    for(size_t n =0; n<argument_vector.size(); n++)
+        argv[n] = &argument_vector.at(n)[0];
+    
+    gmx_run_cmain(argument_vector.size(), argv, &gmx_distMat);
+}*/
+
 void wrap_gmx_clusterByFeatures(py::module &m) {
+    register_ctrl_c_signal(); // register Ctrl+C for keyboard interruption
+    
+    std::function<void(std::vector<std::string>)> wrapped_gmx_clusterByFeatures = [](std::vector<std::string>  argument_vector) { 
+        wrapped_gmx_function(argument_vector, &gmx_clusterByFeatures);
+    };
+    
+    std::function<void(std::vector<std::string>)> wrapped_gmx_distMat = [](std::vector<std::string>  argument_vector) { 
+        wrapped_gmx_function(argument_vector, &gmx_distMat);
+    };
+    
+    std::function<void(std::vector<std::string>)> wrapped_gmx_hole = [](std::vector<std::string>  argument_vector) { 
+        wrapped_gmx_function(argument_vector, &gmx_hole);
+    };
+    
     m.def("gmx_version", &gmx_version);
-    m.def("cluster", &wrapped_gmx_clusterByFeatures);
+    m.def("cluster", wrapped_gmx_clusterByFeatures, py::call_guard<py::gil_scoped_release>());
+    m.def("distmat", wrapped_gmx_distMat, py::call_guard<py::gil_scoped_release>());
+    m.def("hole", wrapped_gmx_hole, py::call_guard<py::gil_scoped_release>());
 }
 
 

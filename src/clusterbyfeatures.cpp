@@ -2,7 +2,7 @@
  * This file is part of gmx_clusterByFeatures
  *
  * Author: Rajendra Kumar
- * Copyright (C) 2018  Rajendra Kumar
+ * Copyright (C) 2018-2019  Rajendra Kumar
  *
  * gmx_clusterByFeatures is a free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -45,6 +45,7 @@
 #include <utility>
 #include <numeric>
 #include <algorithm>
+#include <omp.h>
 
 
 #include "gromacs/commandline/pargs.h"
@@ -67,8 +68,9 @@
 #include "gromacs/utility/futil.h"
 #include "gromacs/utility/fatalerror.h"
 #include "gromacs/fileio/oenv.h"
+#include "gromacs/pbcutil/pbc.h"
 
-#include "gmx_clusterbyfeatures.h"
+#include "clusterbyfeatures.h"
 #include "logstream.h"
 #include "do_cluster.h"
 
@@ -267,6 +269,9 @@ int ClusteringStuffs::write_central_pdbfiles(std::vector < std::string > pdbName
 
 
     this->centralCoords = centralCoords;
+    
+    // rewind trajectory file and Initialize status
+    rewind_trj(inpTrajStuff.status);
 
     return TRUE;
 }
@@ -363,6 +368,9 @@ int ClusteringStuffs::rmsd_bw_central_structure( int *fitAtomIndex, int fitAtomI
     lstream->resetprecision();
 
     this->centrlRmsdMatrix = centrlRmsdMatrix;
+    
+    // rewind trajectory file and Initialize status
+    rewind_trj(inpTrajStuff.status);
 
     return TRUE;
 }
@@ -904,14 +912,14 @@ int ClusteringStuffs::performClusterMetrics(int eClusterMetrics, int n_clusters,
 // ############################### ClusteringStuffs END ##########################
 
 
-void CopyRightMsg() {
+void CopyRightMsgCluster() {
 
     std::string msg = R"~(
-               :-)  gmx_clusterByFeatures (-:
+         :-)  gmx_clusterByFeatures cluster (-:
 
              Author: Rajendra Kumar
 
-       Copyright (C) 2018  Rajendra Kumar
+       Copyright (C) 2018-2019  Rajendra Kumar
 
 
 gmx_clusterByFeatures is a free software: you can redistribute it and/or modify
@@ -1138,6 +1146,9 @@ std::vector< std::vector< real > > calculate_rmsd(ClusteringStuffs *clustStuff,
 
     sfree(w_rms);
     sfree(w_rls);
+    
+    // rewind trajectory file and Initialize status
+    rewind_trj(inpTrajStuff.status);
 
     return clusterRMSD;
 }
@@ -1163,6 +1174,114 @@ void write_rmsd( std::vector< std::vector< real > > rmsd,
         }
         xvgrclose(fout);
     }
+}
+
+
+real calculate_rmsdist(int nind, int index[], const rvec x[], real **d, real **d_ref) {
+
+    int      i, j;
+    real     rms_diff = 0, r2 = 0, r = 0;
+    rvec     dx;
+    bool dist_ref_exists = false;
+    
+    if (d_ref != NULL)
+        dist_ref_exists = true;
+
+    // #pragma omp parallel for schedule(dynamic) shared(r2) private(j)
+    for (i = 0; (i < nind-1); i++)
+    {
+        for (j = i+1; (j < nind); j++)
+        {   
+            dx[XX] = x[index[i]][XX] - x[index[j]][XX];
+            dx[YY] = x[index[i]][YY] - x[index[j]][YY];
+            dx[ZZ] = x[index[i]][ZZ] - x[index[j]][ZZ];
+                    
+            r = std::sqrt( norm2(dx) );
+            d[i][j] = d[j][i] = r;
+
+            if (dist_ref_exists) {
+                r2  += (r - d_ref[i][j]) * (r - d_ref[i][j]);
+            }
+
+        }
+    }
+    
+    if (dist_ref_exists) {
+        r2 /= (nind*(nind-1))/2;
+        rms_diff = std::sqrt(r2);
+    }
+    
+    return rms_diff;
+}
+
+
+std::vector< std::vector< real > > calculate_rmsdist_cluster(ClusteringStuffs *clustStuff, int *rmsdAtomIndex, int rmsdAtomIndexSize, TrajectoryStuffs inpTrajStuff)    {
+
+    real currentTime, temp, **dist, **dist_ref;
+    int i = 0;
+    int ftp = fn2ftp(inpTrajStuff.filename);
+    t_fileio *fio = trx_get_fileio(inpTrajStuff.status);
+    std::vector< std::vector< real > > clusterRMSDist;
+    long clusterLength;
+    int cluster, bRet;
+    
+    // Assign memory for dist-matrix
+    snew(dist, rmsdAtomIndexSize);
+    snew(dist_ref, rmsdAtomIndexSize);
+    for(i=0; i<rmsdAtomIndexSize; i++)  {
+        snew(dist[i], rmsdAtomIndexSize);
+        snew(dist_ref[i], rmsdAtomIndexSize);
+    }
+
+    std::cout<<"\n\nCalculating RMSDist from central structure for each cluster...\n";
+
+    //Loop over cluster start here
+    for (size_t c=0; c < clustStuff->clusterIndex.size(); c++) {
+        std::vector< real > rmsd;
+
+        cluster = clustStuff->clusterIndex[c];
+        clusterLength = clustStuff->clusterDict[cluster].size();
+        
+        temp = calculate_rmsdist(rmsdAtomIndexSize, rmsdAtomIndex, clustStuff->centralCoords[c], dist_ref, NULL);
+
+        // Loop for frame of each cluster start here
+        for(int n = 0; n < clusterLength; n++)  {
+            currentTime = ClusteringStuffs::timeInInput[clustStuff->clusterDict[cluster][n]];
+
+            if (ftp == efXTC) {
+                bRet = xtc_seek_time(fio, currentTime, inpTrajStuff.natoms, FALSE);
+                if (bRet == -1) {
+                    gmx_fatal(FARGS, "Frame for this time is not found in trajectory");
+                }
+                read_next_x(inpTrajStuff.oenv, inpTrajStuff.status, &inpTrajStuff.time, inpTrajStuff.x, inpTrajStuff.box);
+            }
+            else {
+                // If current time is larger than time in trajectory rewind back
+                if (currentTime < inpTrajStuff.time)
+                    rewind_trj(inpTrajStuff.status);
+
+                while (inpTrajStuff.time !=  currentTime)   {
+                    bRet = read_next_x(inpTrajStuff.oenv, inpTrajStuff.status, &inpTrajStuff.time, inpTrajStuff.x, inpTrajStuff.box);
+                    if (!bRet)
+                        break;
+                }
+            }
+            // Loop for frame of each cluster end here
+
+            temp = calculate_rmsdist(rmsdAtomIndexSize, rmsdAtomIndex, inpTrajStuff.x, dist, dist_ref);
+            rmsd.push_back( temp );
+        }
+        clusterRMSDist.push_back(rmsd);
+
+    } //Loop over cluster end here
+
+    sfree(dist);
+    sfree(dist_ref);
+
+    // rewind trajectory file and Initialize status
+    rewind_trj(inpTrajStuff.status);
+
+    return clusterRMSDist;
 }
 
 
@@ -1234,8 +1353,8 @@ int gmx_clusterByFeatures(int argc,char *argv[])    {
 
     gmx_bool bAlignTrajToCentral=FALSE, bFit=TRUE;
     int numMinFrameCluster = 20, minFeatures=10;
-    const char     *sortMethod[] = { NULL, "none", "rmsd", "features", "user", NULL };
-    enum {eNoSort = 1, eSortByRMSD, eSortByFeatures, eSortByUser};
+    const char     *sortMethod[] = { NULL, "none", "rmsd", "rmsdist", "features", "user", NULL };
+    enum {eNoSort = 1, eSortByRMSD, eSortByRMSDist, eSortByFeatures, eSortByUser};
     int eSortMethod;
 
     int eClusterMetrics;
@@ -1291,7 +1410,7 @@ int gmx_clusterByFeatures(int argc,char *argv[])    {
 
 
     // Copyright message
-    CopyRightMsg();
+    CopyRightMsgCluster();
 
     // Parse command line argument and print all options
     if ( ! parse_common_args(&argc,argv,PCA_CAN_TIME | PCA_TIME_UNIT,NFILE,fnm,asize(pa),pa,asize(desc),desc,0,NULL,&oenv) )	{
@@ -1322,7 +1441,7 @@ int gmx_clusterByFeatures(int argc,char *argv[])    {
     int *rmsdAtomIndex, rmsdAtomIndexSize; // Group for which clustering has been performed, also used for RMSD calculation
     char *grpnm;
 
-    gmx_bool bFeatures = FALSE, bCentralPDB = FALSE, bDoCluster = FALSE, bTrajRMSD=FALSE;
+    gmx_bool bFeatures = FALSE, bCentralPDB = FALSE, bDoCluster = FALSE, bTrajRMSD=FALSE, bTrajRMSDist=FALSE;
 
     t_topology top;
     int ePBC;
@@ -1414,9 +1533,24 @@ int gmx_clusterByFeatures(int argc,char *argv[])    {
         bCentralPDB = FALSE;
         bAlignTrajToCentral = FALSE;
     }
+    
+    if (opt2fn_null("-rmsd", NFILE, fnm) != NULL)  {
+        if (inpTrajStuff.bTraj) {
+            if (eSortMethod == eSortByRMSDist)
+                bTrajRMSDist = TRUE;
+            else
+                bTrajRMSD = TRUE;
+        }
+        else    {
+            lstream<<"\n\n======== WARNING ========\n";
+            lstream<<"\nTrajectory file is miising. Central structure needs to be extracted from trajectory!!!\n";
+            lstream<<"Therefore, RMSD w.r.t central structure cannot be calculated and trajectory cannot be sorted.\n";
+            eSortMethod = eNoSort;
+        }
+    }
 
     // If sorted method is given, check for RMSD calculation
-    if ( (eSortMethod == eSortByRMSD) || (opt2fn_null("-rmsd", NFILE, fnm) != NULL)) {
+    if (eSortMethod == eSortByRMSD) {
         if (inpTrajStuff.bTraj)
             bTrajRMSD = TRUE;
         else    {
@@ -1426,6 +1560,15 @@ int gmx_clusterByFeatures(int argc,char *argv[])    {
             eSortMethod = eNoSort;
         }
     }
+    
+    // If sorted method is given, check for RMSDist calculation
+    if ( (eSortMethod == eSortByRMSDist) && (!(inpTrajStuff.bTraj)) ) {
+            lstream<<"\n\n======== WARNING ========\n";
+            lstream<<"\nTrajectory file is miising. Central structure needs to be extracted from trajectory!!!\n";
+            lstream<<"Therefore, RMSDist w.r.t central structure cannot be calculated and trajectory cannot be sorted.\n";
+            eSortMethod = eNoSort;        
+    }
+    
 
     // If trajectory is not given and RMSD cluster metric is given as input, change metric to ssr-sst
     if( (eClusterMetrics == eCRmsdClusterMetric) && (!inpTrajStuff.bTraj) ) {
@@ -1652,12 +1795,15 @@ int gmx_clusterByFeatures(int argc,char *argv[])    {
                                      inpTrajStuff);
     }
 
-
-
-    if (eSortMethod == eSortByRMSD) {
-        sort_cluster_frame(clusterRMSD, clustStuff, &clusterRMSD );
+    // Calculate RMSDist of trajectories
+    if (eSortMethod == eSortByRMSDist)    {
+        clusterRMSD = calculate_rmsdist_cluster(clustStuff, rmsdAtomIndex, rmsdAtomIndexSize, inpTrajStuff);
     }
 
+    if ((eSortMethod == eSortByRMSD) || (eSortMethod == eSortByRMSDist))  {
+        lstream<<"\n\nSorting clustered frames according to RMSD/RMSDist...\n";
+        sort_cluster_frame(clusterRMSD, clustStuff, &clusterRMSD);
+    }
 
     if ( (eSortMethod == eSortByFeatures) && (clustStuff->avgDistanceToAllDict.empty() == false) ) {
         std::vector< std::vector< real > > sorter;
@@ -1676,7 +1822,7 @@ int gmx_clusterByFeatures(int argc,char *argv[])    {
       }
 
     // Calculate and write RMSD
-    if (bTrajRMSD)  {
+    if ( (bTrajRMSD) || (bTrajRMSDist) ) {
         fnOutRMSD = opt2fn_null("-rmsd", NFILE, fnm);
         if (fnOutRMSD != NULL)
             write_rmsd( clusterRMSD, fnOutRMSD, clustStuff->clusterIndex, inpTrajStuff);

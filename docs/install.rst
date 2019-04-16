@@ -23,35 +23,18 @@
   <a href="http://brew.sh/" target="_blank"> Homebrew </a>
 
 
-Requirements and Installation
-=============================
+Download and Installation
+=========================
+  
 
-
-Requirements
-------------
-
-It depends on following two packages:
-  * **GROMACS** : 2016 and above version
-  * **Python** : 3.4 and above version
-
-**Python packages required for installation:** These packages are installed automatically during gmx_clusterByFeatures installation.
-
-* |scikit-learn|
-* |numpy|
-* |scipy|
-* |matplotlib|
-
-
-****
-
-Installation using ``pip``
---------------------------
+Quick Installation using ``pip``
+--------------------------------
 
 It is **recommended** method to install gmx_clusterByFeatrues.
 
 **Not require to install GROMACS**
 
-**Only available on Linux, MacOS-10.12 and MacOS-10.13**
+**Only available on Linux, MacOS-10.12 (Sierra) and MacOS-10.13 (High Sierra)**
 
 On Linux
 ~~~~~~~~
@@ -69,6 +52,10 @@ On MacOS
 1. Python3 is available through |Homebrew| package manager. After installing Homebrew, run ``brew install python3`` command to install Python3.
 
 2. Install **gmx_clusterByFeatrues** by ``pip3 install gmx-clusterByFeatrues`` command.
+
+
+.. note:: Presently, installation with pip on MacOS is restricted to **10.12 (Sierra)** and **10.13 (High Sierra)** 
+          versions. For other MacOS versions, install gmx_clusterByFeatrues from source as described further below.
 
 
 Updating gmx_clusterByFeatrues
@@ -91,13 +78,12 @@ update of dependent packages like numpy, scipy, matplotlib etc.
 Installation from source-code
 -----------------------------
 
-It can be downloaded using git as follows
+Requirements
+~~~~~~~~~~~~~~
 
-.. code-block:: bash
-
-  git clone -b master https://github.com/rjdkmr/gmx_clusterByFeatures
-
-It can be also downloaded as `zip file <https://github.com/rjdkmr/gmx_clusterByFeatures/archive/master.zip>`_.
+It depends on following two packages:
+  * **GROMACS** : 2016 and above version
+  * **Python** : 3.4 and above version
 
 
 GROMACS
@@ -110,7 +96,7 @@ If GROMACS is not installed at standard location, define ``GMX_PATH`` environmen
 
 .. code-block:: bash
 
-    export GMX_PATH=/opt/gromacs
+    export GMX_PATH=/path/to/installed/gromacs
     
 Python3
 ~~~~~~~
@@ -133,22 +119,64 @@ development files can be installed as follows:
   sudo yum install python3 python3-devel
 
 
-Two other Python packages are required that can be installed as follows:
+Four other Python packages |numpy|, |scipy|, |scikit-learn|, and |matplotlib| are required 
+that can be installed as follows:
 
 .. code-block:: bash
 
-  sudo pip3 install sklearn matplotlib
+  sudo pip3 install numpy scipy sklearn matplotlib
 
 
-Compilation and Installation
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+****
+
+Downloading source-code
+~~~~~~~~~~~~~~~~~~~~~~~~~
+
+It can be downloaded using git as follows
+
+.. code-block:: bash
+
+  git clone -b master https://github.com/rjdkmr/gmx_clusterByFeatures
+
+It can be also downloaded as `zip file <https://github.com/rjdkmr/gmx_clusterByFeatures/archive/master.zip>`_.
+
+
+
+Compilation and Installation using python
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 Clone the repository from github as directed above then follow these steps.
 
 .. code-block:: bash
 
   cd gmx_clusterByFeatures # or gmx_clusterByFeatures-master (zip file download)
+  export GMX_PATH=/path/to/installed/gromacs
   sudo GMX_PATH=$GMX_PATH python3 setup.py install
 
 
 Now, gmx_clusterByFeatures command will be accessible in terminal.
+
+Compilation and Installation using cmake for C++ IDEs
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+This method can be used for developement purpose using C++ IDE like QT creator and KDevelop etc.
+
+**To install and use gmx_clusterByFeatrues from source location:**
+
+.. code-block:: bash
+
+  cd gmx_clusterByFeatures # or gmx_clusterByFeatures-master (zip file download)
+  mkdir build
+  cd build
+  cmake -DGMX_PATH=/path/to/installed/gromacs -DINPLACE=ON ..
+  make
+  sudo make install  # Only needed for first time install 
+
+In this installation, only ``gmx_clusterByFeatures`` executable file is installed at default
+location (mostly ``/usr/local/bin``) while whole package remains at the source location.
+
+This method is extremely useful for developement because ``make install`` is only required
+for first time to install executable file. During subsequent developement, only command 
+``make`` need to be repeated. In IDEs ``make`` command is executed by ``build``. In IDEs 
+project build setting, cmake arguments ``-DGMX_PATH=/path/to/installed/gromacs -DINPLACE=ON``
+needs to be added manually.

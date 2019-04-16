@@ -2,7 +2,7 @@
  * This file is part of gmx_clusterByFeatures
  *
  * Author: Rajendra Kumar
- * Copyright (C) 2018  Rajendra Kumar
+ * Copyright (C) 2018-2019  Rajendra Kumar
  *
  * gmx_clusterByFeatures is a free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -33,8 +33,8 @@
  */
 
 
-#ifndef GMX_CLUSTERBYFEATURES_H
-#define GMX_CLUSTERBYFEATURES_H
+#ifndef CLUSTERBYFEATURES_H
+#define CLUSTERBYFEATURES_H
 
 #include <vector>
 #include <map>
@@ -215,6 +215,5 @@ void sort_cluster_frame(std::vector< std::vector< real > > sorter,
 int gmx_clusterByFeatures(int argc,char *argv[]);
 
 
-
-#endif // GMX_CLUSTERBYFEATURES_H
+#endif // CLUSTERBYFEATURES_H
 

@@ -16,6 +16,15 @@ It contains several sub-commands for different purposes.
     * - `cluster <commands/cluster.html>`_
       - Main module to perform clustering
 
+    * - `distmat <commands/distmat.html>`_
+      - Distance-matrix related calculations
+
+    * - `matplot <commands/matplot.html>`_
+      - To visulaize/plot matrix obtained from ``distmat``
+      
+    * - `hole <commands/hole.html>`_
+      - To calculate cavity/channel radius using HOLE program
+
       
 sub-commands
 ------------
@@ -23,3 +32,6 @@ sub-commands
    :maxdepth: 1
 
    cluster <commands/cluster.rst>
+   distmat <commands/distmat.rst>
+   matplot <commands/matplot.rst>
+   hole <commands/hole.rst>

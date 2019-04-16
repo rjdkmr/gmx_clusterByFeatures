@@ -104,30 +104,43 @@ add_subdirectory(pybind11)
 
 ##############################################################
 # Python module compilation and installation path
-if (NOT PYTHON_INSTDIR)
+if (INPLACE)
+    set(PYTHON_INSTDIR "${CMAKE_SOURCE_DIR}")
+    message(STATUS "gmx_clusterByFeatures will be built in place and executed from here")
+else (INPLACE)
     # Determine correct installation directory for Python bindings
     # From http://plplot.svn.sourceforge.net/viewvc/plplot/trunk/cmake/modules/python.cmake?revision=11014
     execute_process(
         COMMAND
-        ${PYTHON_EXECUTABLE} -c "from __future__ import print_function; from distutils import sysconfig; print(sysconfig.get_python_lib(1,0,prefix='${CMAKE_INSTALL_PREFIX}'))"
+        ${PYTHON_EXECUTABLE} -c "import site; print(site.getsitepackages()[0])"
         OUTPUT_VARIABLE PYTHON_INSTDIR
         OUTPUT_STRIP_TRAILING_WHITESPACE
       )
-endif (NOT PYTHON_INSTDIR)
-message("Python Install directory ${PYTHON_INSTDIR}")
-
-INSTALL(DIRECTORY gmx_clusterByFeatures DESTINATION ${PYTHON_INSTDIR}
-COMPONENT python
-PATTERN ".svn" EXCLUDE
-PATTERN "test_data" EXCLUDE
-PATTERN "testData" EXCLUDE
-PATTERN "test_list*" EXCLUDE
-PATTERN "CMake*" EXCLUDE
-PATTERN "Basement" EXCLUDE
-PATTERN "UnitTest*" EXCLUDE
-)
-set(gmx_clusterByFeatures_PythonDir "${PYTHON_INSTDIR}/gmx_clusterByFeatures")
+endif (INPLACE)
+message(STATUS "Python Install directory ${PYTHON_INSTDIR}")
 set(gmx_clusterByFeatures_PYTHON_OUTPUT_DIRECTORY "${CMAKE_SOURCE_DIR}/gmx_clusterByFeatures")
+configure_file("gmx_clusterByFeatures.py.in" "gmx_clusterByFeatures.py" @ONLY)
+
+# Change python-code file to C hex-code
+execute_process(COMMAND ${PYTHON_EXECUTABLE} ${CMAKE_SOURCE_DIR}/pyCode2Hex.py ${CMAKE_SOURCE_DIR}/src/cluster.py ${CMAKE_SOURCE_DIR}/src/cluster.pyhex)
+
 
 # Add sub-directories
 add_subdirectory(src)
+
+if(NOT INPLACE)
+    INSTALL(DIRECTORY "${CMAKE_SOURCE_DIR}/gmx_clusterByFeatures" DESTINATION ${PYTHON_INSTDIR}
+    COMPONENT python
+    PATTERN ".svn" EXCLUDE
+    PATTERN "test_data" EXCLUDE
+    PATTERN "testData" EXCLUDE
+    PATTERN "test_list*" EXCLUDE
+    PATTERN "CMake*" EXCLUDE
+    PATTERN "Basement" EXCLUDE
+    PATTERN "UnitTest*" EXCLUDE
+    PATTERN "__pycache__*" EXCLUDE
+    PATTERN ".localhistory*" EXCLUDE
+    )
+endif(NOT INPLACE)
+
+INSTALL(PROGRAMS "${CMAKE_BINARY_DIR}/gmx_clusterByFeatures.py" DESTINATION "${INSTALL_BIN_DIR}" RENAME "gmx_clusterByFeatures" COMPONENT bin)

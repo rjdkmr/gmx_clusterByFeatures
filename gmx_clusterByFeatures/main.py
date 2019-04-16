@@ -33,9 +33,11 @@
 
 import sys
 
-
 def main():
     options = {'cluster':'Perform clustering using features and extract clustered trajectories',
+               'distmat': 'Calculate avearge, standard-deviation and variance distance-matrix including contact map.',
+               'hole'   : 'Calculate channel or cavity radius using hole program',
+               'matplot': 'Plot distmat output matrix file'
               }
 
     if len(sys.argv)<=1:
@@ -50,6 +52,18 @@ def main():
     if sys.argv[1] == 'cluster':
         from .gmx_clusterByFeatures import cluster
         cluster(sys.argv[1:])
+    
+    if sys.argv[1] == 'distmat':
+        from .gmx_clusterByFeatures import distmat
+        distmat(sys.argv[1:])
+        
+    if sys.argv[1] == 'hole':
+        from .gmx_clusterByFeatures import hole
+        hole(sys.argv[1:])
+        
+    if sys.argv[1] == 'matplot':
+        from . import matplot
+        matplot.main()
         
 def show_help(options):
     print(' ==============================')

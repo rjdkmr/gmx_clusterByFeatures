@@ -42,6 +42,9 @@ import sys
 import setuptools
 import os
 
+from pyCode2Hex import pyCode2Hex
+pyCode2Hex('src/cluster.py', 'src/cluster.pyhex')
+
 here = os.path.abspath(os.path.dirname(__file__))
 with open(os.path.join(here, 'README.rst'), encoding='utf-8') as f:
     long_description = f.read()
@@ -61,7 +64,7 @@ def check_gromacs_dirs():
     out = dict()
     
     cppflags_t = pkgconfig.re.split('\s+', pkgconfig.cflags('libgromacs'))
-    out['cppflags'] = ''
+    out['cppflags'] = []
     out['ldflags'] = []
     out['include'] = []
     out['lib_dirs'] = []
@@ -72,7 +75,7 @@ def check_gromacs_dirs():
         if '-I' in flags:
             out['include'].append(flags[2:])
         else:
-            out['cppflags'] += flags + ' '
+            out['cppflags'].append(flags)
             
     # Extract lib directory and LDFLAGS
     ldflags_t = pkgconfig.re.split('\s+', pkgconfig.libs('libgromacs'))
@@ -84,6 +87,9 @@ def check_gromacs_dirs():
         else:
             out['ldflags'].append(flags)
  
+    if '-fopenmp' not in out['ldflags']:
+        out['ldflags'].append('-fopenmp')
+
     
     return out
 
@@ -136,12 +142,16 @@ def get_extensions():
     extensions = [ Extension(
         'gmx_clusterByFeatures.gmx_clusterByFeatures',
         [   'src/pywrapper.cpp',
-            'src/gmx_clusterbyfeatures.cpp',
+            'src/clusterbyfeatures.cpp',
             'src/logstream.cpp',
             'src/do_cluster.cpp',
+            'src/distMat.cpp',
+            'src/hole.cpp',
+            'src/parseData.cpp',
             ],
         include_dirs=[ get_pybind_include(), get_pybind_include(user=True), 
                       'src', ] + gromacs_flags['include'],
+        extra_compile_args = ['-fopenmp'],
         library_dirs=gromacs_flags['lib_dirs'],
         libraries=gromacs_flags['libs'],
         runtime_library_dirs = gromacs_flags['lib_dirs'],
