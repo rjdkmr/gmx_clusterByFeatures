@@ -22,14 +22,17 @@ matrix:
     python: 3.6
     osx_image: xcode10.2
     language: generic
+    env: MACOS='mojave'
   - os: osx
     python: 3.6
     osx_image: xcode10
     language: generic
+    env: MACOS='high_sierra'
   - os: osx
     python: 3.6
     osx_image: xcode9.2
     language: generic
+    env: MACOS='sierra'
   allow_failures:
   - os: osx
 
@@ -52,9 +55,14 @@ before_install:
     python -m pip install auditwheel
   else
     brew update
-    brew cask uninstall oclint
+    if [[ $MACOS == 'mojave' ]]; then
+      brew install zlib
+      brew install gcc@8
+    else
+      brew cask uninstall oclint
+      brew install gcc@8 --with-system-zlib
+    fi
     brew install gsl
-    brew install gcc@8 --with-system-zlib
     brew install fftw
     brew outdated pyenv || brew upgrade pyenv
     brew upgrade cmake
