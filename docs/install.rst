@@ -34,7 +34,7 @@ It is **recommended** method to install gmx_clusterByFeatrues.
 
 **Not require to install GROMACS**
 
-**Only available on Linux, MacOS-10.12 (Sierra) and MacOS-10.13 (High Sierra)**
+**Only available on Linux, MacOS-10.12 (Sierra), MacOS-10.13 (High Sierra) and MacOS-10.14 (Mojave)**
 
 On Linux
 ~~~~~~~~
@@ -54,8 +54,9 @@ On MacOS
 2. Install **gmx_clusterByFeatrues** by ``pip3 install gmx-clusterByFeatrues`` command.
 
 
-.. note:: Presently, installation with pip on MacOS is restricted to **10.12 (Sierra)** and **10.13 (High Sierra)** 
-          versions. For other MacOS versions, install gmx_clusterByFeatrues from source as described further below.
+.. note:: Presently, installation with pip on MacOS is restricted to **10.12 (Sierra)**, **10.13 (High Sierra)** 
+          and 10.14 (Mojave) versions. For other MacOS versions, install gmx_clusterByFeatrues from source as 
+          described further below.
 
 
 Updating gmx_clusterByFeatrues

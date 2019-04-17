@@ -1,23 +1,3 @@
-.. |kmeans| raw:: html
-
-   <a href="https://en.wikipedia.org/wiki/K-means_clustering" target="_blank">K-means clustering</a>
-
-.. |DBSCAN| raw:: html
-
-   <a href="https://en.wikipedia.org/wiki/DBSCAN" target="_blank">DBSCAN - Density-based spatial clustering of applications with noise</a>
-
-.. |gmixture| raw:: html
-
-   <a href="https://en.wikipedia.org/wiki/Mixture_model" target="_blank">Gaussian mixture model clustering</a>
-
-.. |elbow| raw:: html
-
-   <a href="https://en.wikipedia.org/wiki/Elbow_method_(clustering)" target="_blank">Elbow method</a>
-
-.. |DBI| raw:: html
-
-  <a href="https://en.wikipedia.org/wiki/Davies%E2%80%93Bouldin_index" target="_blank">DBI : Davies–Bouldin index</a>
-
 
 .. image:: https://travis-ci.org/rjdkmr/gmx_clusterByFeatures.svg?branch=master
     :target: https://travis-ci.org/rjdkmr/gmx_clusterByFeatures
@@ -38,22 +18,6 @@ distances, angles, channel radius etc.
 .. note:: It is developed for **GROMACS MD trajectory.** However, it can be used with
   any other trajectory format after converting it to GROMACS format trajectory.
 
-Clustering methods
-------------------
-Presently three methods are implemented:
-  * |kmeans|
-  * |DBSCAN|
-  * |gmixture|
-
-
-Clustering metrics
-------------------
-To determine the number of clustering, following metrics are implemented:
-  * RMSD : Root Mean Square deviation between central structures of clusters.
-  * SSR/SST ratio ( |elbow| ) : Relative change in SSR/SST ratio in percentage.
-  * pFS : Psuedo F-statatics determined from SSR/SST ratio.
-  * |DBI|
-
 Installation on Linux and MacOS
 -------------------------------
 
@@ -61,4 +25,31 @@ Installation on Linux and MacOS
 
     sudo pip3 install gmx-clusterByFeatrues
 
-No dependency on GROMACS. Just install it and use it.
+No dependency on GROMACS. Install and use it.
+
+For more details, visit `download and installation <https://gmx-clusterbyfeatures.readthedocs.io/en/latest/install.html>`_ section. 
+
+Usage
+-----------
+
+.. list-table:: List of sub-commands available in gmx_clusterByFeatures
+    :widths: 1, 4
+    :header-rows: 1
+    :name: commands-table
+
+    * - Command
+      - Function
+
+    * - `cluster <https://gmx-clusterbyfeatures.readthedocs.io/commands/cluster.html>`_
+      - Main module to perform clustering
+
+    * - `distmat <commands/distmat.html>`_
+      - Distance-matrix related calculations
+
+    * - `matplot <commands/matplot.html>`_
+      - To visulaize/plot matrix obtained from ``distmat``
+      
+    * - `hole <commands/hole.html>`_
+      - To calculate cavity/channel radius using HOLE program
+
+For more details, visit `usage <https://gmx-clusterbyfeatures.readthedocs.io/en/latest/usage.html>`_ section. 
