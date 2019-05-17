@@ -1,9 +1,12 @@
-Clustering ligand conformations using PCA
-=========================================
+Clustering ligand conformations using cartesian PCA
+=====================================================
 
 In this example, conformation of ligands were clustered with respect to receptor.
 
-At first, PCA was performed, and subsequently, projections on eigenvectors were used as the features
+At first, PCA was performed using atom-coordinates (cPCA), and subsequently, projections on eigenvectors were used as the features
+
+Atom-coordinates PCA
+---------------------
 
 1. **Covariance, eigenvector and eigenvalue caculcations**
 
@@ -23,9 +26,10 @@ Here, ``13`` is index group of receptor atoms, which were used for superposition
     
 In the above command, ``-v eigenvec.trr`` was used by default and eigenvectors were read from this file.
 A new output file ``proj.xvg`` is generated containing projections on first 20 eigenvectors.
-I will use this file as a input file in ``gmx_clusterByFeatures``.
+This file is used as an input file in ``gmx_clusterByFeatures``.
 
-3. **Clustering**
+Clustering
+-----------
 
 .. code-block:: bash
 
@@ -46,6 +50,9 @@ using change in SSR/SST ratio (``-cmetric ssr-sst`` and ``-ssrchange 2``)
           
           **c.** Third group - Used for superposition by least-square fitting.
           
+
+Outputs
+--------
 
 **Central structures of each cluster:**
 

@@ -23,7 +23,7 @@ Installation on Linux and MacOS
 
 .. code-block:: bash
 
-    sudo pip3 install gmx-clusterByFeatrues
+    sudo pip3 install gmx-clusterByFeatures
 
 No dependency on GROMACS. Install and use it.
 

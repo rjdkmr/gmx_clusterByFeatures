@@ -225,7 +225,7 @@ Options summary
     * - `-sort  \<keyword\> <cluster.html#sort-none>`_
       - none
       - Sort trajectory according to these values. Accepted methods are:
-        none, rmsd, features, user
+        none, rmsd, rmsdist, features, user
 
     * - `-plot  \<string\> <cluster.html#plot-pca-cluster-png>`_
       - pca_cluster.png
@@ -404,6 +404,8 @@ Each pdb file name is suffixed by its respective cluster-id.
 RMSD of clustering atom groups with respect to central structure.
 
 Each RMSD file name is suffixed by its respective cluster-id.
+
+In case of ``-sort rmsdist`` option, RMSD in distance-matrix is calculated.
 
 ******
 

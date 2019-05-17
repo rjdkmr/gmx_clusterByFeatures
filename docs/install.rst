@@ -42,7 +42,7 @@ On Linux
 1. Python3 is available through package managers such as **yum** (Fedora, CentOs), **YaST** (OpenSuse) and **apt-get**
    (Ubuntu, Linux Mint). For example on ubuntu: run ``sudo apt-get install python3`` command to install Python3.
 
-2. Install **gmx_clusterByFeatrues** by ``sudo pip3 install gmx-clusterByFeatrues`` command.
+2. Install **gmx_clusterByFeatrues** by ``sudo pip3 install gmx-clusterByFeatures`` command.
 
 
 
@@ -51,7 +51,7 @@ On MacOS
 
 1. Python3 is available through |Homebrew| package manager. After installing Homebrew, run ``brew install python3`` command to install Python3.
 
-2. Install **gmx_clusterByFeatrues** by ``pip3 install gmx-clusterByFeatrues`` command.
+2. Install **gmx_clusterByFeatrues** by ``pip3 install gmx-clusterByFeatures`` command.
 
 
 .. note:: Presently, installation with pip on MacOS is restricted to **10.12 (Sierra)**, **10.13 (High Sierra)** 
@@ -65,7 +65,7 @@ To update the gmx_clusterByFeatrues package use following command:
 
 .. code-block:: bash
 
-    pip3 install --upgrade --no-deps gmx-clusterByFeatrues
+    pip3 install --upgrade --no-deps gmx-clusterByFeatures
 
 
 ``--upgrade`` flag is used to update the package and ``--no-deps`` prevents

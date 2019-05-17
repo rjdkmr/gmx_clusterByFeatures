@@ -30,7 +30,8 @@ In next step, all above files are merged to a single file to use as a `feature i
     cat r1H61-r17N1.xvg >> distances.xvg
     printf "\n& \n\n"   >> distances.xvg
     
-In next step, clustering is performed.
+Clustering
+-----------
 
 .. code-block:: bash
 
@@ -51,6 +52,9 @@ using change in SSR/SST ratio (``-cmetric ssr-sst`` and ``-ssrchange 2``)
           
           **c.** Third group - Used for superposition by least-square fitting, here it is four tettrads of G-Quadruplex DNA.
           
+Outputs
+--------
+
 **Central structures of each cluster:**
 
 .. code-block:: bash

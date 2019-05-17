@@ -243,10 +243,14 @@ Gap between residues in distance-matrix along **X-axis** dumped with option `-pc
 for further PCA. This gap reduces the distance-matrix size and subsequently speed-up
 the PCA performance.
 
+.. note:: This option **ONLY** affect output from ``-pca`` option.
+
 ******
 
 ``-gy 1``
 ~~~~~~~~~~~~~~~~~~~~~~
 Gap between residues in distance-matrix along **Y-axis** dumped with option `-pca <distmat.html#pca-pca-xtc>`_
 for further PCA. This gap reduces the distance-matrix size and subsequently speed-up
-the PCA performance. 
+the PCA performance.
+
+.. note:: This option **ONLY** affect output from ``-pca`` option.
