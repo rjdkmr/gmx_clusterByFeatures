@@ -63,7 +63,7 @@ before_install:
       brew install openssl
     else
       brew cask uninstall oclint
-      brew install gcc@8 --with-system-zlib
+      brew install gcc@8
     fi
     brew install gsl
     brew install fftw
