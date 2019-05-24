@@ -46,6 +46,14 @@
 #include <cctype>
 #include "parseData.h"
 
+void freeCharArray(char **a, int m) {
+    int i;
+    for (i = 0; i < m; i++) {
+        free(a[i]);
+    }
+    free(a);
+}
+
 int* extract_coulmn_integer(char *str, int col_min, int col_max)	{
 	/*
 	 Similar to extract_coulmn_double but extract integer data.
@@ -65,8 +73,12 @@ int* extract_coulmn_integer(char *str, int col_min, int col_max)	{
 		data[n] = atoi(str_data[i]);
 		n++;
 	}
+	
+	freeCharArray(str_data, num);
 	return data;
 }
+
+
 
 
 double* extract_coulmn_double(char *str, int col_min, int col_max)	{
@@ -201,7 +213,7 @@ char** split_by_char(char *OrigStr, char *delimeter)	{
 
 		final = (char **) malloc (sizeof(char*));
 		buffer = strtok(str,delimeter);
-		final[n] = buffer;
+		final[n] = strdup(buffer);
 		n++;
 
 		while(1)	{
@@ -211,11 +223,13 @@ char** split_by_char(char *OrigStr, char *delimeter)	{
 				break;
 
 			final  = (char**) realloc (final, (sizeof(char*)*(n+1)));
-			final[n] = buffer;
+			final[n] = strdup(buffer);
 			n++;
 		}
 	}
-	return final;
+	
+	free(str);
+    return final;
 }
 
 
@@ -236,7 +250,7 @@ char** split_by_space(char *OrigStr, int *num)	{
 
 		final = (char **) malloc (sizeof(char*));
 		buffer = strtok(str," \t\n\v\f\r");
-		final[n] = buffer;
+		final[n] = strdup(buffer);
 		n++;
 
 		while(1)	{
@@ -246,11 +260,12 @@ char** split_by_space(char *OrigStr, int *num)	{
 				break;
 
 			final  = (char**) realloc (final, (sizeof(char*)*(n+1)));
-			final[n] = buffer;
+			final[n] = strdup(buffer);
 			n++;
 		}
 	}
 	*num = n;
+    free(str);
 	return final;
 }
 

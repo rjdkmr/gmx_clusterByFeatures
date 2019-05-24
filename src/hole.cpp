@@ -189,7 +189,8 @@ int add_data_to_file(char *fn_input, FILE *fOutResult, rvec cvect)	{
 				dataNumber +=1 ;
 				radius[dataNumber-1] = strtof(SplitData[1], NULL);
 				center[dataNumber-1] = sign *strtof(SplitData[0], NULL); // multiply by sign
-				free(SplitData);
+				freeCharArray(SplitData, num);
+                SplitData = NULL;
 			}
 		}
 	}
@@ -239,7 +240,8 @@ int add_data_to_file(char *fn_input, FILE *fOutResult, rvec cvect)	{
 			coord[XX] = strtof(SplitData[2], NULL);
 			coord[YY] = strtof(SplitData[3], NULL);
 			coord[ZZ] = strtof(SplitData[4], NULL);
-			free(SplitData);
+			freeCharArray(SplitData, num);
+            SplitData = NULL;
 		}
 
 		// Parse closest residue
@@ -249,7 +251,8 @@ int add_data_to_file(char *fn_input, FILE *fOutResult, rvec cvect)	{
 				sprintf(residues[0], "%s%s", SplitData[5], SplitData[7]);
 			else
 				sprintf(residues[0], "%s%s", SplitData[5], SplitData[6]);
-			free(SplitData);
+			freeCharArray(SplitData, num);
+            SplitData = NULL;
 		}
 
 		// Parse 2nd closest residue
@@ -265,7 +268,8 @@ int add_data_to_file(char *fn_input, FILE *fOutResult, rvec cvect)	{
                         else {
 				sprintf(residues[1], "     ");
                         }
-			free(SplitData);
+			freeCharArray(SplitData, num);
+            SplitData = NULL;
 		}
 
 	}
@@ -274,11 +278,15 @@ int add_data_to_file(char *fn_input, FILE *fOutResult, rvec cvect)	{
 		fprintf(fOutResult, "%5.3f  %5.3f  %5.3f  %5.3f  %s\n", coordList[i][0], coordList[i][1], coordList[i][2], radius[i], residueList[i]);
 	}
 
+    for(i=0; i<dataNumber; i++)	{
+		sfree(residueList[i]);
+		sfree(coordList[i]);
+	}
 	sfree(residueList);
 	sfree(coordList);
 	sfree(radius);
 	sfree(center);
-	free(data);
+	freeCharArray(data, number);
 
 	return 0;
 }
@@ -448,6 +456,15 @@ int gmx_hole (int argc,char *argv[])	{
 
    if(bOutPDB)
 	   fOutPDB = gmx_ffopen(fnOutPDB,"w");
+   
+    //Creating variable for executing hole
+    if(bOutPDB)
+        sprintf(hole_cmd,"hole >%s <<EOF\ncoord %s\nradius %s\ncvect %2.2f %2.2f %2.2f\nsample %2.2f\nendrad %2.2f\ncpoint %2.2f %2.2f %2.2f\nsphpdb %s\nEOF", \
+                    hole_outfile, pdbfile, "input_atom_radius.rad", cvect[XX], cvect[YY], cvect[ZZ], sample, endrad, cpoint[XX], cpoint[YY], cpoint[ZZ], hole_outPDB );
+    else
+        sprintf(hole_cmd,"hole >%s <<EOF\ncoord %s\nradius %s\ncvect %2.2f %2.2f %2.2f\nsample %2.2f\nendrad %2.2f\ncpoint %2.2f %2.2f %2.2f\nEOF", \
+            hole_outfile, pdbfile,  "input_atom_radius.rad", cvect[XX], cvect[YY], cvect[ZZ], sample, endrad, cpoint[XX], cpoint[YY], cpoint[ZZ] );
+
 
    do	{
 	   if (bFit)	{
@@ -457,13 +474,6 @@ int gmx_hole (int argc,char *argv[])	{
                 	rvec_inc(x[i], x_shift);
 	   }
 
-	   //Creating variable for executing hole
-	   if(bOutPDB)
-		   sprintf(hole_cmd,"hole >%s <<EOF\ncoord %s\nradius %s\ncvect %2.2f %2.2f %2.2f\nsample %2.2f\nendrad %2.2f\ncpoint %2.2f %2.2f %2.2f\nsphpdb %s\nEOF", \
-		   			   hole_outfile, pdbfile, "input_atom_radius.rad", cvect[XX], cvect[YY], cvect[ZZ], sample, endrad, cpoint[XX], cpoint[YY], cpoint[ZZ], hole_outPDB );
-	   else
-		   sprintf(hole_cmd,"hole >%s <<EOF\ncoord %s\nradius %s\ncvect %2.2f %2.2f %2.2f\nsample %2.2f\nendrad %2.2f\ncpoint %2.2f %2.2f %2.2f\nEOF", \
-			   hole_outfile, pdbfile,  "input_atom_radius.rad", cvect[XX], cvect[YY], cvect[ZZ], sample, endrad, cpoint[XX], cpoint[YY], cpoint[ZZ] );
 
 	   tmpf = gmx_ffopen(pdbfile,"w");
 	   write_pdbfile_indexed(tmpf,NULL,&top.atoms,x,ePBC,box,' ',-1,indsize,index,NULL,TRUE);

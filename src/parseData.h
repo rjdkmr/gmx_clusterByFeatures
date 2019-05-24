@@ -167,6 +167,8 @@ cbool is_first_numerics(char *str);
 
 char** get_block_lines(FILE *fp, char *delimeter, int *num_line);
 
+void freeCharArray(char **a, int m);
+
 #ifdef __cplusplus
 }
 #endif
