@@ -58,6 +58,7 @@ before_install:
     if [[ $MACOS == 'mojave' ]]; then
       brew install zlib
       brew install gcc@8
+      brew link --overwrite gcc@8
       brew uninstall openssl@1.1
       brew uninstall openssl
       brew install openssl
@@ -93,7 +94,9 @@ before_install:
       echo $(python --version)
       python -m pip install --upgrade pip
       python -m pip install --upgrade $pymodules
-      python -m pip install delocate
+      if [[ $PYVER == '3.6' ]]; then
+        python -m pip install delocate
+      fi
     done
   fi
   
