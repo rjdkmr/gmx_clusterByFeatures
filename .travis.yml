@@ -43,7 +43,7 @@ env:
 
 before_install:
 - |
-  pymodules="numpy scipy matplotlib scikit-learn wheel pkgconfig pybind11 pyopenssl six cryptography twine"
+  pymodules="wheel pkgconfig pybind11 pyopenssl six cryptography twine"
   if [[ $TRAVIS_OS_NAME != 'osx' ]]; then
     sudo apt-get update -qq
     sudo apt-get install libeigen3-dev
@@ -57,13 +57,13 @@ before_install:
     brew update
     if [[ $MACOS == 'mojave' ]]; then
       brew install zlib
-      brew install gcc
+      brew install gcc@9
       brew uninstall openssl@1.1
       brew uninstall openssl
       brew install openssl
     else
       brew cask uninstall oclint
-      brew install gcc
+      brew install gcc@9
     fi
     brew install gsl
     brew install fftw
@@ -93,6 +93,7 @@ before_install:
       echo $(python --version)
       python -m pip install --upgrade pip
       python -m pip install --upgrade $pymodules
+      python -m pip install scikit-learn=0.20.3
       if [[ $PYVER == '3.6' ]]; then
         python -m pip install delocate
       fi
@@ -103,8 +104,8 @@ install:
 - |
   if [[ -z ${DOCKER_IMAGE} ]]; then
     if [[ $TRAVIS_OS_NAME == 'osx' ]]; then
-      export CC=$(brew --prefix gcc)/bin/gcc
-      export CXX=$(brew --prefix gcc)/bin/g++
+      export CC=gcc-9
+      export CXX=g++-9
     fi
     bash build_in_travis.sh $TRAVIS_OS_NAME
     export GMX_PATH=/usr/local/gromacs
