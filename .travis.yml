@@ -103,8 +103,8 @@ install:
 - |
   if [[ -z ${DOCKER_IMAGE} ]]; then
     if [[ $TRAVIS_OS_NAME == 'osx' ]]; then
-      export CC=$(brew --prefix openssl)/bin/gcc
-      export CXX=$(brew --prefix openssl)/bin/g++
+      export CC=$(brew --prefix gcc)/bin/gcc
+      export CXX=$(brew --prefix gcc)/bin/g++
     fi
     bash build_in_travis.sh $TRAVIS_OS_NAME
     export GMX_PATH=/usr/local/gromacs
