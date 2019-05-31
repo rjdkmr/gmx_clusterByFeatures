@@ -57,12 +57,7 @@ before_install:
     brew update
     if [[ $MACOS == 'mojave' ]]; then
       brew install zlib
-<<<<<<< HEAD
       brew install gcc
-=======
-      brew install gcc@8
-      brew link --overwrite gcc@8
->>>>>>> ebd92c47a0a54044533a1d75cd30f05fdbc78006
       brew uninstall openssl@1.1
       brew uninstall openssl
       brew install openssl
