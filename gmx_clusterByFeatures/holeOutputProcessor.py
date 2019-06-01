@@ -7,6 +7,7 @@ from numpy import ma
 import sys
 import re
 import matplotlib as mpl
+mpl.use('TkAgg')
 import matplotlib.pyplot as plt
 from collections import OrderedDict
 import math
@@ -15,7 +16,7 @@ class HoleOutputProcessor:
 
     def __init__(self, filename, axis='Z', endrad=5, xmin=None, xmax=None, gap=1, begin=0, end=-1, dataOccupancy=90):
         ''' Class to read, process and visualzie hole output
-        
+
         Parameters
         ----------
         filename : str
@@ -23,7 +24,7 @@ class HoleOutputProcessor:
         axis : str
             Principal axis parallel to the channel or cavity.
         endrad : float
-            If radius is larger than this value, this value will not considered 
+            If radius is larger than this value, this value will not considered
             for average calculation and features output. This value might be equal or
             less than ``-endrad`` value supplied with ``hole`` sub-command.
         xmin : float
@@ -38,18 +39,18 @@ class HoleOutputProcessor:
         begin : float
             First frame to read from the input file
         end : float
-            Last frame to read from the input file. If its ``end = -1``, All frames till 
+            Last frame to read from the input file. If its ``end = -1``, All frames till
             the end will be read.
         dataOccupancy : float
             Precentage of radius-data occupancy for axis-points. If an axis-point has radius-data
-            less than this percentage of frame, the axis-point will not be considered for average 
+            less than this percentage of frame, the axis-point will not be considered for average
             calculation and features output.
-            
-            This is critical for axis-points, which are at the 
+
+            This is critical for axis-points, which are at the
             opening of cahnnel/cavity. In several frames, radius-value could be missing and therefore,
             dataOccupancy thershold could be used to discard those axis points with lots of missing
             radius values.
-            
+
         '''
         self.filename = filename
         self.paxis = axis
@@ -78,15 +79,15 @@ class HoleOutputProcessor:
         self.average = None
         self.error = None
         self.time = []
-        
-        
+
+
         if self.end != -1:
             if self.end < self.begin:
                 raise AssertionError('Begin time cannot be larger than end time.')
-            
+
         if self.dataOccupancy > 100 or self.dataOccupancy < 0:
             raise ValueError('Data occupancy thershold should be between 0 to 100.')
-        
+
         if self.paxis not in self.axis2index.keys():
             raise ValueError('{0} is requested for axis. However, only X, Y and Z axis are accepted'.format(self.paxis))
 
@@ -96,61 +97,61 @@ class HoleOutputProcessor:
         It can be used to plot radius of cavity/channel for clusters seperately.
         It reads radius file from "hole" and cluster-id file  from "cluster",
         and extract radius of each cluster separately and plot them in one plot.
-        This plot could be extremely useful to compare radius along the 
+        This plot could be extremely useful to compare radius along the
         channel/cavity in all clusters.
-        
+
         Parameters
         ----------
         cluster_file : str
             Input file containing cluster-id as a function of time. The number of frames in this
             file should be same as in radius file.
-            
+
         outfile : str
             Output plot file. The radius as a function of axis-points is plotted in this file.
-            
+
         csvfile : str
             Output csv file. The radius as a function of axis-points in csv formatted file. This
             file can be read in external data-plotting program.
-            
+
         stdbar : bool
             If it is ``True``, standard deviation will be shown as an error-bar in the plot.
-            
+
         discard_lasts : int
             Number of smallest clusters to discard from the plotting. It can be useful to filter
             out few smallest clusters because these may contain small number of frames.
-            
+
         width : int
             Width of the plot
-            
+
         height : int
             Height of the plot
-            
+
         fontsize : int
             Font size in the plot
-            
+
         rightmargin : float
-            Margin at right side of the plots. If legends overflow into the plot area, margin can 
+            Margin at right side of the plots. If legends overflow into the plot area, margin can
             be increased to fit the legend.
-            
+
         legendcols : int
-            If legend overflow into the plot area, legends can be made of more than 
+            If legend overflow into the plot area, legends can be made of more than
             one column to accomodate all legends.
-        
+
         '''
-        
+
         # Read hole data if not read previously
         if self.axis_value is None:
             self.read_hole_data()
-        
+
         # Calculate average and standard-deviation to mark the axis point containing missing data
         if self.average is None:
             self.calculate_average()
-            
+
         clids_data = self.read_clid(cluster_file)
         clids = sorted(clids_data.keys())
         if discard_lasts is not None:
             clids = clids[:-1*discard_lasts]
-        
+
         averages = OrderedDict()
         stddevs = OrderedDict()
         for clid in clids:
@@ -161,18 +162,18 @@ class HoleOutputProcessor:
                 sd.append((self.radius[key])[clids_data[clid]].std())
             averages[clid] = means
             stddevs[clid] = sd
-        
+
         # Write data to a csv file
         if csvfile is not None:
             with open(csvfile, 'w', newline='') as csvfile:
                 csvwriter = csv.writer(csvfile)
-                
+
                 # Write header
                 row = ['Axis']
                 for clid in clids:
                     row.append(clid)
                 csvwriter.writerow(row)
-                
+
                 # Write data
                 for i in range(len(self.axis_value)):
                     row = [self.axis_value[i]]
@@ -187,7 +188,7 @@ class HoleOutputProcessor:
         colors = OrderedDict()
         for clid in clids:
             colors[clid] = cmap(normalize(clid))
-        
+
         mpl.rcParams['font.size'] = fontsize
         fig, ax1 = plt.subplots(1, sharex=True, gridspec_kw={'hspace': 0}, figsize=(width, height))
         #fig.subplots_adjust(top=0.9, bottom=0.1)
@@ -205,37 +206,37 @@ class HoleOutputProcessor:
         handles, legend_labels = ax1.get_legend_handles_labels()
         ax1.set_ylabel(r'Radius ($\AA$)')
         ax1.set_xlabel(r'Axis ($\AA$)')
-        
+
         legend = fig.legend(handles, legend_labels, ncol=legendcols, loc='right',scatterpoints=5, markerscale=3)
         fig.set_tight_layout(tight={'rect':(None,None,1-rightmargin, None)})
         fig.savefig(outfile, dpi=dpi, bbox_extra_artists=(legend, ), bbox_inches='tight')
-    
+
     def write_features(self, outfile):
         ''' Write radius as features for clustering
-        
+
         .. :note: If a frame does not contain radius value, zero is written.
-        
+
         Parameters
         ----------
         outfile : str
-            Name of output file. Output file containing radius as function of 
-            time at each axis points. This file can be used as features file 
-            for clustersing. This file can be also used to plot radius vs time 
+            Name of output file. Output file containing radius as function of
+            time at each axis points. This file can be used as features file
+            for clustersing. This file can be also used to plot radius vs time
             with external plotting program.
 
             The file name should end with xvg extension, which is
             recognized by ``cluster`` command.
-        
-        
+
+
         '''
         # Read hole data if not read previously
         if self.axis_value is None:
             self.read_hole_data()
-        
+
         # Calculate average and standard-deviation to mark the axis point containing missing data
         if self.average is None:
             self.calculate_average()
-            
+
 
         fout = open(outfile, 'w')
         for key in list(map(self._float2str, self.axis_value)):
@@ -281,7 +282,7 @@ class HoleOutputProcessor:
                     #radius[key] = t[idx]
                     radius[key] = ma.masked_values(radius_npy, self.flag_radius)
                     residues[key] = np.asarray(self.rawResidues[key])
-                
+
         self.axis_value = np.asarray(keys_new)
         self.radius = radius
         self.rawResidues = residues
@@ -298,7 +299,7 @@ class HoleOutputProcessor:
             self.error[key]  = self.radius[key].std()
             print('{0:12.3f} {1:16.3f} {2:>16.3f}'.format(float(key), self.average[key], self.error[key]))
         print('------------------------------------------------------------')
-            
+
     def processResiduesData(self):
         self.residuesByAxis = OrderedDict()
         self.residue_list = []
@@ -317,25 +318,25 @@ class HoleOutputProcessor:
 
     def plot_radius_residues(self, outfile, residue_frequency=50, width=6, height=6, fontsize=18, rlabelsize=10, dpi=300):
         ''' Plot radius and residues as a function of axis points
-        
+
         Parameters
         ----------
         outfile : str
             Output plot file
         residue_frequency : float
             Frequency (%) of residue occurence during the simulations at a given axis points.
-            If frequency is less than this threshold, it will not considered for plotting. 
+            If frequency is less than this threshold, it will not considered for plotting.
         width : int
             Width of the plot
-            
+
         height : int
             Height of the plot
-            
+
         fontsize : int
             Font size in the plot
-            
+
         rlabelsize : float
-            Fontsize of residue label along Y-axis. 
+            Fontsize of residue label along Y-axis.
 
         '''
 
@@ -464,13 +465,13 @@ class HoleOutputProcessor:
         for value in list(map(self._float2str, self.axis_value)):
             radius_list[value] = []
             residues_list[value] = ''
-            
+
         # Read from block data and append in temorary dictionary of lists
         for i in np.argsort(input_axis):
             min_idx = np.abs((input_axis[i] - self.axis_value) - 0).argmin()
             if abs(input_axis[i] - self.axis_value[min_idx]) <= self.gap:
                 x = self._float2str(self.axis_value[min_idx])
-                
+
                 # If a new axis point is found, all previous frame should be filled with this value
                 if x not in self.radius:
                     self.radius[x] = [self.flag_radius] * self.frame_number
@@ -483,7 +484,7 @@ class HoleOutputProcessor:
                 else:
                     radius_list[x].append(self.flag_radius)
                 residues_list[x] += ',' + input_residues[i]
-                
+
         # Append in final list after merging results
         for value in list(map(self._float2str, self.axis_value)):
             if radius_list[value]:
@@ -567,7 +568,7 @@ class HoleOutputProcessor:
     def read_clid(self, filename):
         fin = open(filename, 'r')
         data = OrderedDict()
-        
+
         index = 0
         for line in fin:
             line = line.rstrip().lstrip()
@@ -578,7 +579,7 @@ class HoleOutputProcessor:
                         continue
 
             temp = re.split('\s+', line)
-            
+
             time = float(temp[0])
             clid = int(temp[1])
 
@@ -589,12 +590,12 @@ class HoleOutputProcessor:
                     data[clid] = data[clid] + [ index ]
 
                 index = index + 1
-                
+
             if (self.end != -1):
                 if (time >= self.end):
                     break
 
-                
+
         fin.close()
 
         return data
