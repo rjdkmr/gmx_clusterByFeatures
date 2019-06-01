@@ -93,7 +93,7 @@ before_install:
       echo $(python --version)
       python -m pip install --upgrade pip
       python -m pip install --upgrade $pymodules
-      python -m pip install scikit-learn=0.20.3
+      python -m pip install scikit-learn numpy scipy matplotlib 
       if [[ $PYVER == '3.6' ]]; then
         python -m pip install delocate
       fi

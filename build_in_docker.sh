@@ -14,7 +14,7 @@ yum -y install openblas openblas-devel blas blas-devel atlas atlas-devel lapack 
 mkdir external
 cd external
 
-# Install slightly newer version of cmake 
+# Install slightly newer version of cmake
 curl -O https://cmake.org/files/v3.0/cmake-3.0.2.tar.gz
 tar -zxvf cmake-3.0.2.tar.gz
 cd cmake-3.0.2
@@ -66,21 +66,30 @@ cd ..
 
 # Compile wheels
 export PKG_CONFIG_PATH="${PKG_CONFIG_PATH}:${GMX_PATH}/lib64/pkgconfig/"
+exclude="cp34"
 for PYBIN in /opt/python/cp3*/bin; do
-    "${PYBIN}/pip" install -r /io/dev-requirements.txt
-    "${PYBIN}/pip" wheel -w /io/wheelhouse/ --no-deps --no-cache-dir /io/
+    if [[ ${PYBIN} =~ $exclude ]]; then
+        echo "Python-3.4 is excluded"
+    else
+        "${PYBIN}/pip" install -r /io/dev-requirements.txt
+        "${PYBIN}/pip" wheel -w /io/wheelhouse/ --no-deps --no-cache-dir /io/
+    fi
 done
 
 # Bundle external shared libraries into the wheels
 for whl in /io/wheelhouse/*.whl; do
-    auditwheel show "$whl" 
+    auditwheel show "$whl"
     auditwheel repair "$whl" -w /io/wheelhouse/
 done
 
 
 # Install packages and test
 for PYBIN in /opt/python/cp3*/bin/; do
-    "${PYBIN}pip" install gmx_clusterByFeatures --no-index -f /io/wheelhouse
-    "${PYBIN}python" -c "import gmx_clusterByFeatures; print('=====\nTEST -- gmx_clusterByFeatures GROMACS version: ', gmx_clusterByFeatures.gmx_version, '\n=====')"
+    if [[ ${PYBIN} =~ $exclude ]]; then
+        echo "Python-3.4 is excluded"
+    else
+        "${PYBIN}pip" install gmx_clusterByFeatures --no-index -f /io/wheelhouse
+        "${PYBIN}python" -c "import gmx_clusterByFeatures; print('=====\nTEST -- gmx_clusterByFeatures GROMACS version: ', gmx_clusterByFeatures.gmx_version, '\n=====')"
+    fi
 done
 
