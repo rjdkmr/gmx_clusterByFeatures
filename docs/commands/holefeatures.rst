@@ -21,10 +21,10 @@ Command summary
 
 .. code-block:: bash
 
-    gmx_clusterByFeatures holefeatures [-h] [-i radius.dat] [-o output.xvg]
-                                       [-xmin XMIN] [-xmax XMAX]
-                                       [-endrad ENDRAD] [-ax Z] [-gap 1]
-                                       [-b BEGIN] [-e 1] [-do 90]
+    gmx_clusterByFeatures holefeatures  [-h] [-i radius.dat] [-o output.xvg]
+                                        [-xmin XMIN] [-xmax XMAX]
+                                        [-endrad ENDRAD] [-ax Z] [-gap 1]
+                                        [-b 0] [-e -1] [-do 90]
 
 Options 
 ---------
@@ -86,15 +86,15 @@ with ``hole`` sub-command.
 
 ******
 
-``-b BEGIN``, ``--begin BEGIN``
+``-b 0``, ``--begin 0``
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-First frame to read from the input file
+First frame in time to read from the input file
 
 ******
 
-``-e 1``, ``--end 1``
+``-e -1``, ``--end -1``
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-Last frame to read from the input file.
+Last frame in time to read from the input file.
 By default ( ``-e -1``), all frames till the end will be read.
 
 ******

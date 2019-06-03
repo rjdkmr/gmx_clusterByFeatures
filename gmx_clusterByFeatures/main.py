@@ -35,6 +35,7 @@ import sys
 
 def main():
     options = {'cluster':'Perform clustering using features and extract clustered trajectories',
+               'featuresplot' : 'Feature vs Feature plot to check quality of clustering',
                'distmat': 'Calculate avearge, standard-deviation and variance distance-matrix including contact map.',
                'matplot': 'Plot distmat output matrix file',
                'hole'   : 'Calculate channel or cavity radius using hole program',
@@ -55,6 +56,10 @@ def main():
     if sys.argv[1] == 'cluster':
         from .gmx_clusterByFeatures import cluster
         cluster(sys.argv[1:])
+        
+    if sys.argv[1] == 'featuresplot':
+        from . import featuresplotcmd
+        featuresplotcmd.main()
     
     if sys.argv[1] == 'distmat':
         from .gmx_clusterByFeatures import distmat

@@ -64,7 +64,7 @@ with "hole" sub-command.
 """
 
 endHelp=\
-"""Last frame to read from the input file.
+"""Last frame in time to read from the input file.
 If its ``end = -1``, All frames till the end will be read.
 
 """
@@ -145,11 +145,11 @@ def parseArguments():
                         dest='gap', help=gapHelp)
     
     parser.add_argument('-b', '--begin', action='store',
-                        type=float, default=0, 
-                        dest='begin', help="First frame to read from the input file")
+                        type=float, default=0,  metavar=0,
+                        dest='begin', help="First frame in time to read from the input file")
 
     parser.add_argument('-e', '--end', action='store',
-                        type=float, metavar=1, default=-1, 
+                        type=float, metavar=-1, default=-1, 
                         dest='end', help=endHelp)
     
     parser.add_argument('-do', '--data-occupancy', action='store',

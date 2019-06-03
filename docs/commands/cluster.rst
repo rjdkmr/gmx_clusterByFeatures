@@ -670,7 +670,9 @@ Accepted methods are:
 ``-plot pca_cluster.png``
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-To plot features with clusters in this file.
+To plot features vs featrues with clusters in this file.
 
 Plot is generated where feature-vs-feature are depicted with different clusters
 as colors. It is helpful in checking whether number of clusters is enough.
+
+.. seealso:: Similar types of plots can be obtained using `featuresplot <featuresplot.html>`_ sub-command.

@@ -16,6 +16,9 @@ It contains several sub-commands for different purposes.
     * - `cluster <commands/cluster.html>`_
       - Main module to perform clustering
 
+    * - `featuresplot <commands/featuresplot.html>`_
+      - Feature vs Feature plot to check quality of clustering
+      
     * - `distmat <commands/distmat.html>`_
       - Distance-matrix related calculations
 
@@ -40,6 +43,7 @@ sub-commands
    :maxdepth: 1
 
    cluster <commands/cluster.rst>
+   featuresplot <commands/featuresplot.rst>
    distmat <commands/distmat.rst>
    matplot <commands/matplot.rst>
    hole <commands/hole.rst>

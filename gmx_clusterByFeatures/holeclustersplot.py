@@ -78,6 +78,21 @@ If not supplied, maximum axis value will be extracted from input radius file.
 
 """
 
+yminHelp=\
+"""Minimum value at Y-axis.
+If not supplied minimum value from data will be used. It can be useful to minimum and 
+maximum values of Y-axis when several plots are compared together.
+
+"""
+            
+ymaxHelp=\
+"""Maximum value at Y-axis.
+If not supplied maximum value from data will be used. It can be useful to minimum and 
+maximum values of Y-axis when several plots are compared together.
+
+"""
+
+
 endradHelp=\
 """End/Opening radius
 If radius is larger than this value, radius will not considered 
@@ -93,7 +108,7 @@ with "hole" sub-command.
 """
 
 endHelp=\
-"""Last frame to read from the input file.
+"""Last frame in time to read from the input file.
 If its ``end = -1``, All frames till the end will be read.
 
 """
@@ -176,9 +191,9 @@ def main():
                                         dataOccupancy=args.dataOccupancy)
 
     holeProcessor.plot_by_cluster(cluster_file, outputFile, csvfile=args.outCsvFile, stdbar=args.stdbar, 
-                                  discard_lasts=args.discard_lasts, width=args.width, height=args.height, 
-                                  fontsize=args.fontsize, rightmargin=args.rightmargin, 
-                                  legendcols=args.legendcols)
+                                  discard_lasts=args.discard_lasts, width=args.width, height=args.height,
+                                  ymin=args.ymin, ymax=args.ymax, fontsize=args.fontsize, 
+                                  rightmargin=args.rightmargin, legendcols=args.legendcols)
 
 
 
@@ -227,8 +242,8 @@ def parseArguments():
                         dest='gap', help=gapHelp)
     
     parser.add_argument('-b', '--begin', action='store',
-                        type=float, default=0, 
-                        dest='begin', help="First frame to read from the input file")
+                        type=float, default=0, metavar=0,
+                        dest='begin', help="First frame in time to read from the input file")
 
     parser.add_argument('-e', '--end', action='store',
                         type=float, metavar=-1, default=-1, 
@@ -245,6 +260,14 @@ def parseArguments():
     parser.add_argument('-dl', '--discard-lasts', action='store',
                         type=int, metavar=0, 
                         dest='discard_lasts', help=discardLastsHelp)
+    
+    parser.add_argument('-ymin', '--y-axis-min', action='store',
+                        type=float, dest='ymin', 
+                        help=yminHelp)
+    
+    parser.add_argument('-ymax', '--y-axis-max', action='store',
+                        type=float, dest='ymax', 
+                        help=ymaxHelp)
         
     parser.add_argument('-rmargin', '--right-margin', action='store',
                         type=float, metavar=0.15, default=0.15,

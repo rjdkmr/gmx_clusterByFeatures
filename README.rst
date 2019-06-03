@@ -43,6 +43,9 @@ Usage
     * - `cluster <https://gmx-clusterbyfeatures.readthedocs.io/commands/cluster.html>`_
       - Main module to perform clustering
 
+    * - `featuresplot <https://gmx-clusterbyfeatures.readthedocs.io/commands/featuresplot.html>`_
+      - Feature vs Feature plot to check quality of clustering
+
     * - `distmat <https://gmx-clusterbyfeatures.readthedocs.io/commands/distmat.html>`_
       - Distance-matrix related calculations
 

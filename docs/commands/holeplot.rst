@@ -21,12 +21,14 @@ Command summary
 
 .. code-block:: bash
 
-    gmx_clusterByFeatures holeplot [-h] [-i radius.dat] [-o output.png]
-                                      [-xmin XMIN] [-xmax XMAX]
-                                      [-endrad ENDRAD] [-ax Z] [-gap 1]
-                                      [-b BEGIN] [-e 1] [-do 90] [-rfreq 50]
-                                      [-fs 18] [-rlsize 10] [-wd 6] [-ht 6]
-                                      [-dpi 300]
+    gmx_clusterByFeatures holeplot  [-h] [-i radius.dat] [-resplot]
+                                    [-o output.png] [-csv output.csv]
+                                    [-xmin XMIN] [-xmax XMAX]
+                                    [-endrad ENDRAD] [-ax Z] [-gap 1] [-b 0]
+                                    [-e -1] [-do 90] [-rfreq 50]
+                                    [-ymin YMIN] [-ymax YMAX] [-fs 18]
+                                    [-rlsize 10] [-wd 6] [-ht 6] [-dpi 300]
+
                                   
 Options 
 ---------
@@ -38,6 +40,12 @@ output file.
 
 ******
 
+``-resplot``, ``--residues-plot``
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+Plot distributions of outlining residues to cavity/channel. By default, these 
+distributions are not plotted. This option enables the plotting of distributions.
+
+                        
 ``-o output.png``, ``--output output.png``
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 Name of the output plot file. The extension will be used to determine the output
@@ -62,6 +70,14 @@ Following output formats (system dependent) might be available:
 
 ******
 
+``-csv output.csv``, ``--out-csv output.csv``
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+Output csv file. The radius as a function of axis-points in csv formatted file. This
+file can be read in external data-plotting program.
+
+******
+
+                        
 ``-xmin XMIN``, ``--axis-min XMIN``
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 Minimum value of axis point after which radius value will be considered for plot.
@@ -101,15 +117,15 @@ with ``hole`` sub-command.
 
 ******
 
-``-b BEGIN``, ``--begin BEGIN``
+``-b 0``, ``--begin 0``
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-First frame to read from the input file
+First frame in time to read from the input file
 
 ******
 
-``-e 1``, ``--end 1``
+``-e -1``, ``--end -1``
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-Last frame to read from the input file.
+Last frame in time to read from the input file.
 By default ( ``-e -1``), all frames till the end will be read.
 
 ******
@@ -136,6 +152,22 @@ not considered for plotting.
 
 ******
 
+``-ymin YMIN``, ``--y-axis-min YMIN``
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+Minimum value at Y-axis. If not supplied minimum value from data will be used. 
+It can be useful to minimum and maximum values of Y-axis when several plots 
+are compared together.
+
+******
+
+``-ymax YMAX``, ``--y-axis-max YMAX``
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+Maximum value at Y-axis. If not supplied maximum value from data will be used.
+It can be useful to minimum and maximum values of Y-axis when several plots 
+are compared together.
+
+******
+                        
 ``-rlsize 10``, ``--rlabel-size 10``
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 Fontsize of residue label along Y-axis

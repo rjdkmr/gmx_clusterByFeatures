@@ -1,4 +1,3 @@
-
 #!/usr/bin/env python
 
 import csv
@@ -37,9 +36,9 @@ class HoleOutputProcessor:
             Gap between axis points in Ångstroms. It should be either equal to or larger than
            ``-sample value supplied with hole sub-command.
         begin : float
-            First frame to read from the input file
+            First frame in time to read from the input file
         end : float
-            Last frame to read from the input file. If its ``end = -1``, All frames till
+            Last frame in time to read from the input file. If its ``end = -1``, All frames till
             the end will be read.
         dataOccupancy : float
             Precentage of radius-data occupancy for axis-points. If an axis-point has radius-data
@@ -52,6 +51,7 @@ class HoleOutputProcessor:
             radius values.
 
         '''
+        
         self.filename = filename
         self.paxis = axis
         self.xmin = xmin
@@ -92,7 +92,7 @@ class HoleOutputProcessor:
             raise ValueError('{0} is requested for axis. However, only X, Y and Z axis are accepted'.format(self.paxis))
 
 
-    def plot_by_cluster(self, cluster_file, outfile, csvfile=None, stdbar=False, discard_lasts=None, width=6, height=4, fontsize=12, rightmargin=0.15, legendcols=1, dpi=300):
+    def plot_by_cluster(self, cluster_file, outfile, csvfile=None, stdbar=False, discard_lasts=0, ymin=None, ymax=None, width=6, height=4, fontsize=12, rightmargin=0.15, legendcols=1, dpi=300):
         '''Plot radius by Clusters
         It can be used to plot radius of cavity/channel for clusters seperately.
         It reads radius file from "hole" and cluster-id file  from "cluster",
@@ -119,6 +119,16 @@ class HoleOutputProcessor:
         discard_lasts : int
             Number of smallest clusters to discard from the plotting. It can be useful to filter
             out few smallest clusters because these may contain small number of frames.
+            
+        ymin : float
+            Minimum value at Y-axis.
+            If not supplied minimum value from data will be used. It can be useful to minimum and 
+            maximum values of Y-axis when several plots are compared together.
+            
+        ymax : float
+            Maximum value at Y-axis.
+            If not supplied maximum value from data will be used. It can be useful to minimum and 
+            maximum values of Y-axis when several plots are compared together.
 
         width : int
             Width of the plot
@@ -149,7 +159,7 @@ class HoleOutputProcessor:
 
         clids_data = self.read_clid(cluster_file)
         clids = sorted(clids_data.keys())
-        if discard_lasts is not None:
+        if discard_lasts > 0:
             clids = clids[:-1*discard_lasts]
 
         averages = OrderedDict()
@@ -166,7 +176,7 @@ class HoleOutputProcessor:
         # Write data to a csv file
         if csvfile is not None:
             with open(csvfile, 'w', newline='') as csvfile:
-                csvwriter = csv.writer(csvfile)
+                csvwriter = csv.writer(csvfile, dialect='excel')
 
                 # Write header
                 row = ['Axis']
@@ -206,6 +216,16 @@ class HoleOutputProcessor:
         handles, legend_labels = ax1.get_legend_handles_labels()
         ax1.set_ylabel(r'Radius ($\AA$)')
         ax1.set_xlabel(r'Axis ($\AA$)')
+        
+        # Set ylimits if given
+        ylims = ax1.get_ylims()
+        if ymin is not None:
+            ax1.set_ylims(ymin, ylims[1])
+            ylims = [ymin, ylims[1]]
+        if ymax is not None:
+            ax1.set_ylims(ylims[0], ymax)
+            ylims = [ylims[0], ymax]
+         
 
         legend = fig.legend(handles, legend_labels, ncol=legendcols, loc='right',scatterpoints=5, markerscale=3)
         fig.set_tight_layout(tight={'rect':(None,None,1-rightmargin, None)})
@@ -250,7 +270,174 @@ class HoleOutputProcessor:
                 fout.write('\n & \n')
         fout.close()
 
+    def plot_radius_residues(self, outfile, csvfile=None, residue_frequency=50, ymin=None, ymax=None, width=6, height=6, fontsize=18, rlabelsize=10, dpi=300):
+        ''' Plot radius and residues as a function of axis points
 
+        Parameters
+        ----------
+        outfile : str
+            Output plot file
+        
+        csvfile : str
+            Output csv file. The radius as a function of axis-points in csv formatted file. This
+            file can be read in external data-plotting program.
+
+        residue_frequency : float
+            Frequency (%) of residue occurence during the simulations at a given axis points.
+            If frequency is less than this threshold, it will not considered for plotting.
+            
+        ymin : float
+            Minimum value at Y-axis.
+            If not supplied minimum value from data will be used. It can be useful to minimum and 
+            maximum values of Y-axis when several plots are compared together.
+            
+        ymax : float
+            Maximum value at Y-axis.
+            If not supplied maximum value from data will be used. It can be useful to minimum and 
+            maximum values of Y-axis when several plots are compared together.
+
+
+        width : int
+            Width of the plot
+
+        height : int
+            Height of the plot
+
+        fontsize : int
+            Font size in the plot
+
+        rlabelsize : float
+            Fontsize of residue label along Y-axis.
+
+        '''
+
+        if self.average is None:
+            self.calculate_average()
+            
+        if csvfile is not None:
+            self.average2csvfile(csvfile)
+
+        fig = plt.figure(figsize=(width, height))
+        fig, (ax1, ax2) = plt.subplots(2, sharex=True, gridspec_kw={'hspace': 0}, figsize=(width, height))
+        mpl.rcParams['font.size'] = fontsize
+        fig.subplots_adjust(hspace=0.0, wspace=0)
+
+
+        # Plot for radius
+        color=['#000000', '#BDBDBD']
+        ax1.errorbar(self.axis_value, self.average.values(), yerr=self.error.values(), ecolor=color[1], elinewidth=2.5, color=color[0], lw=1.5, marker='o', mfc=color[0], mew=0, ms=1)
+        ax1.plot(self.axis_value, self.average.values(), '-r')
+        ax1.set_ylabel(r'Radius ($\AA$)')
+        ax1.grid(which='major', axis='x', linewidth=0.5, alpha=0.5)
+        ax1.tick_params(axis='x', direction='in', labelbottom=False, top=True)
+        
+        # Set ylimits if given
+        ylims = ax1.get_ylims()
+        if ymin is not None:
+            ax1.set_ylims(ymin, ylims[1])
+            ylims = [ymin, ylims[1]]
+        if ymax is not None:
+            ax1.set_ylims(ylims[0], ymax)
+            ylims = [ylims[0], ymax]
+
+
+        # Plot for residues
+        if self.residuesByAxis is None:
+            self.processResiduesData()
+
+        plot_coords, ylabels, median = [], [], []
+        for res in self.residuesByAxis:
+            if (len(self.residuesByAxis[res])/self.frame_number) < (residue_frequency/100):
+                continue
+            plot_coords.append(self.residuesByAxis[res])
+            median.append(np.median(self.residuesByAxis[res]))
+            ylabels.append(res)
+
+        idx = np.argsort(median)
+        for i in range(len(median)):
+            violins = ax2.violinplot(plot_coords[idx[i]], positions=[i], vert=False, showmedians=True, showextrema=False)
+            for pc in violins['bodies']:
+                pc.set_edgecolor('black')
+                pc.set_linewidth(0.5)
+                pc.set_alpha(0.5)
+
+        ax2.set_yticks(range(0,len(median),1))
+        ax2.set_yticklabels(np.asarray(ylabels)[idx], fontsize=rlabelsize)
+        ax2.grid(which='major', axis='both', linewidth=0.5, alpha=0.5)
+        ax2.set_ylim(-1, len(median))
+        ax2.set_xlabel(r'axis ($\AA$)')
+        ax2.tick_params(axis='x', direction='inout')
+        ax2.tick_params(axis='x', direction='in', top=True)
+
+        fig.tight_layout()
+        plt.savefig(outfile, dpi=dpi)
+
+    def plot_radius(self, outfile, csvfile=None, ymin=None, ymax=None, width=6, height=4, fontsize=18, dpi=300):
+        ''' Plot radius and residues as a function of axis points
+
+        Parameters
+        ----------
+        outfile : str
+            Output plot file
+            
+        csvfile : str
+            Output csv file. The radius as a function of axis-points in csv formatted file. This
+            file can be read in external data-plotting program.
+
+        ymin : float
+            Minimum value at Y-axis.
+            If not supplied minimum value from data will be used. It can be useful to minimum and 
+            maximum values of Y-axis when several plots are compared together.
+            
+        ymax : float
+            Maximum value at Y-axis.
+            If not supplied maximum value from data will be used. It can be useful to minimum and 
+            maximum values of Y-axis when several plots are compared together.
+
+
+        width : int
+            Width of the plot
+
+        height : int
+            Height of the plot
+
+        fontsize : int
+            Font size in the plot
+
+        '''
+
+        if self.average is None:
+            self.calculate_average()
+            
+        if csvfile is not None:
+            self.average2csvfile(csvfile)
+
+        fig = plt.figure(figsize=(width, height))
+        fig, (ax1, ax2) = plt.subplots(2, sharex=True, gridspec_kw={'hspace': 0}, figsize=(width, height))
+        mpl.rcParams['font.size'] = fontsize
+        fig.subplots_adjust(hspace=0.0, wspace=0)
+
+
+        # Plot for radius
+        color=['#000000', '#BDBDBD']
+        ax1.errorbar(self.axis_value, self.average.values(), yerr=self.error.values(), ecolor=color[1], elinewidth=2.5, color=color[0], lw=1.5, marker='o', mfc=color[0], mew=0, ms=1)
+        ax1.plot(self.axis_value, self.average.values(), '-r')
+        ax1.set_ylabel(r'Radius ($\AA$)')
+        ax1.grid(which='major', axis='x', linewidth=0.5, alpha=0.5)
+        ax1.set_xlabel(r'Axis ($\AA$)')
+        
+        # Set ylimits if given
+        ylims = ax1.get_ylims()
+        if ymin is not None:
+            ax1.set_ylims(ymin, ylims[1])
+            ylims = [ymin, ylims[1]]
+        if ymax is not None:
+            ax1.set_ylims(ylims[0], ymax)
+            ylims = [ylims[0], ymax]
+
+        fig.tight_layout()
+        plt.savefig(outfile, dpi=dpi)
+        
     def calculate_average(self):
         '''Calculate average and standard deviation of radius along the axis
         '''
@@ -299,6 +486,32 @@ class HoleOutputProcessor:
             self.error[key]  = self.radius[key].std()
             print('{0:12.3f} {1:16.3f} {2:>16.3f}'.format(float(key), self.average[key], self.error[key]))
         print('------------------------------------------------------------')
+        
+    def average2csvfile(self, csvfile):
+        '''Write average of radius to a CSV output file
+        
+        Parameters
+        ----------
+        
+        csvfile : str
+            Name of output CSV file
+        '''
+        if self.average is None:
+            self.calculate_average()
+
+        # Write data to a csv file
+        with open(csvfile, 'w', newline='') as csvfile:
+            csvwriter = csv.writer(csvfile, dialect='excel')
+
+            # Write header
+            row = ['Axis', 'Radius', 'std-deviation']
+            csvwriter.writerow(row)
+
+            # Write data
+            for key in list(map(self._float2str, self.axis_value)):
+                row = [float(key), self.average[key], self.error[key]]
+                csvwriter.writerow(row)
+                
 
     def processResiduesData(self):
         self.residuesByAxis = OrderedDict()
@@ -315,83 +528,9 @@ class HoleOutputProcessor:
                             self.residuesByAxis[tres] = []
                         self.residuesByAxis[tres].append(float(key))
 
-
-    def plot_radius_residues(self, outfile, residue_frequency=50, width=6, height=6, fontsize=18, rlabelsize=10, dpi=300):
-        ''' Plot radius and residues as a function of axis points
-
-        Parameters
-        ----------
-        outfile : str
-            Output plot file
-        residue_frequency : float
-            Frequency (%) of residue occurence during the simulations at a given axis points.
-            If frequency is less than this threshold, it will not considered for plotting.
-        width : int
-            Width of the plot
-
-        height : int
-            Height of the plot
-
-        fontsize : int
-            Font size in the plot
-
-        rlabelsize : float
-            Fontsize of residue label along Y-axis.
-
-        '''
-
-        if self.average is None:
-            self.calculate_average()
-
-        fig = plt.figure(figsize=(width, height))
-        fig, (ax1, ax2) = plt.subplots(2, sharex=True, gridspec_kw={'hspace': 0}, figsize=(width, height))
-        mpl.rcParams['font.size'] = fontsize
-        fig.subplots_adjust(hspace=0.0, wspace=0)
-
-
-        # Plot for radius
-        color=['#000000', '#BDBDBD']
-        ax1.errorbar(self.axis_value, self.average.values(), yerr=self.error.values(), ecolor=color[1], elinewidth=2.5, color=color[0], lw=1.5, marker='o', mfc=color[0], mew=0, ms=1)
-        ax1.plot(self.axis_value, self.average.values(), '-r')
-        ax1.set_ylabel(r'Radius ($\AA$)')
-        ax1.grid(which='major', axis='x', linewidth=0.5, alpha=0.5)
-        ax1.tick_params(axis='x', direction='in', labelbottom=False, top=True)
-
-
-        # Plot for residues
-        if self.residuesByAxis is None:
-            self.processResiduesData()
-
-        plot_coords, ylabels, median = [], [], []
-        for res in self.residuesByAxis:
-            if (len(self.residuesByAxis[res])/self.frame_number) < (residue_frequency/100):
-                continue
-            plot_coords.append(self.residuesByAxis[res])
-            median.append(np.median(self.residuesByAxis[res]))
-            ylabels.append(res)
-
-        idx = np.argsort(median)
-        for i in range(len(median)):
-            violins = ax2.violinplot(plot_coords[idx[i]], positions=[i], vert=False, showmedians=True, showextrema=False)
-            for pc in violins['bodies']:
-                pc.set_edgecolor('black')
-                pc.set_linewidth(0.5)
-                pc.set_alpha(0.5)
-
-        ax2.set_yticks(range(0,len(median),1))
-        ax2.set_yticklabels(np.asarray(ylabels)[idx], fontsize=rlabelsize)
-        ax2.grid(which='major', axis='both', linewidth=0.5, alpha=0.5)
-        ax2.set_ylim(-1, len(median))
-        ax2.set_xlabel(r'axis ($\AA$)')
-        ax2.tick_params(axis='x', direction='inout')
-        ax2.tick_params(axis='x', direction='in', top=True)
-
-        fig.tight_layout()
-        plt.savefig(outfile, dpi=dpi)
-
     def _float2str(self, x):
         return str(np.round(x, 3))
-
+    
     def _append_block_data(self, block_data, time):
 
         block_data_transpose = np.array(block_data).T

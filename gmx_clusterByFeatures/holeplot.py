@@ -50,6 +50,13 @@ Following output formats are available:
 
 """.format(get_output_formats(fmt=True))
 
+outCsvFileHelp=\
+"""Output csv file.
+The radius as a function of axis-points in csv formatted file. This
+file can be read in external data-plotting program.
+
+"""
+
 xminHelp=\
 """Minimum value of axis-point
 Minimum value of axis point after which radius value will be considered.
@@ -82,7 +89,7 @@ with "hole" sub-command.
 """
 
 endHelp=\
-"""Last frame to read from the input file.
+"""Last frame in time  to read from the input file.
 By default ("-e -1"), all frames till the end will be read.
 
 """
@@ -106,6 +113,21 @@ residueFrequencyHelp=\
 If frequency is less than this threshold, it will not considered for plotting. 
 
 """
+
+yminHelp=\
+"""Minimum value at Y-axis.
+If not supplied minimum value from data will be used. It can be useful to minimum and 
+maximum values of Y-axis when several plots are compared together.
+
+"""
+            
+ymaxHelp=\
+"""Maximum value at Y-axis.
+If not supplied maximum value from data will be used. It can be useful to minimum and 
+maximum values of Y-axis when several plots are compared together.
+
+"""
+
 
 
 def main():
@@ -137,11 +159,16 @@ def main():
     holeProcessor = HoleOutputProcessor(inputFile, axis=args.axis, endrad=args.endrad, xmin=args.xmin, 
                                         xmax=args.xmax, gap=args.gap, begin=args.begin, end=args.end,
                                         dataOccupancy=args.dataOccupancy)
-    holeProcessor.plot_radius_residues(outputFile, residue_frequency=args.residue_frequency, width=args.width, 
-                                       height=args.height, fontsize=args.fontsize, rlabelsize=args.rlabelsize,
-                                       dpi=args.dpi)
-
-
+    if args.resplot:
+        holeProcessor.plot_radius_residues(outputFile, csvfile=args.outCsvFile, ymin=args.ymin, 
+                                           ymax=args.ymax, residue_frequency=args.residue_frequency, 
+                                           width=args.width, height=args.height, fontsize=args.fontsize, 
+                                           rlabelsize=args.rlabelsize, dpi=args.dpi)
+    else:
+        holeProcessor.plot_radius(outputFile, csvfile=args.outCsvFile, ymin=args.ymin, ymax=args.ymax,
+                                  width=args.width, height=args.height, fontsize=args.fontsize, 
+                                  dpi=args.dpi)
+        
 
 def parseArguments():
 
@@ -155,10 +182,17 @@ def parseArguments():
                         type=argparse.FileType('r'), metavar='radius.dat',
                         dest='inputFile', required=False, help=inputFileHelp)
 
+    parser.add_argument('-resplot', '--residues-plot', action='store_true',
+                        default=False, dest='resplot', 
+                        help="Plot distributions of outlining residues to cavity/channel.")
     
     parser.add_argument('-o', '--output', action='store',
                         type=str, metavar='output.png', 
                         dest='outputFile', help=outputFileHelp)
+    
+    parser.add_argument('-csv', '--out-csv', action='store',
+                        type=str, metavar='output.csv', 
+                        dest='outCsvFile', help=outCsvFileHelp)
     
     parser.add_argument('-xmin', '--axis-min', action='store',
                         type=float, dest='xmin', 
@@ -181,11 +215,11 @@ def parseArguments():
                         dest='gap', help=gapHelp)
     
     parser.add_argument('-b', '--begin', action='store',
-                        type=float, default=0, 
-                        dest='begin', help="First frame to read from the input file")
+                        type=float, default=0, metavar=0,
+                        dest='begin', help="First frame in time to read from the input file")
 
     parser.add_argument('-e', '--end', action='store',
-                        type=float, metavar=1, default=-1, 
+                        type=float, metavar=-1, default=-1, 
                         dest='end', help=endHelp)
     
     parser.add_argument('-do', '--data-occupancy', action='store',
@@ -196,6 +230,14 @@ def parseArguments():
                         type=float, metavar=50, default=50, 
                         dest='residue_frequency', help=residueFrequencyHelp)
      
+    parser.add_argument('-ymin', '--y-axis-min', action='store',
+                        type=float, dest='ymin', 
+                        help=yminHelp)
+    
+    parser.add_argument('-ymax', '--y-axis-max', action='store',
+                        type=float, dest='ymax', 
+                        help=ymaxHelp)
+    
     parser.add_argument('-fs', '--font-size', action='store',
                         type=int, metavar=18, default=18,
                         dest='fontsize', help="Font-size of all texts in plot")

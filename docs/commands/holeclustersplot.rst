@@ -5,7 +5,7 @@
    
    
 ``holeclustersplot``
-=============
+======================
 
 Description
 -----------
@@ -22,16 +22,17 @@ Command summary
 
 .. code-block:: bash
 
-    gmx_clusterByFeatures holeclustersplot [-h] [-i radius.dat]                                                                                                                                                                           
-                                           [-clid clid.xvg] [-o output.png]
-                                           [-csv output.csv] [-xmin XMIN]
-                                           [-xmax XMAX] [-endrad ENDRAD]
-                                           [-ax Z] [-gap 1] [-b BEGIN]
-                                           [-e -1] [-do 90] [-stdbar]
-                                           [-dl 0] [-rmargin 0.15]
-                                           [-lcols 1] [-fs 18] [-wd 6]
-                                           [-ht 6] [-dpi 300]
-                                  
+    gmx_clusterByFeatures holeclustersplot  [-h] [-i radius.dat]
+                                            [-clid clid.xvg] [-o output.png]
+                                            [-csv output.csv] [-xmin XMIN]
+                                            [-xmax XMAX] [-endrad ENDRAD]
+                                            [-ax Z] [-gap 1] [-b 0] [-e -1]
+                                            [-do 90] [-stdbar] [-dl 0]
+                                            [-ymin YMIN] [-ymax YMAX]
+                                            [-rmargin 0.15] [-lcols 1]
+                                            [-fs 18] [-wd 6] [-ht 6]
+                                            [-dpi 300]
+                                 
 
 Options 
 ---------
@@ -119,15 +120,15 @@ with ``hole`` sub-command.
 
 ******
 
-``-b BEGIN``, ``--begin BEGIN``
+``-b 0``, ``--begin 0``
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-First frame to read from the input file
+First frame in time to read from the input file
 
 ******
 
-``-e 1``, ``--end 1``
+``-e -1``, ``--end -1``
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-Last frame to read from the input file.
+Last frame in time to read from the input file.
 By default ( ``-e -1``), all frames till the end will be read.
 
 ******
@@ -158,6 +159,22 @@ If it is supplied, standard deviation will be shown as an error-bar in the plot.
 Number of smallest clusters to discard from the plotting.
 It can be useful to filter out few smallest clusters because these may 
 contain small number of frames.
+
+******
+
+``-ymin YMIN``, ``--y-axis-min YMIN``
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+Minimum value at Y-axis. If not supplied minimum value from data will be used. 
+It can be useful to minimum and maximum values of Y-axis when several plots 
+are compared together.
+
+******
+
+``-ymax YMAX``, ``--y-axis-max YMAX``
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+Maximum value at Y-axis. If not supplied maximum value from data will be used.
+It can be useful to minimum and maximum values of Y-axis when several plots 
+are compared together.
 
 ******
 
