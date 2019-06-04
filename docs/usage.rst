@@ -34,7 +34,7 @@ It contains several sub-commands for different purposes.
     * - `holefeatures <commands/holefeatures.html>`_
       - To write radius as a features for clustering
       
-    * - `holefeatures <commands/holefeatures.html>`_
+    * - `holeclustersplot <commands/holeclustersplot.html>`_
       - To plot or write radius for clusters separately
 
 sub-commands

@@ -40,28 +40,28 @@ Usage
     * - Command
       - Function
 
-    * - `cluster <https://gmx-clusterbyfeatures.readthedocs.io/commands/cluster.html>`_
+    * - `cluster <https://gmx-clusterbyfeatures.readthedocs.io/en/latest/commands/cluster.html>`_
       - Main module to perform clustering
 
-    * - `featuresplot <https://gmx-clusterbyfeatures.readthedocs.io/commands/featuresplot.html>`_
+    * - `featuresplot <https://gmx-clusterbyfeatures.readthedocs.io/en/latest/commands/featuresplot.html>`_
       - Feature vs Feature plot to check quality of clustering
 
-    * - `distmat <https://gmx-clusterbyfeatures.readthedocs.io/commands/distmat.html>`_
+    * - `distmat <https://gmx-clusterbyfeatures.readthedocs.io/en/latest/commands/distmat.html>`_
       - Distance-matrix related calculations
 
-    * - `matplot <https://gmx-clusterbyfeatures.readthedocs.io/commands/matplot.html>`_
+    * - `matplot <https://gmx-clusterbyfeatures.readthedocs.io/en/latest/commands/matplot.html>`_
       - To visulaize/plot matrix obtained from ``distmat``
       
-    * - `hole <https://gmx-clusterbyfeatures.readthedocs.io/commands/hole.html>`_
+    * - `hole <https://gmx-clusterbyfeatures.readthedocs.io/en/latest/commands/hole.html>`_
       - To calculate cavity/channel radius using HOLE program
       
-    * - `holeplot <https://gmx-clusterbyfeatures.readthedocs.io/commands/holeplot.html>`_
+    * - `holeplot <https://gmx-clusterbyfeatures.readthedocs.io/en/latest/commands/holeplot.html>`_
       - To calculate average and plot hole output radius file
     
-    * - `holefeatures <https://gmx-clusterbyfeatures.readthedocs.io/commands/holefeatures.html>`_
+    * - `holefeatures <https://gmx-clusterbyfeatures.readthedocs.io/en/latest/commands/holefeatures.html>`_
       - To write radius as a features for clustering
       
-    * - `holefeatures <https://gmx-clusterbyfeatures.readthedocs.io/commands/holefeatures.html>`_
+    * - `holeclustersplot <https://gmx-clusterbyfeatures.readthedocs.io/en/latest/commands/holeclustersplot.html>`_
       - To plot or write radius for clusters separately
 
 For more details, visit `usage <https://gmx-clusterbyfeatures.readthedocs.io/en/latest/usage.html>`_ section. 
