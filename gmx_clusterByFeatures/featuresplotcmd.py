@@ -3,12 +3,11 @@ import sys
 import argparse
 import os
 import numpy as np
-import matplotlib.pyplot as plt
 
-from .featuresplotter import FeaturesPlotter
+from . import featuresplotter
 
 def get_output_formats(fmt=False):
-    fig = plt.figure()
+    fig = featuresplotter.plt.figure()
     output_formats_dict = fig.canvas.get_supported_filetypes()
     del fig
     
@@ -139,7 +138,7 @@ def main():
                          " acceptable extension.\n Use from following: {1}"
                          .format(outputFileExtension, output_formats))
         
-    featurePlot = FeaturesPlotter(inputFile, clidfile, featuresfile, 
+    featurePlot = featuresplotter.FeaturesPlotter(inputFile, clidfile, featuresfile, 
                                                   nFeatures=None, clusterlogfile=None, 
                                                   begin=args.begin, end=args.end)
     featurePlot.plot_features(outputFile, width=args.width, height=args.height,

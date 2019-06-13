@@ -6,7 +6,7 @@ from numpy import ma
 import sys
 import re
 import matplotlib as mpl
-mpl.use('TkAgg')
+mpl.use('Agg')
 import matplotlib.pyplot as plt
 from collections import OrderedDict
 import math
@@ -51,7 +51,7 @@ class HoleOutputProcessor:
             radius values.
 
         '''
-        
+
         self.filename = filename
         self.paxis = axis
         self.xmin = xmin
@@ -119,15 +119,15 @@ class HoleOutputProcessor:
         discard_lasts : int
             Number of smallest clusters to discard from the plotting. It can be useful to filter
             out few smallest clusters because these may contain small number of frames.
-            
+
         ymin : float
             Minimum value at Y-axis.
-            If not supplied minimum value from data will be used. It can be useful to minimum and 
+            If not supplied minimum value from data will be used. It can be useful to minimum and
             maximum values of Y-axis when several plots are compared together.
-            
+
         ymax : float
             Maximum value at Y-axis.
-            If not supplied maximum value from data will be used. It can be useful to minimum and 
+            If not supplied maximum value from data will be used. It can be useful to minimum and
             maximum values of Y-axis when several plots are compared together.
 
         width : int
@@ -216,16 +216,16 @@ class HoleOutputProcessor:
         handles, legend_labels = ax1.get_legend_handles_labels()
         ax1.set_ylabel(r'Radius ($\AA$)')
         ax1.set_xlabel(r'Axis ($\AA$)')
-        
+
         # Set ylimits if given
-        ylims = ax1.get_ylims()
+        ylims = ax1.get_ylim()
         if ymin is not None:
-            ax1.set_ylims(ymin, ylims[1])
+            ax1.set_ylim(ymin, ylims[1])
             ylims = [ymin, ylims[1]]
         if ymax is not None:
-            ax1.set_ylims(ylims[0], ymax)
+            ax1.set_ylim(ylims[0], ymax)
             ylims = [ylims[0], ymax]
-         
+
 
         legend = fig.legend(handles, legend_labels, ncol=legendcols, loc='right',scatterpoints=5, markerscale=3)
         fig.set_tight_layout(tight={'rect':(None,None,1-rightmargin, None)})
@@ -270,30 +270,35 @@ class HoleOutputProcessor:
                 fout.write('\n & \n')
         fout.close()
 
-    def plot_radius_residues(self, outfile, csvfile=None, residue_frequency=50, ymin=None, ymax=None, width=6, height=6, fontsize=18, rlabelsize=10, dpi=300):
+    def plot_radius_residues(self, outfile, csvfile=None,  violinplot=False, residue_frequency=50, ymin=None, ymax=None, width=6, height=6, fontsize=18, rlabelsize=10, dpi=300):
         ''' Plot radius and residues as a function of axis points
 
         Parameters
         ----------
         outfile : str
             Output plot file
-        
+
         csvfile : str
             Output csv file. The radius as a function of axis-points in csv formatted file. This
             file can be read in external data-plotting program.
 
+        violinplot : bool
+            In place of normal line-plot, it plots radius distribution as violins. It is useful
+            because this plot gives distribution of radius values over entire trajectory for each
+            axis-points
+
         residue_frequency : float
             Frequency (%) of residue occurence during the simulations at a given axis points.
             If frequency is less than this threshold, it will not considered for plotting.
-            
+
         ymin : float
             Minimum value at Y-axis.
-            If not supplied minimum value from data will be used. It can be useful to minimum and 
+            If not supplied minimum value from data will be used. It can be useful to minimum and
             maximum values of Y-axis when several plots are compared together.
-            
+
         ymax : float
             Maximum value at Y-axis.
-            If not supplied maximum value from data will be used. It can be useful to minimum and 
+            If not supplied maximum value from data will be used. It can be useful to minimum and
             maximum values of Y-axis when several plots are compared together.
 
 
@@ -313,7 +318,7 @@ class HoleOutputProcessor:
 
         if self.average is None:
             self.calculate_average()
-            
+
         if csvfile is not None:
             self.average2csvfile(csvfile)
 
@@ -322,22 +327,24 @@ class HoleOutputProcessor:
         mpl.rcParams['font.size'] = fontsize
         fig.subplots_adjust(hspace=0.0, wspace=0)
 
-
         # Plot for radius
-        color=['#000000', '#BDBDBD']
-        ax1.errorbar(self.axis_value, self.average.values(), yerr=self.error.values(), ecolor=color[1], elinewidth=2.5, color=color[0], lw=1.5, marker='o', mfc=color[0], mew=0, ms=1)
-        ax1.plot(self.axis_value, self.average.values(), '-r')
+        if violinplot:
+            self._violinplot(ax1)
+        else:
+            color=['#000000', '#BDBDBD']
+            ax1.errorbar(self.axis_value, self.average.values(), yerr=self.error.values(), ecolor=color[1], elinewidth=2.5, color=color[0], lw=1.5, marker='o', mfc=color[0], mew=0, ms=1)
+            ax1.plot(self.axis_value, self.average.values(), '-r')
         ax1.set_ylabel(r'Radius ($\AA$)')
         ax1.grid(which='major', axis='x', linewidth=0.5, alpha=0.5)
         ax1.tick_params(axis='x', direction='in', labelbottom=False, top=True)
-        
+
         # Set ylimits if given
-        ylims = ax1.get_ylims()
+        ylims = ax1.get_ylim()
         if ymin is not None:
-            ax1.set_ylims(ymin, ylims[1])
+            ax1.set_ylim(ymin, ylims[1])
             ylims = [ymin, ylims[1]]
         if ymax is not None:
-            ax1.set_ylims(ylims[0], ymax)
+            ax1.set_ylim(ylims[0], ymax)
             ylims = [ylims[0], ymax]
 
 
@@ -372,26 +379,31 @@ class HoleOutputProcessor:
         fig.tight_layout()
         plt.savefig(outfile, dpi=dpi)
 
-    def plot_radius(self, outfile, csvfile=None, ymin=None, ymax=None, width=6, height=4, fontsize=18, dpi=300):
+    def plot_radius(self, outfile, csvfile=None, violinplot=False, ymin=None, ymax=None, width=6, height=4, fontsize=18, dpi=300):
         ''' Plot radius and residues as a function of axis points
 
         Parameters
         ----------
         outfile : str
             Output plot file
-            
+
         csvfile : str
             Output csv file. The radius as a function of axis-points in csv formatted file. This
             file can be read in external data-plotting program.
 
+        violinplot : bool
+            In place of normal line-plot, it plots radius distribution as violins. It is useful
+            because this plot gives distribution of radius values over entire trajectory for each
+            axis-points
+
         ymin : float
             Minimum value at Y-axis.
-            If not supplied minimum value from data will be used. It can be useful to minimum and 
+            If not supplied minimum value from data will be used. It can be useful to minimum and
             maximum values of Y-axis when several plots are compared together.
-            
+
         ymax : float
             Maximum value at Y-axis.
-            If not supplied maximum value from data will be used. It can be useful to minimum and 
+            If not supplied maximum value from data will be used. It can be useful to minimum and
             maximum values of Y-axis when several plots are compared together.
 
 
@@ -408,7 +420,7 @@ class HoleOutputProcessor:
 
         if self.average is None:
             self.calculate_average()
-            
+
         if csvfile is not None:
             self.average2csvfile(csvfile)
 
@@ -419,25 +431,28 @@ class HoleOutputProcessor:
 
 
         # Plot for radius
-        color=['#000000', '#BDBDBD']
-        ax1.errorbar(self.axis_value, self.average.values(), yerr=self.error.values(), ecolor=color[1], elinewidth=2.5, color=color[0], lw=1.5, marker='o', mfc=color[0], mew=0, ms=1)
-        ax1.plot(self.axis_value, self.average.values(), '-r')
+        if violinplot:
+            self._violinplot(ax1)
+        else:
+            color=['#000000', '#BDBDBD']
+            ax1.errorbar(self.axis_value, self.average.values(), yerr=self.error.values(), ecolor=color[1], elinewidth=2.5, color=color[0], lw=1.5, marker='o', mfc=color[0], mew=0, ms=1)
+            ax1.plot(self.axis_value, self.average.values(), '-r')
         ax1.set_ylabel(r'Radius ($\AA$)')
         ax1.grid(which='major', axis='x', linewidth=0.5, alpha=0.5)
         ax1.set_xlabel(r'Axis ($\AA$)')
-        
+
         # Set ylimits if given
-        ylims = ax1.get_ylims()
+        ylims = ax1.get_ylim()
         if ymin is not None:
-            ax1.set_ylims(ymin, ylims[1])
+            ax1.set_ylim(ymin, ylims[1])
             ylims = [ymin, ylims[1]]
         if ymax is not None:
-            ax1.set_ylims(ylims[0], ymax)
+            ax1.set_ylim(ylims[0], ymax)
             ylims = [ylims[0], ymax]
 
         fig.tight_layout()
         plt.savefig(outfile, dpi=dpi)
-        
+
     def calculate_average(self):
         '''Calculate average and standard deviation of radius along the axis
         '''
@@ -486,13 +501,13 @@ class HoleOutputProcessor:
             self.error[key]  = self.radius[key].std()
             print('{0:12.3f} {1:16.3f} {2:>16.3f}'.format(float(key), self.average[key], self.error[key]))
         print('------------------------------------------------------------')
-        
+
     def average2csvfile(self, csvfile):
         '''Write average of radius to a CSV output file
-        
+
         Parameters
         ----------
-        
+
         csvfile : str
             Name of output CSV file
         '''
@@ -511,7 +526,7 @@ class HoleOutputProcessor:
             for key in list(map(self._float2str, self.axis_value)):
                 row = [float(key), self.average[key], self.error[key]]
                 csvwriter.writerow(row)
-                
+
 
     def processResiduesData(self):
         self.residuesByAxis = OrderedDict()
@@ -528,9 +543,28 @@ class HoleOutputProcessor:
                             self.residuesByAxis[tres] = []
                         self.residuesByAxis[tres].append(float(key))
 
+    def _violinplot(self, ax):
+        values = []
+        positions = []
+
+        for key in list(map(self._float2str, self.axis_value)):
+            # Axis point with any missing data are not written
+            if float(key) in self.axis_value:
+                if hasattr(self.radius[key], 'compressed'):
+                    values.append(self.radius[key].compressed())
+                else:
+                    values.append(self.radius[key])
+                positions.append(float(key))
+
+        violins = ax.violinplot(values, positions=positions, showmedians=True, showextrema=False)
+        for pc in violins['bodies']:
+            pc.set_edgecolor('black')
+            pc.set_linewidth(0.5)
+            pc.set_alpha(0.5)
+
     def _float2str(self, x):
         return str(np.round(x, 3))
-    
+
     def _append_block_data(self, block_data, time):
 
         block_data_transpose = np.array(block_data).T

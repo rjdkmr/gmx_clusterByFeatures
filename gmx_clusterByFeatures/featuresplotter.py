@@ -5,7 +5,7 @@ import numpy as np
 import sys
 import re
 import matplotlib as mpl
-mpl.use('TkAgg')
+mpl.use('Agg')
 import matplotlib.pyplot as plt
 from collections import OrderedDict
 

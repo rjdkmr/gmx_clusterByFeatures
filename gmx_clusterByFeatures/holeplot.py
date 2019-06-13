@@ -3,12 +3,11 @@ import sys
 import argparse
 import os
 import numpy as np
-import matplotlib.pyplot as plt
 
-from .holeOutputProcessor import HoleOutputProcessor
+from . import holeOutputProcessor
 
 def get_output_formats(fmt=False):
-    fig = plt.figure()
+    fig = holeOutputProcessor.plt.figure()
     output_formats_dict = fig.canvas.get_supported_filetypes()
     del fig
     
@@ -156,9 +155,10 @@ def main():
                          " acceptable extension.\n Use from following: {1}"
                          .format(outputFileExtension, output_formats))
 
-    holeProcessor = HoleOutputProcessor(inputFile, axis=args.axis, endrad=args.endrad, xmin=args.xmin, 
-                                        xmax=args.xmax, gap=args.gap, begin=args.begin, end=args.end,
-                                        dataOccupancy=args.dataOccupancy)
+    holeProcessor = holeOutputProcessor.HoleOutputProcessor(inputFile, axis=args.axis, endrad=args.endrad, 
+                                                            xmin=args.xmin, xmax=args.xmax, gap=args.gap, 
+                                                            begin=args.begin, end=args.end,
+                                                            dataOccupancy=args.dataOccupancy)
     if args.resplot:
         holeProcessor.plot_radius_residues(outputFile, csvfile=args.outCsvFile, ymin=args.ymin, 
                                            ymax=args.ymax, residue_frequency=args.residue_frequency, 
