@@ -71,15 +71,16 @@ Command summary
 
 .. code-block:: bash
 
-  gmx_clusterByFeatures cluster [-f [<.xtc/.trr/...>]] [-s [<.tpr/.gro/...>]] [-feat [<.xvg>]]
-                                [-n [<.ndx>]] [-clid [<.xvg>]] [-g [<.log>]]
-                                [-fout [<.xtc/.trr/...>]] [-cpdb [<.pdb>]] [-rmsd [<.xvg>]]
-                                [-b <time>] [-e <time>] [-dt <time>] [-tu <enum>] [-xvg <enum>]
-                                [-method <enum>] [-nfeature <int>] [-cmetric <enum>]
-                                [-ncluster <int>] [-crmsthres <real>] [-ssrchange <real>]
-                                [-db_eps <real>] [-db_min_samples <int>] [-nminfr <int>] [-[no]fit]
-                                [-[no]fit2central] [-sort <enum>] [-plot <string>] [-fsize <int>]
-                                [-pltw <real>] [-plth <real>]
+    gmx_clusterByFeatures cluster   [-f [<.xtc/.trr/...>]] [-s [<.tpr/.gro/...>]]
+                                    [-feat [<.xvg>]] [-n [<.ndx>]] [-clid [<.xvg>]] [-g [<.log>]]
+                                    [-fout [<.xtc/.trr/...>]] [-cpdb [<.pdb>]] [-rmsd [<.xvg>]]
+                                    [-b <time>] [-e <time>] [-dt <time>] [-tu <enum>] [-xvg <enum>]
+                                    [-method <enum>] [-nfeature <int>] [-cmetric <enum>]
+                                    [-ncluster <int>] [-crmsthres <real>] [-ssrchange <real>]
+                                    [-db_eps <real>] [-db_min_samples <int>] [-nminfr <int>]
+                                    [-[no]fit] [-[no]fit2central] [-outframe <int>] [-sort <enum>]
+                                    [-plot <string>] [-fsize <int>] [-pltw <real>] [-plth <real>]
+                                    
 
 
 Options summary
@@ -222,6 +223,10 @@ Options summary
       - Disable
       - Enable/Disable trajectory superimposition or fitting to central structure in the output trajectory
 
+    * - `-outframe \<int\> <cluster.html#outframe-1>`_
+      - -1
+      - Number of maximum frames in the output trajectories.
+      
     * - `-sort  \<keyword\> <cluster.html#sort-none>`_
       - none
       - Sort trajectory according to these values. Accepted methods are:
@@ -626,6 +631,15 @@ Enable/Disable trajectory superimposition or fitting to central structure in
 the output trajectory. Atoms group used for fitting depends on ``-[no]fit``
 option. If ``-nofit``, second input index group (RMSD/clustering group) will
 be used for fitting otherwise third index group will be used for fitting.
+
+
+******
+
+``-outframe -1``
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+Number of maximum frames in the output trajectories. It can be helpful to get 
+output trajectory with only structures around the central structure.
 
 
 ******

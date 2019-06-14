@@ -249,6 +249,11 @@ class HoleOutputProcessor:
 
 
         '''
+        toBePrinted = True
+        msg =  "WARNING: radius value for the axis point was not calculated by hole. Zero will be written as feature value."
+        msg += "However, large number of missing values will lead to wrong clustering. Therefore, please try to minimize or"
+        msg += "eliminate the missing values by changing axis-point range using xmin and xmax option and/or dataOccupancy option."
+        
         # Read hole data if not read previously
         if self.axis_value is None:
             self.read_hole_data()
@@ -264,6 +269,9 @@ class HoleOutputProcessor:
             if float(key) in self.axis_value:
                 for i in range(len(self.radius[key])):
                     if self.radius[key][i] is ma.masked:
+                        if toBePrinted:
+                            print(msg)
+                            toBePrinted = False
                         fout.write('{0:18.3f} {1:18.3f}\n'.format(self.time[i], 0))
                     else:
                         fout.write('{0:18.3f} {1:18.3f}\n'.format(self.time[i], self.radius[key][i]))
@@ -589,12 +597,14 @@ class HoleOutputProcessor:
             self.min_axis_value = min(np.amax(input_axis), self.min_axis_value)
 
         # Check if axis value is outside of input range
+        '''
         if self.xmin is not None:
             if self.xmin < self.min_axis_value:
                 raise ValueError ("Input minimum axis value {0} is less than minimum axis value {1} at time {2}".format(self.xmin, self.min_axis_value, time))
         if self.xmax is not None:
             if self.xmax > self.max_axis_value:
                 raise ValueError ("Input maximum axis value {0} is less than maximum axis value {1} at time {2}".format(self.xmax, self.max_axis_value, time))
+        '''
 
         # Initialize output range for axis
         if self.output_range is None:

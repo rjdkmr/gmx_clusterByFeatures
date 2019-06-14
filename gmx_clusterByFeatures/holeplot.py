@@ -3,6 +3,7 @@ import sys
 import argparse
 import os
 import numpy as np
+import matplotlib as mpl
 
 from . import holeOutputProcessor
 
@@ -53,6 +54,13 @@ outCsvFileHelp=\
 """Output csv file.
 The radius as a function of axis-points in csv formatted file. This
 file can be read in external data-plotting program.
+
+"""
+
+violinplotHelp=\
+"""In place of normal line-plot, it plots radius distribution as violins.
+It is useful because this plot gives distribution of radius values over 
+entire trajectory for each axis-points
 
 """
 
@@ -160,14 +168,14 @@ def main():
                                                             begin=args.begin, end=args.end,
                                                             dataOccupancy=args.dataOccupancy)
     if args.resplot:
-        holeProcessor.plot_radius_residues(outputFile, csvfile=args.outCsvFile, ymin=args.ymin, 
-                                           ymax=args.ymax, residue_frequency=args.residue_frequency, 
+        holeProcessor.plot_radius_residues(outputFile, csvfile=args.outCsvFile, violinplot=args.violinplot, 
+                                           ymin=args.ymin, ymax=args.ymax, residue_frequency=args.residue_frequency, 
                                            width=args.width, height=args.height, fontsize=args.fontsize, 
                                            rlabelsize=args.rlabelsize, dpi=args.dpi)
     else:
-        holeProcessor.plot_radius(outputFile, csvfile=args.outCsvFile, ymin=args.ymin, ymax=args.ymax,
-                                  width=args.width, height=args.height, fontsize=args.fontsize, 
-                                  dpi=args.dpi)
+        holeProcessor.plot_radius(outputFile, csvfile=args.outCsvFile, violinplot=args.violinplot, 
+                                  ymin=args.ymin, ymax=args.ymax,width=args.width, height=args.height, 
+                                  fontsize=args.fontsize, dpi=args.dpi)
         
 
 def parseArguments():
@@ -190,9 +198,13 @@ def parseArguments():
                         type=str, metavar='output.png', 
                         dest='outputFile', help=outputFileHelp)
     
+    parser.add_argument('-vplot', '--violinplot', action='store_true',
+                        default=False, dest='violinplot', 
+                        help=violinplotHelp)
+    
     parser.add_argument('-csv', '--out-csv', action='store',
                         type=str, metavar='output.csv', 
-                        dest='outCsvFile', help=outCsvFileHelp)
+                        help=outCsvFileHelp)
     
     parser.add_argument('-xmin', '--axis-min', action='store',
                         type=float, dest='xmin', 

@@ -44,6 +44,7 @@ def main():
                'holeclustersplot' : 'To plot or write radius for clusters separately'
               }
 
+    program = 'gmx_clusterByFeatures '
     if len(sys.argv)<=1:
         show_help(options)
         sys.exit(-1)
@@ -55,7 +56,7 @@ def main():
 
     if sys.argv[1] == 'cluster':
         from .gmx_clusterByFeatures import cluster
-        cluster(sys.argv[1:])
+        cluster([program + 'cluster'] + sys.argv[2:])
         
     if sys.argv[1] == 'featuresplot':
         from . import featuresplotcmd
@@ -63,7 +64,7 @@ def main():
     
     if sys.argv[1] == 'distmat':
         from .gmx_clusterByFeatures import distmat
-        distmat(sys.argv[1:])
+        distmat([program + 'distmat'] + sys.argv[2:])
         
     if sys.argv[1] == 'matplot':
         from . import matplot
@@ -71,7 +72,7 @@ def main():
         
     if sys.argv[1] == 'hole':
         from .gmx_clusterByFeatures import hole
-        hole(sys.argv[1:])
+        hole([program + 'hole'] + sys.argv[2:])
         
     if sys.argv[1] == 'holeplot':
         from . import holeplot

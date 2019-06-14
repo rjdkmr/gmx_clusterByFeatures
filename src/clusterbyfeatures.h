@@ -60,6 +60,7 @@ struct TrajectoryStuffs {
     matrix box;
     int natoms;
     gmx_output_env_t *oenv;
+    int maxOutFrame = -1;
 };
 
 
@@ -194,8 +195,7 @@ void write_clustered_trajs(const char *fname, ClusteringStuffs *clustStuff,
                            int *atomIndex, int atomIndexSize,
                            TrajectoryStuffs inpTrajStuff,
                            gmx_bool bAlignTrajToCentral,
-                           int *fitAtomIndex, int fitAtomIndexSize,
-                           LogStream *lstream);
+                           int *fitAtomIndex, int fitAtomIndexSize);
 
 std::vector< std::vector< real > > calculate_rmsd(ClusteringStuffs *clustStuff,
                                                   int *fitAtomIndex, int fitAtomIndexSize,

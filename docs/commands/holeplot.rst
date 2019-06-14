@@ -22,12 +22,13 @@ Command summary
 .. code-block:: bash
 
     gmx_clusterByFeatures holeplot  [-h] [-i radius.dat] [-resplot]
-                                    [-o output.png] [-csv output.csv]
-                                    [-xmin XMIN] [-xmax XMAX]
-                                    [-endrad ENDRAD] [-ax Z] [-gap 1] [-b 0]
-                                    [-e -1] [-do 90] [-rfreq 50]
-                                    [-ymin YMIN] [-ymax YMAX] [-fs 18]
-                                    [-rlsize 10] [-wd 6] [-ht 6] [-dpi 300]
+                                    [-o output.png] [-vplot]
+                                    [-csv output.csv] [-xmin XMIN]
+                                    [-xmax XMAX] [-endrad ENDRAD] [-ax Z]
+                                    [-gap 1] [-b 0] [-e -1] [-do 90]
+                                    [-rfreq 50] [-ymin YMIN] [-ymax YMAX]
+                                    [-fs 18] [-rlsize 10] [-wd 6] [-ht 6]
+                                    [-dpi 300]
 
                                   
 Options 
@@ -74,6 +75,14 @@ Following output formats (system dependent) might be available:
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 Output csv file. The radius as a function of axis-points in csv formatted file. This
 file can be read in external data-plotting program.
+
+******
+
+``-vplot``, ``--violinplot``
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+In place of normal line-plot, it plots radius distribution as violins.
+It is useful because this plot gives distribution of radius values over 
+entire trajectory for each axis-points
 
 ******
 

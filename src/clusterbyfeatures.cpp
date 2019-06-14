@@ -952,12 +952,8 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 }
 
 
-void write_clustered_trajs(const char *fname, ClusteringStuffs *clustStuff,
-                           int *atomIndex, int atomIndexSize,
-                           TrajectoryStuffs inpTrajStuff,
-                           gmx_bool bAlignTrajToCentral,
-                           int *fitAtomIndex, int fitAtomIndexSize,
-                           LogStream *lstream)    {
+void write_clustered_trajs(const char* fname, ClusteringStuffs* clustStuff, int* atomIndex, int atomIndexSize, TrajectoryStuffs inpTrajStuff, gmx_bool bAlignTrajToCentral, int* fitAtomIndex, int fitAtomIndexSize)
+{
 
     std::vector< std::string > fnOutTrajs = get_outFile_names(fname, clustStuff->clusterIndex, ".xtc", "");
     t_trxstatus *outStatus;
@@ -1037,6 +1033,13 @@ void write_clustered_trajs(const char *fname, ClusteringStuffs *clustStuff,
             }
 
             write_trx(outStatus, atomIndexSize, atomIndex, &inpTrajStuff.atoms, 0, outTime, inpTrajStuff.box, inpTrajStuff.x, NULL, NULL);
+            
+            // Break loop when desired number of frame is already output
+            if(inpTrajStuff.maxOutFrame >= 0)   {
+                if(n >= inpTrajStuff.maxOutFrame-1) {
+                    break;
+                }
+            }
 
         } // Loop for frame of each cluster end here
 
@@ -1352,7 +1355,7 @@ int gmx_clusterByFeatures(int argc,char *argv[])    {
 	};
 
     gmx_bool bAlignTrajToCentral=FALSE, bFit=TRUE;
-    int numMinFrameCluster = 20, minFeatures=10;
+    int numMinFrameCluster = 20, minFeatures=10, maxOutFrame =-1;
     const char     *sortMethod[] = { NULL, "none", "rmsd", "rmsdist", "features", "user", NULL };
     enum {eNoSort = 1, eSortByRMSD, eSortByRMSDist, eSortByFeatures, eSortByUser};
     int eSortMethod;
@@ -1383,9 +1386,10 @@ int gmx_clusterByFeatures(int argc,char *argv[])    {
         { "-ssrchange",      FALSE, etREAL, {&ssrSstChange},        "Thershold relative change % in SSR/SST ratio for ssr-sst cluster metric method." },
         { "-db_eps",         FALSE, etREAL, {&dbscan_eps},          "The maximum distance between two samples for them to be considered as in the same neighborhood." },
         { "-db_min_samples", FALSE, etINT,  {&dbscan_min_samples},  "The number of samples (or total weight) in a neighborhood for a point to be considered as a core point. This includes the point itself." },
-        { "-nminfr",         FALSE, etINT,  {&numMinFrameCluster},  "Number of nimimum frames in a cluster to output it as trajectory" },
+        { "-nminfr",         FALSE, etINT,  {&numMinFrameCluster},  "Number of nimimum frames in a cluster to consider it for output trajectory" },
         { "-fit",            FALSE, etBOOL, {&bFit},                "Enable fitting and superimposition of the atoms groups different from RMSD/clustering group before RMSD calculation." },
         { "-fit2central",    FALSE, etBOOL, {&bAlignTrajToCentral}, "Enable/Disable trajectory superimposition or fitting to central structure in the output trajectory" },
+        { "-outframe",       FALSE, etINT,  { &maxOutFrame },       "Number of maximum frames in the output trajectories." },
         { "-sort",           FALSE, etENUM, { sortMethod },         "Sort trajectory according to these values. Accepted methods are" },
         { "-plot",           FALSE, etSTR,  { &plotfile },          "To plot features with clusters in this file." },
         { "-fsize",          FALSE, etINT,  { &fontsize },          "Font size in plot." },
@@ -1616,6 +1620,10 @@ int gmx_clusterByFeatures(int argc,char *argv[])    {
       // Read first frame of the input trajectory
       inpTrajStuff.natoms = read_first_x(oenv, &inpTrajStuff.status, inpTrajName, &inpTrajStuff.time, &inpTrajStuff.x, inpTrajStuff.box);
       inpTrajStuff.oenv = oenv;
+      if(maxOutFrame >=-1)
+          inpTrajStuff.maxOutFrame = maxOutFrame;
+      else
+          inpTrajStuff.maxOutFrame = -1;
       set_dTime(&inpTrajStuff);
 
       }
@@ -1818,7 +1826,7 @@ int gmx_clusterByFeatures(int argc,char *argv[])    {
         fnOutTraj = opt2fn_null("-fout", NFILE, fnm);
         if(fnOutTraj != NULL)
           write_clustered_trajs(fnOutTraj, clustStuff, outIndex, outIndexSize, \
-                                inpTrajStuff, bAlignTrajToCentral, fitAtomIndex, fitAtomIndexSize, &lstream);
+                                inpTrajStuff, bAlignTrajToCentral, fitAtomIndex, fitAtomIndexSize);
       }
 
     // Calculate and write RMSD
