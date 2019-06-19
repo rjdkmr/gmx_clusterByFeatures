@@ -489,7 +489,6 @@ class HoleOutputProcessor:
                 idx = np.nonzero(data_found)
                 if data_found.sum()/self.frame_number >= self.dataOccupancy/100:
                     keys_new.append(float(key))
-                    #radius[key] = t[idx]
                     radius[key] = ma.masked_values(radius_npy, self.flag_radius)
                     residues[key] = np.asarray(self.rawResidues[key])
 
@@ -683,6 +682,11 @@ class HoleOutputProcessor:
                     self.radius[value].append(np.amax(radius_list[value]))
                 self.rawResidues[value].append(residues_list[value])
             else:
+                # Sometime input range is outside in first frame, therefore, here again initialized 
+                if value not in self.radius:
+                    self.radius[value] = [self.flag_radius] * self.frame_number
+                if value not in self.rawResidues:
+                    self.rawResidues[value] = ['dummy'] * self.frame_number
                 self.radius[value].append(self.flag_radius)
                 self.rawResidues[value].append('dummy')
 

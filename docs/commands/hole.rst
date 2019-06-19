@@ -28,10 +28,11 @@ Command summary
 
 .. code-block:: bash
 
-    gmx_clusterByFeatures hole [-f [<.xtc/.trr/...>]] [-s [<.tpr/.gro/...>]] [-n [<.ndx>]]
-                               [-o [<.dat>]] [-pdb [<.pdb>]] [-b <time>] [-e <time>] [-dt <time>]
-                               [-tu <enum>] [-[no]fit] [-endrad <real>] [-sample <real>]
-                               [-cvect <vector>] [-cpoint <vector>] [-rad <enum>]
+    gmx_clusterByFeatures hole  [-f [<.xtc/.trr/...>]] [-s [<.tpr/.gro/...>]]
+                                [-n [<.ndx>]] [-o [<.dat>]] [-pdb [<.pdb>]] [-b <time>]
+                                [-e <time>] [-dt <time>] [-tu <enum>] [-[no]fit]
+                                [-endrad <real>] [-sample <real>] [-cvect <vector>]
+                                [-cpoint <vector>] [-catmid <int>] [-rad <enum>]
 
                                
 .. list-table:: Options to specify input files to hole
@@ -122,7 +123,11 @@ Command summary
     
     * - `-cpoint <vector> <hole.html#cpoint-999-999-999>`_
       - 999 999 999
-      - Coordinate within a channel.
+      - Coordinate within a channel as seed for channel/cavity.
+
+    * - `-catmid <int> <hole.html#catmid-1>`_
+      - -1
+      - Serial number of atom, whoose coordinate acts as seed for channel/cavity.
 
     * - `-rad <keyword> <hole.html#rad-bondi>`_
       - bondi
@@ -203,8 +208,19 @@ channel/cavity radius.
 
 .. note:: Due to this option, superimposition of structures on reference 
           structure is neccessary.
+          
+.. note:: Conformations changtes during the simulations, therefore, this 
+          coordinate may not be inside the cavity. To dynamically select seed coordinate, 
+          use ``-catmid`` option.
+          
 
+``-catmid -1``
+~~~~~~~~~~~~~~~~~~~~~~~~
+Serial number of atom, which lies within the channel and acts
+as a seed for channel/cavity. If not given, center of mass will be
+used. It can be used to assign seed-coordinate dynamically.
 
+           
 ``-rad bondi``
 ~~~~~~~~~~~~~~~~~~~~~~
 Radius of atoms considered during channel/cavity calculation.

@@ -3,7 +3,6 @@ import sys
 import argparse
 import os
 import numpy as np
-import matplotlib as mpl
 
 from . import holeOutputProcessor
 
