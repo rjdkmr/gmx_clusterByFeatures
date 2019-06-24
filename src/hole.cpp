@@ -444,7 +444,7 @@ int gmx_hole (int argc,char *argv[])	{
         if(!bMatchCenterAtomId) {
             gmx_fatal(FARGS,"Input serial number of atom %d is not found in selected atom-groups index.\n", centatomid);
         }
-        printf("\n\nSelected \"%s\" atom of \"%s-%d\" as seed for channel/cavity\n", *top.atoms.atomname[centatomid-1], \
+        printf("\n\nSelected \"%s\" atom of \"%s-%d\" as seed for channel/cavity\n\n", *top.atoms.atomname[centatomid-1], \
         *top.atoms.resinfo[top.atoms.atom[centatomid-1].resind].name, top.atoms.resinfo[top.atoms.atom[centatomid-1].resind].nr);
     }
     
@@ -489,10 +489,11 @@ int gmx_hole (int argc,char *argv[])	{
         write_pdbfile_indexed(tmpf,NULL,&top.atoms,x,ePBC,box,' ',-1,indsize,index,NULL,TRUE);
         gmx_ffclose(tmpf);
         
-        if(centatomid >= 0) {
-            cpoint[XX] = x[centatomid-1][XX];
-            cpoint[YY] = x[centatomid-1][YY];
-            cpoint[ZZ] = x[centatomid-1][ZZ];
+        // Assign cpoint from input atom coordinate
+        if(centatomid > 0) {
+            cpoint[XX] = x[centatomid-1][XX]*10;
+            cpoint[YY] = x[centatomid-1][YY]*10;
+            cpoint[ZZ] = x[centatomid-1][ZZ]*10;
         }
 
         //Creating variable for executing hole

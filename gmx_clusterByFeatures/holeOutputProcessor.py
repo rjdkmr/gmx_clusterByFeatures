@@ -330,9 +330,9 @@ class HoleOutputProcessor:
         if csvfile is not None:
             self.average2csvfile(csvfile)
 
-        fig = plt.figure(figsize=(width, height))
-        fig, (ax1, ax2) = plt.subplots(2, sharex=True, gridspec_kw={'hspace': 0}, figsize=(width, height))
         mpl.rcParams['font.size'] = fontsize
+        fig = plt.figure(figsize=(width, height))
+        fig, (ax1, ax2) = plt.subplots(2, sharex=True, gridspec_kw={'hspace': 0}, figsize=(width, height))        
         fig.subplots_adjust(hspace=0.0, wspace=0)
 
         # Plot for radius
@@ -432,9 +432,9 @@ class HoleOutputProcessor:
         if csvfile is not None:
             self.average2csvfile(csvfile)
 
+        mpl.rcParams['font.size'] = fontsize
         fig = plt.figure(figsize=(width, height))
         fig, (ax1, ax2) = plt.subplots(2, sharex=True, gridspec_kw={'hspace': 0}, figsize=(width, height))
-        mpl.rcParams['font.size'] = fontsize
         fig.subplots_adjust(hspace=0.0, wspace=0)
 
 
@@ -611,12 +611,12 @@ class HoleOutputProcessor:
             if self.xmin is not None:
                 self.output_range.append(self.xmin)
             else:
-                self.output_range.append(self.min_axis_value)
+                self.output_range.append(self.min_axis_value-(self.min_axis_value%self.gap))
 
             if self.xmax is not None:
                 self.output_range.append(self.xmax)
             else:
-                self.output_range.append(self.max_axis_value)
+                self.output_range.append(self.max_axis_value-(self.max_axis_value%self.gap)+self.gap)
 
             sys.stdout.write('\nMaximum axis range is: ({0:.3f} to {1:.3f})\n'.format(self.output_range[0], self.output_range[1]))
             sys.stdout.flush()
@@ -627,16 +627,21 @@ class HoleOutputProcessor:
 
         # Change axis-values list if input range is not given
         if (self.min_axis_value < self.output_range[0]) and (self.xmin is None):
-            self.axis_value = np.hstack((np.arange(self.min_axis_value, self.output_range[0], self.gap), self.axis_value))
-            self.output_range[0] = self.min_axis_value
+            tmin = self.output_range[0]
+            while(tmin >= self.min_axis_value):
+                tmin = tmin - self.gap
+            self.axis_value = np.hstack((np.arange(tmin, self.output_range[0], self.gap), self.axis_value))
+            self.output_range[0] = tmin
             print_new_output_range = True
 
         # Change axis-values list if input range is not given
         if (self.max_axis_value > self.output_range[1]) and (self.xmax is None):
-            self.axis_value = np.hstack((self.axis_value, np.arange(self.output_range[1], self.max_axis_value, self.gap)))
-            self.output_range[1] = self.max_axis_value
-            print_new_output_range = True
-
+            tmax = self.output_range[1]
+            while(tmax <= self.max_axis_value):
+                tmax = tmax + self.gap
+            self.axis_value = np.hstack((self.axis_value, np.arange(self.output_range[1], tmax, self.gap)))
+            self.output_range[1] = tmax
+   
         if print_new_output_range:
             sys.stdout.write('\nNew Maximum axis range at time {0} is: ({1:.3f} to {2:.3f})\n'.format(time, self.output_range[0], self.output_range[1]))
             sys.stdout.flush()
