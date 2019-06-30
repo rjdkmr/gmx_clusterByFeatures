@@ -51,7 +51,7 @@ public:
     /*
      * Initialize DoClustering Class as doCluster object in python
      */
-    static void initializeClustering(const char* filename, int nPC=2, const char* algo="kmeans", float dbscan_eps=0.5, int dbscan_min_samples=20);
+    static void initializeClustering(const char* filename, int nPC=2, const char* algo="kmeans", float dbscan_eps=0.5, int dbscan_min_samples=20, float silhouette_score_sample_size=10);
 
     /*
      * Perform clustering for a given number of cluster
@@ -66,7 +66,7 @@ public:
     /*
      * Get SSR/SST ratio and Psuedo F-statistics from Python to C++
      */
-    static void getSsrSstStats(int n_clusters, double *ratio, double *pFS);
+    static void getClusterMetrics(int n_clusters, double *ratio,  double *pFS, double *silhouette_score, double *davies_bouldin_score);
 
     /*
      * Plot the features with clusters.

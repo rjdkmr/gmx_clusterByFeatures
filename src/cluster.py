@@ -1,6 +1,7 @@
 import numpy as np
 from sklearn import cluster as getCluster
 from sklearn import mixture
+from sklearn import metrics
 import re, os, sys
 import shlex, subprocess, shutil
 
@@ -8,17 +9,21 @@ class DoClustering:
     algo = 'kmeans'
     dbscan_eps = 0.5
     dbscan_min_samples=20
+    silhouette_score_sample_size = 50
 
     features = None
     time = []
     labels = dict()
     sse = dict()
+    silhouette_score = dict()
+    davies_bouldin_score = dict()
 
     #########################################################################################
-    def __init__(self, filename, nFeatures=2, algo='kmeans', dbscan_eps=0.5, dbscan_min_samples=20):
+    def __init__(self, filename, nFeatures=2, algo='kmeans', dbscan_eps=0.5, dbscan_min_samples=20, silhouette_score_sample_size=10):
         self.algo = algo
         self.dbscan_eps = dbscan_eps
         self.dbscan_min_samples = dbscan_min_samples
+        self.silhouette_score_sample_size = None
 
         # Read features file here
         fin = open(filename, 'r')
@@ -50,6 +55,8 @@ class DoClustering:
 
         fin.close()
         self.features = np.asarray(features).T
+        if silhouette_score_sample_size > 0:
+            self.silhouette_score_sample_size = int(len(self.time) * (silhouette_score_sample_size/100))
 
     #########################################################################################
     def calculate_clusters(self, n_clusters):
@@ -67,7 +74,14 @@ class DoClustering:
         if hasattr(db, 'labels_'):
             labels = db.labels_.astype(np.int)
         else:
-            labels = db.predict(features)
+            labels = db.predict(self.features)
+            
+        if n_clusters > 1:
+            self.silhouette_score[n_clusters] = metrics.silhouette_score(self.features, labels, sample_size=self.silhouette_score_sample_size)
+            self.davies_bouldin_score[n_clusters] = metrics.davies_bouldin_score(self.features, labels)
+        else:
+            self.silhouette_score[n_clusters] = 0
+            self.davies_bouldin_score[n_clusters] = 0
 
         trueIdx = np.nonzero(labels >= 0)
         labels[trueIdx] = labels[trueIdx] + 1
@@ -157,14 +171,15 @@ class DoClustering:
         return self.labels[n_clusters]
 
     #########################################################################################
-    def get_ssr_sst_stats(self, n_clusters):
+    def get_cluster_metrics(self, n_clusters):
         sst = self.sse[1]
         ssr = sst - self.sse[n_clusters]
         ratio = ssr/sst * 100
+        
         if n_clusters != 1:
             pFS = (ssr/(n_clusters-1)) / (self.sse[n_clusters] /(self.features.shape[0]-n_clusters) )
         else:
             pFS = 0.0
-
-        return (ratio, pFS)
+            
+        return (ratio, pFS, self.silhouette_score[n_clusters], self.davies_bouldin_score[n_clusters])
 

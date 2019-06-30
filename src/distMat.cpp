@@ -412,7 +412,7 @@ void calc_msd_2nd()	{
 	}
 }
 
-void write_distmat_xtc(struct t_fileio *fioXTC, int gapX, int gapY, int step, real time, bool index_grp_same) {
+void write_distmat_xtc(struct t_fileio *fioXTC, int gapX, int gapY, int step, real time, bool index_grp_same, real power) {
     
     int              i=0, j=0, d=0, l=0, nB=0, ret_val;
     real            prec=1000;
@@ -425,7 +425,24 @@ void write_distmat_xtc(struct t_fileio *fioXTC, int gapX, int gapY, int step, re
             nB = distance_matrix.nB;
 
         while (j < nB) {
-            distance_matrix.pcaCoords[l][d] = distance_matrix.dist[i][j];
+            if (power > 0) {
+                if (power == 1)    {
+                    distance_matrix.pcaCoords[l][d] = distance_matrix.dist[i][j];
+                }
+                else    {
+                    distance_matrix.pcaCoords[l][d] = std::pow(distance_matrix.dist[i][j], power);
+                }
+            }
+            else if (power < 0){
+                if (power == -1)    {
+                    distance_matrix.pcaCoords[l][d] = 1/distance_matrix.dist[i][j];
+                }
+                else {
+                    distance_matrix.pcaCoords[l][d] = 1/std::pow(distance_matrix.dist[i][j], power*-1);
+                }
+            } else{
+                distance_matrix.pcaCoords[l][d] = distance_matrix.dist[i][j];
+            }
             d++; // XX, YY, or ZZ
             if (d == DIM)
             {
@@ -498,14 +515,15 @@ int gmx_distMat(int argc,char *argv[])
 			"calculated for \"traj_for_variance.xtc\" with respect to previosly calculated averages.\n",
 	};
 	static real cutoff = 0.4;
+	real power = 1;
 	int NTHREADS = sysconf( _SC_NPROCESSORS_ONLN );
     int gapX = 5, gapY = 1;
 	t_pargs pa[] = {
 			{ "-ct",   FALSE, etREAL, {&cutoff}, "cut-off distance (nm) for contact map" },
 			{ "-nt",   FALSE, etINT, {&NTHREADS}, "number of threads for multi-threading" },
             { "-gx",   FALSE, etINT, {&gapX}, "Gap between residues along X-axis in distance-matrix for PCA trajectory" },
-            { "-gy",   FALSE, etINT, {&gapY}, "ap between residues along Y-axis in distance-matrix for PCA trajectory" }
-	};
+            { "-gy",   FALSE, etINT, {&gapY}, "ap between residues along Y-axis in distance-matrix for PCA trajectory" },
+            { "-power", FALSE, etREAL, {&power}, "Distances will be raised by this power and then dumped in xtc file."} 	};
 
 	t_filenm   fnm[] = {
 			{ efTRX, "-f",  NULL, ffREAD },
@@ -627,7 +645,7 @@ int gmx_distMat(int argc,char *argv[])
             calculate_dist_mat();
         
         if (fioXTC != NULL) {
-            write_distmat_xtc(fioXTC, gapX, gapY, nframe, time, index_grp_same);
+            write_distmat_xtc(fioXTC, gapX, gapY, nframe, time, index_grp_same, power);
         }
         
         nframe++;

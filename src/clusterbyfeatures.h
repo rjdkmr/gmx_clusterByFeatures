@@ -44,8 +44,8 @@
 
 #include "logstream.h"
 
-const char *clusterMetrics[] = { NULL, "prior", "rmsd", "ssr-sst", "pFS", "DBI", NULL };
-enum { ePriorClusterMetric = 1, eCRmsdClusterMetric, eSsrSstClusterMetric, ePfsClusterMetric, eDbiClusterMetric };
+const char *clusterMetrics[] = { NULL, "prior", "rmsd", "ssr-sst", "silhouette", "DBI", NULL };
+enum { ePriorClusterMetric = 1, eCRmsdClusterMetric, eSsrSstClusterMetric, eSilhouetteClusterMetric, eDbiClusterMetric };
 
 // Trajectory stuffs, clumped in one data structure for easy handling
 struct TrajectoryStuffs {
@@ -74,7 +74,7 @@ public:
     static std::vector< std::vector<real> > features; // features
     static std::vector< real > timeInInput; // Real time
     static bool bSortByFeatures;    // If sort by feature is on
-    static std::map< int, real > ssrSstRatio, pFS, dbi; //Davies–Bouldin index
+    static std::map< int, real > ssrSstRatio, pFS, silhouetteScore, daviesBouldinScore;
 
     // other variables that are different in case of different cluster-stuffs
     std::vector< int > clidAlongTime; // Clusterid along number of frames

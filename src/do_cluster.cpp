@@ -64,14 +64,15 @@ std::string PyCluster::PyDoClusteringClusteringClassCode() {
 
 
 
-void PyCluster::initializeClustering(const char* filename, int nFeatures, const char* algo, float dbscan_eps, int dbscan_min_samples) {
+void PyCluster::initializeClustering(const char* filename, int nFeatures, const char* algo, float dbscan_eps, int dbscan_min_samples, float silhouette_score_sample_size) {
     std::stringstream code;
     code<<"doCluster = DoClustering( ";
     code<<"\'"<<filename<<"\', ";
     code<<"nFeatures= "<<nFeatures<<", ";
     code<<"algo=\'"<<algo<<"\', ";
     code<<"dbscan_eps="<<dbscan_eps<<", ";
-    code<<"dbscan_min_samples="<<dbscan_min_samples;
+    code<<"dbscan_min_samples="<<dbscan_min_samples<<", ";
+    code<<"silhouette_score_sample_size="<<silhouette_score_sample_size;
     code<<")";
     py::exec(code.str(), PyCluster::scope);
 }
@@ -102,11 +103,11 @@ std::vector< int > PyCluster::getClusterLabels(int n_clusters){
     return labels;
 }
 
-void PyCluster::getSsrSstStats(int n_clusters, double *ratio, double *pFS) {
+void PyCluster::getClusterMetrics(int n_clusters, double *ratio, double *pFS, double *silhouette_score, double *davies_bouldin_score) {
     py::tuple pyReturnValues;
 
     // Run the code and return python tuple
-    pyReturnValues = py::eval("doCluster.get_ssr_sst_stats( " + std::to_string(n_clusters) + " ) \n", PyCluster::scope );
+    pyReturnValues = py::eval("doCluster.get_cluster_metrics( " + std::to_string(n_clusters) + " ) \n", PyCluster::scope );
 
     if (pyReturnValues == NULL)   {
         std::cout<<"ERROR: Error in python execution. No python object returned from getSsrSstStats().\n";
@@ -115,6 +116,8 @@ void PyCluster::getSsrSstStats(int n_clusters, double *ratio, double *pFS) {
 
     *ratio = pyReturnValues[0].cast<float>() ;
     *pFS = pyReturnValues[1].cast<float>() ;
+    *silhouette_score = pyReturnValues[2].cast<float>() ;
+    *davies_bouldin_score = pyReturnValues[3].cast<float>() ;
 
     //std::cout<<*ratio<<" "<<*pFS<<"\n";
 }

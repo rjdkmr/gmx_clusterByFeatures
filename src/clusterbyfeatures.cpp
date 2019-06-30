@@ -209,7 +209,8 @@ std::vector< real > ClusteringStuffs::timeInInput;
 bool ClusteringStuffs::bSortByFeatures = false;
 std::map< int, real > ClusteringStuffs::ssrSstRatio;
 std::map< int, real > ClusteringStuffs::pFS;
-std::map< int, real > ClusteringStuffs::dbi;
+std::map< int, real > ClusteringStuffs::silhouetteScore;
+std::map< int, real > ClusteringStuffs::daviesBouldinScore;
 
 
 int ClusteringStuffs::write_central_pdbfiles(std::vector < std::string > pdbNames,
@@ -530,7 +531,7 @@ void ClusteringStuffs::calculateDaviesBouldinIndex() {
     int n_cluster = sortedKeys.size();
 
     if (n_cluster == 1){
-        ClusteringStuffs::dbi.emplace(n_cluster, 0);
+        ClusteringStuffs::daviesBouldinScore.emplace(n_cluster, 0);
         return;
     }
 
@@ -582,7 +583,7 @@ void ClusteringStuffs::calculateDaviesBouldinIndex() {
 
     // dbi = Di/C
     dbi = di_sum / n_cluster;
-    ClusteringStuffs::dbi.emplace(n_cluster, dbi);
+    ClusteringStuffs::daviesBouldinScore.emplace(n_cluster, dbi);
 
     // std::cout<<"\n ###### ncluster, DBI = "<<n_cluster<<" "<<dbi<<"\n";
 
@@ -850,16 +851,17 @@ int ClusteringStuffs::performClusterMetrics(int eClusterMetrics, int n_clusters,
     real prevSsrSstRatio = ClusteringStuffs::ssrSstRatio.at(1), changeInSsrSstRatio = 0;
 
     lstream->setprecision(3);
-    *lstream<< "\n\n##################### Cluster Metrics Summary #####################\n";
-    *lstream<<"Clust. No.\tssr/sst (%)\tDelta(ssr/sst)\tpsuedo F-stat\tDBI\n";
+    *lstream<< "\n\n################################ Cluster Metrics Summary ################################\n";
+    *lstream<<"Clust. No.\tssr/sst (%)\tDelta(ssr/sst)\tpsuedo F-stat\tSilhouette-score\tDavies-bouldin-score\n";
     for(int i = 2; i <= n_clusters; i++){
         changeInSsrSstRatio = ClusteringStuffs::ssrSstRatio.at(i) -prevSsrSstRatio;
 
         *lstream<<i<<"\t\t";
         *lstream<<ClusteringStuffs::ssrSstRatio.at(i)<<"\t\t";
         *lstream<<changeInSsrSstRatio<<"\t\t";
-        *lstream<<ClusteringStuffs::pFS.at(i)<<"\t";
-        *lstream<<ClusteringStuffs::dbi.at(i)<<"\n";
+        *lstream<<ClusteringStuffs::pFS.at(i)<<"\t\t";
+        *lstream<<ClusteringStuffs::silhouetteScore.at(i)<<"\t\t\t";
+        *lstream<<ClusteringStuffs::daviesBouldinScore.at(i)<<"\n";
 
         prevSsrSstRatio = ClusteringStuffs::ssrSstRatio.at(i);
 
@@ -876,10 +878,10 @@ int ClusteringStuffs::performClusterMetrics(int eClusterMetrics, int n_clusters,
             }
         }
 
-        if (eClusterMetrics == ePfsClusterMetric) {
+        if (eClusterMetrics == eSilhouetteClusterMetric) {
             //std::cout<<ClusteringStuffs::pFS.at(finalClustersNumber)<<" "<<ClusteringStuffs::pFS.at(i)<<" "<<bGotFinalClusterNumber<<" "<<finalClustersNumber<<"\n";
 
-            if(  ClusteringStuffs::pFS.at(i) > ClusteringStuffs::pFS.at(finalClustersNumber) ) {
+            if(  ClusteringStuffs::silhouetteScore.at(i) > ClusteringStuffs::silhouetteScore.at(finalClustersNumber) ) {
                 if(!bGotFinalClusterNumber)
                     finalClustersNumber = i;
             }
@@ -891,7 +893,7 @@ int ClusteringStuffs::performClusterMetrics(int eClusterMetrics, int n_clusters,
         if (eClusterMetrics == eDbiClusterMetric) {
             // std::cout<<ClusteringStuffs::dbi.at(finalClustersNumber)<<" "<<ClusteringStuffs::dbi.at(i)<<" "<<bGotFinalClusterNumber<<" "<<finalClustersNumber<<"\n";
 
-            if(  ClusteringStuffs::dbi.at(i) < ClusteringStuffs::dbi.at(finalClustersNumber)) {
+            if(  ClusteringStuffs::daviesBouldinScore.at(i) < ClusteringStuffs::daviesBouldinScore.at(finalClustersNumber)) {
                 if(!bGotFinalClusterNumber) {
                     finalClustersNumber = i;
                 }
@@ -902,7 +904,7 @@ int ClusteringStuffs::performClusterMetrics(int eClusterMetrics, int n_clusters,
 
         }
     }
-    *lstream<< "##################### ######################### ################### \n";
+    *lstream<< "##################### ############################################### ################### \n";
     lstream->resetprecision();
 
     return finalClustersNumber;
@@ -1369,6 +1371,7 @@ int gmx_clusterByFeatures(int argc,char *argv[])    {
     int eClusterMethod;
     real dbscan_eps = 0.5;
     int dbscan_min_samples = 20;
+    real silhouette_score_sample_size = 10;
     int n_clusters=5;
 
     const char *plotfile = "pca_cluster.png";
@@ -1386,6 +1389,7 @@ int gmx_clusterByFeatures(int argc,char *argv[])    {
         { "-ssrchange",      FALSE, etREAL, {&ssrSstChange},        "Thershold relative change % in SSR/SST ratio for ssr-sst cluster metric method." },
         { "-db_eps",         FALSE, etREAL, {&dbscan_eps},          "The maximum distance between two samples for them to be considered as in the same neighborhood." },
         { "-db_min_samples", FALSE, etINT,  {&dbscan_min_samples},  "The number of samples (or total weight) in a neighborhood for a point to be considered as a core point. This includes the point itself." },
+        { "-sil_ssize",      FALSE, etREAL, {&silhouette_score_sample_size},  "Percentage of number of frames to be considered as sample size for silhouette score calculation." },
         { "-nminfr",         FALSE, etINT,  {&numMinFrameCluster},  "Number of nimimum frames in a cluster to consider it for output trajectory" },
         { "-fit",            FALSE, etBOOL, {&bFit},                "Enable fitting and superimposition of the atoms groups different from RMSD/clustering group before RMSD calculation." },
         { "-fit2central",    FALSE, etBOOL, {&bAlignTrajToCentral}, "Enable/Disable trajectory superimposition or fitting to central structure in the output trajectory" },
@@ -1633,7 +1637,7 @@ int gmx_clusterByFeatures(int argc,char *argv[])    {
         // Initialize python and clustering code
         PyCluster pycluster = PyCluster();
         pycluster.InitPythonAndLoadFunc();
-        pycluster.initializeClustering(fnFeatures, minFeatures, clusterAlgo[eClusterMethod], (float)dbscan_eps, dbscan_min_samples);
+        pycluster.initializeClustering(fnFeatures, minFeatures, clusterAlgo[eClusterMethod], (float)dbscan_eps, dbscan_min_samples, (float)silhouette_score_sample_size);
     }
 
     if(bDoCluster) {
@@ -1655,7 +1659,7 @@ int gmx_clusterByFeatures(int argc,char *argv[])    {
         }
 
         while(1)    {
-            double tempSsrSstRatio, tempPFS;
+            double tempSsrSstRatio, tempPFS, tempSilhouetteScore, tempDaviesBouldinScore;
             lstream<<"\n###########################################\n";
             lstream<<"########## NUMBER OF CLUSTERS : "<<curr_n_cluster<<" ########\n";
             lstream<<"###########################################\n";
@@ -1668,6 +1672,7 @@ int gmx_clusterByFeatures(int argc,char *argv[])    {
             // Perform clustering
             pycluster.performClustering(curr_n_cluster);
             clustStuff->clidAlongTime = pycluster.getClusterLabels(curr_n_cluster);
+            
 
             // Construct cluster dictionary and cluster-index
             clustStuff->constructClusterDict(numMinFrameCluster, &lstream);
@@ -1712,13 +1717,17 @@ int gmx_clusterByFeatures(int argc,char *argv[])    {
                 curr_n_cluster = curr_n_cluster - 1;
             }
             else {
+
                 // If any of others cluster-metrics, ssr-sst ratio, Psuedo F-statistics and DB index is used,
                 // Start with clusters number one and increase it to maximum clusters number.
                 // For each increased number, compute all quantities
-                pycluster.getSsrSstStats(curr_n_cluster, &tempSsrSstRatio,  &tempPFS);
+                pycluster.getClusterMetrics(curr_n_cluster, &tempSsrSstRatio,  &tempPFS, &tempSilhouetteScore, &tempDaviesBouldinScore);
                 ClusteringStuffs::ssrSstRatio.emplace(curr_n_cluster, (real)tempSsrSstRatio);
                 ClusteringStuffs::pFS.emplace(curr_n_cluster, (real)tempPFS);
-                clustStuff->calculateDaviesBouldinIndex();
+                ClusteringStuffs::silhouetteScore.emplace(curr_n_cluster, (real)tempSilhouetteScore);
+                ClusteringStuffs::daviesBouldinScore.emplace(curr_n_cluster, (real)tempDaviesBouldinScore);
+                // clustStuff->calculateDaviesBouldinIndex();
+
 
                 if (curr_n_cluster == n_clusters) {
                     break;
