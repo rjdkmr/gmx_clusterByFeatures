@@ -327,6 +327,7 @@ int gmx_hole (int argc,char *argv[])	{
     gmx_bool bFit=TRUE;
     int eHoleInputRadius;
     int centatomid=-1;
+    int mcstep=1500;
     gmx_output_env_t *oenv;
     
     t_pargs pa[] = {
@@ -336,6 +337,7 @@ int gmx_hole (int argc,char *argv[])	{
         { "-cvect",  FALSE, etRVEC, {cvect},    "This specified a vector which lies in the direction of the channel/pore." },
         { "-cpoint", FALSE, etRVEC, {cpoint},   "A point which lies within the channel and acts as a seed for channel/cavity. If not given, center of mass will be used." },
         { "-catmid",  FALSE, etINT,  {&centatomid},   "Serial number of atom, which lies within the channel and acts as a seed for channel/cavity. If not given, center of mass will be used." },
+        { "-mcstep",  FALSE, etINT,  {&mcstep},   "Number of Monte-Carlo steps for hole program" },
         { "-rad",    TRUE,  etENUM, {hole_inp_radius },"Radius of atoms. Accepted categories of radii are" },
     };
     
@@ -498,11 +500,11 @@ int gmx_hole (int argc,char *argv[])	{
 
         //Creating variable for executing hole
         if(bOutPDB)
-            sprintf(hole_cmd,"hole >%s <<EOF\ncoord %s\nradius %s\ncvect %2.2f %2.2f %2.2f\nsample %2.2f\nendrad %2.2f\ncpoint %2.2f %2.2f %2.2f\nsphpdb %s\nEOF", \
-            hole_outfile, pdbfile, "input_atom_radius.rad", cvect[XX], cvect[YY], cvect[ZZ], sample, endrad, cpoint[XX], cpoint[YY], cpoint[ZZ], hole_outPDB );
+            sprintf(hole_cmd,"hole >%s <<EOF\ncoord %s\nradius %s\ncvect %2.2f %2.2f %2.2f\nsample %2.2f\nendrad %2.2f\ncpoint %2.2f %2.2f %2.2f\nmcstep %d\nsphpdb %s\nEOF", \
+            hole_outfile, pdbfile, "input_atom_radius.rad", cvect[XX], cvect[YY], cvect[ZZ], sample, endrad, cpoint[XX], cpoint[YY], cpoint[ZZ], mcstep, hole_outPDB );
         else
-            sprintf(hole_cmd,"hole >%s <<EOF\ncoord %s\nradius %s\ncvect %2.2f %2.2f %2.2f\nsample %2.2f\nendrad %2.2f\ncpoint %2.2f %2.2f %2.2f\nEOF", \
-            hole_outfile, pdbfile,  "input_atom_radius.rad", cvect[XX], cvect[YY], cvect[ZZ], sample, endrad, cpoint[XX], cpoint[YY], cpoint[ZZ] );
+            sprintf(hole_cmd,"hole >%s <<EOF\ncoord %s\nradius %s\ncvect %2.2f %2.2f %2.2f\nsample %2.2f\nendrad %2.2f\ncpoint %2.2f %2.2f %2.2f\n\nmcstep %d\nEOF", \
+            hole_outfile, pdbfile,  "input_atom_radius.rad", cvect[XX], cvect[YY], cvect[ZZ], sample, endrad, cpoint[XX], cpoint[YY], cpoint[ZZ], mcstep);
         
         if(0 != system(hole_cmd))
             gmx_fatal(FARGS,"Failed to execute command: %s",hole_cmd);
