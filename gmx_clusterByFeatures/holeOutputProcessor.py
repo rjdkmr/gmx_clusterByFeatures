@@ -10,6 +10,7 @@ mpl.use('Agg')
 import matplotlib.pyplot as plt
 from collections import OrderedDict
 import math
+from sklearn.decomposition import PCA
 
 class HoleOutputProcessor:
 
@@ -41,13 +42,13 @@ class HoleOutputProcessor:
             Last frame in time to read from the input file. If its ``end = -1``, All frames till
             the end will be read.
         dataOccupancy : float
-            Precentage of radius-data occupancy for axis-points. If an axis-point has radius-data
+            Percentage of radius-data occupancy for axis-points. If an axis-point has radius-data
             less than this percentage of frame, the axis-point will not be considered for average
             calculation and features output.
 
             This is critical for axis-points, which are at the
-            opening of cahnnel/cavity. In several frames, radius-value could be missing and therefore,
-            dataOccupancy thershold could be used to discard those axis points with lots of missing
+            opening of channel/cavity. In several frames, radius-value could be missing and therefore,
+            dataOccupancy threshold could be used to discard those axis points with lots of missing
             radius values.
 
         '''
@@ -145,7 +146,7 @@ class HoleOutputProcessor:
 
         legendcols : int
             If legend overflow into the plot area, legends can be made of more than
-            one column to accomodate all legends.
+            one column to accommodate all legends.
 
         '''
 
@@ -231,7 +232,7 @@ class HoleOutputProcessor:
         fig.set_tight_layout(tight={'rect':(None,None,1-rightmargin, None)})
         fig.savefig(outfile, dpi=dpi, bbox_extra_artists=(legend, ), bbox_inches='tight')
 
-    def write_features(self, outfile):
+    def write_features(self, outfile, pca=None):
         ''' Write radius as features for clustering
 
         .. :note: If a frame does not contain radius value, zero is written.
@@ -241,17 +242,23 @@ class HoleOutputProcessor:
         outfile : str
             Name of output file. Output file containing radius as function of
             time at each axis points. This file can be used as features file
-            for clustersing. This file can be also used to plot radius vs time
+            for clustering. This file can be also used to plot radius vs time
             with external plotting program.
 
             The file name should end with xvg extension, which is
             recognized by ``cluster`` command.
+            
+        pca : int
+            Number of eigenvectors to be considered for the features.
+            In place for taking radius as features, this option enable PCA of radii
+            and the resultant projections on eigenvectors can be used as features.
+            
 
 
         '''
         toBePrinted = True
-        msg =  "WARNING: radius value for the axis point was not calculated by hole. Zero will be written as feature value."
-        msg += "However, large number of missing values will lead to wrong clustering. Therefore, please try to minimize or"
+        msg =  "WARNING: radius value for the axis point was not calculated by hole. Zero will be written as feature value. "
+        msg += "However, large number of missing values will lead to wrong clustering. Therefore, please try to minimize or "
         msg += "eliminate the missing values by changing axis-point range using xmin and xmax option and/or dataOccupancy option."
         
         # Read hole data if not read previously
@@ -263,20 +270,49 @@ class HoleOutputProcessor:
             self.calculate_average()
 
 
-        fout = open(outfile, 'w')
-        for key in list(map(self._float2str, self.axis_value)):
-            # Axis point with any missing data are not written
-            if float(key) in self.axis_value:
-                for i in range(len(self.radius[key])):
-                    if self.radius[key][i] is ma.masked:
+        if pca is not None:
+            features = []
+            for i in range(len(self.axis_value)):
+                key = self._float2str(self.axis_value[i])
+                if float(key) in self.axis_value:
+                    x = self.radius[key]
+                    if isinstance(x, ma.MaskedArray):
                         if toBePrinted:
                             print(msg)
                             toBePrinted = False
-                        fout.write('{0:18.3f} {1:18.3f}\n'.format(self.time[i], 0))
+                        features.append(x.filled(0))
                     else:
-                        fout.write('{0:18.3f} {1:18.3f}\n'.format(self.time[i], self.radius[key][i]))
+                        features.append(x)
+            features = np.asarray(features)
+            print(features.shape)
+            
+            # Use Singular Value Decomposition
+            pcaobj = PCA(pca)
+            projs = pcaobj.fit_transform(features.T)
+            projs = projs.T
+            
+            fout = open(outfile, 'w')
+            for i in range(projs.shape[0]):
+                for j in range(projs.shape[1]):
+                    fout.write('{0:18.3f} {1:18.3f}\n'.format(self.time[j], projs[i][j]))
                 fout.write('\n & \n')
-        fout.close()
+            fout.close()
+            
+        else:
+            fout = open(outfile, 'w')
+            for key in list(map(self._float2str, self.axis_value)):
+                # Axis point with any missing data are not written
+                if float(key) in self.axis_value:
+                    for i in range(len(self.radius[key])):
+                        if self.radius[key][i] is ma.masked:
+                            if toBePrinted:
+                                print(msg)
+                                toBePrinted = False
+                            fout.write('{0:18.3f} {1:18.3f}\n'.format(self.time[i], 0))
+                        else:
+                            fout.write('{0:18.3f} {1:18.3f}\n'.format(self.time[i], self.radius[key][i]))
+                    fout.write('\n & \n')
+            fout.close()
 
     def plot_radius_residues(self, outfile, csvfile=None,  violinplot=False, residue_frequency=50, ymin=None, ymax=None, width=6, height=6, fontsize=18, rlabelsize=10, dpi=300):
         ''' Plot radius and residues as a function of axis points
@@ -296,7 +332,7 @@ class HoleOutputProcessor:
             axis-points
 
         residue_frequency : float
-            Frequency (%) of residue occurence during the simulations at a given axis points.
+            Frequency (%) of residue occurrence during the simulations at a given axis points.
             If frequency is less than this threshold, it will not considered for plotting.
 
         ymin : float
@@ -581,7 +617,7 @@ class HoleOutputProcessor:
         input_residues = block_data_transpose[4]
         print_new_output_range = False
 
-        if abs(input_axis[1]-input_axis[0]) > self.gap:
+        if np.round(abs(input_axis[1]-input_axis[0]), 2) > self.gap:
             raise ValueError('Gap {0} between slabs in hole output is larger than the input gap {1}. '
                              'Input gap should be either equal aur larger than gap between slabs in hole output'.format(abs(input_axis[1]-input_axis[0]), self.gap))
 

@@ -10,7 +10,7 @@
 Description
 -----------
 
-It can be used to plot radius of cavity/channel for clusters seperately.
+It can be used to plot radius of cavity/channel for clusters separately.
 It reads radius file from `hole <hole.html>`_ and cluster-id file from
 `cluster <cluster.html>`_, and extract radius of each cluster separately 
 and plot them in one plot. This plot could be extremely
@@ -135,14 +135,14 @@ By default ( ``-e -1``), all frames till the end will be read.
 
 ``-do 90``, ``--data-occupancy 90``
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-Precentage of radius-data occupancy for axis-points.
+Percentage of radius-data occupancy for axis-points.
 If an axis-point has radius-data less than this percentage of frames, 
 the axis-point will not be considered for average calculation and 
 features output.
 
-This is critical for axis-points, which are at the opening of cahnnel/cavity. 
+This is critical for axis-points, which are at the opening of channel/cavity. 
 In several frames, radius-value could be missing and therefore, ``dataOccupancy`` 
-thershold could be used to discard those axis points with lots of missing 
+threshold could be used to discard those axis points with lots of missing 
 radius values over the trajectories.
 
 ******
@@ -189,7 +189,7 @@ If legends overflow into the plot area, margin can be increased to fit the legen
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 Number of legend columns
 If legend overflow into the plot area, legends can be made of more than 
-one column to accomodate all legends.
+one column to accommodate all legends.
 
 
 ******

@@ -42,6 +42,15 @@
 
   <a href="http://scikit-learn.org/stable/modules/mixture.html#mixture" target="_blank">here</a>
   
+.. |silhouette-score| raw:: html
+
+  <a href="https://en.wikipedia.org/wiki/Silhouette_(clustering)" target="_blank">
+    "The silhouette value is a measure of how similar an object is to its 
+    own cluster (cohesion) compared to other clusters (separation). The silhouette ranges from 
+    −1 to +1, where a high value indicates that the object is well matched to its own cluster 
+    and poorly matched to neighboring clusters."
+  </a>
+  
   
 ``cluster``
 ===========================
@@ -71,15 +80,16 @@ Command summary
 
 .. code-block:: bash
 
-    gmx_clusterByFeatures cluster   [-f [<.xtc/.trr/...>]] [-s [<.tpr/.gro/...>]]
-                                    [-feat [<.xvg>]] [-n [<.ndx>]] [-clid [<.xvg>]] [-g [<.log>]]
-                                    [-fout [<.xtc/.trr/...>]] [-cpdb [<.pdb>]] [-rmsd [<.xvg>]]
-                                    [-b <time>] [-e <time>] [-dt <time>] [-tu <enum>] [-xvg <enum>]
-                                    [-method <enum>] [-nfeature <int>] [-cmetric <enum>]
-                                    [-ncluster <int>] [-crmsthres <real>] [-ssrchange <real>]
-                                    [-db_eps <real>] [-db_min_samples <int>] [-nminfr <int>]
-                                    [-[no]fit] [-[no]fit2central] [-outframe <int>] [-sort <enum>]
-                                    [-plot <string>] [-fsize <int>] [-pltw <real>] [-plth <real>]
+    gmx_clusterByFeatures cluster [-f [<.xtc/.trr/...>]] [-s [<.tpr/.gro/...>]]
+                [-feat [<.xvg>]] [-n [<.ndx>]] [-clid [<.xvg>]] [-g [<.log>]]
+                [-fout [<.xtc/.trr/...>]] [-cpdb [<.pdb>]] [-rmsd [<.xvg>]]
+                [-b <time>] [-e <time>] [-dt <time>] [-tu <enum>] [-xvg <enum>]
+                [-method <enum>] [-nfeature <int>] [-cmetric <enum>]
+                [-ncluster <int>] [-crmsthres <real>] [-ssrchange <real>]
+                [-db_eps <real>] [-db_min_samples <int>] [-sil_ssize <real>]
+                [-nminfr <int>] [-[no]fit] [-[no]fit2central] [-outframe <int>]
+                [-sort <enum>] [-plot <string>] [-fsize <int>] [-pltw <real>]
+                [-plth <real>]
                                     
 
 
@@ -200,6 +210,12 @@ Options summary
       - Thershold relative change % in SSR/SST ratio for ssr-sst cluster
         metric method.
 
+    * - `-sil_ssize <\real\> <cluster.html#sil-ssize-20>`_
+      - 20
+      - Percentage of number of frames to be considered as sample size for
+        silhouette score calculation.
+
+    
     * - `-db_eps \<real\> <cluster.html#db-eps-0-5>`_
       - 0.5
       - The maximum distance between two samples for them to be considered
@@ -507,10 +523,16 @@ Presently following cluster metrics are implemented:
      It is SSR/SST ratio and used for |elbow|. It is the threshold in relative
      change in SSR/SST ratio in percentage.
 
-  4. ``-cmetric pFS``
+  4. ``-cmetric silhouette``
 
-     Psuedo F-statatics determined from SSR/SST ratio. Clusters count with
-     highest value is considered.
+     Silhouette score. From wikipedia: |silhouette-score|
+     First encountered clusters count with highest Silhouette score value is considered as final 
+     cluster number.
+     
+     To calculate score, either entire data will be considered with option ``-sil_ssize -1``, 
+     which could be time expensive or percentage of data by random sampling will be taken 
+     with option ``-sil_ssize``. Because of the random sampling, this score might not be 
+     precisely reproduced in successive calculation. 
 
   5. ``-cmetric DBI``
 
@@ -574,6 +596,15 @@ automatically. This threshold gives potential position of Elbow in |elbow|.
 
 
 ******
+
+``-sil_ssize 20``
+~~~~~~~~~~~~~~~~~~~~~
+Percentage of number of frames to be considered as sample size for
+silhouette score calculation. If its value is ``-1``, sampling is not 
+considered. 
+
+******
+           
 
 
 ``-db_eps 0.5``

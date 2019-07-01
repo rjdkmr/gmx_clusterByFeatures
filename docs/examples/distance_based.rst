@@ -3,7 +3,7 @@ Clustering conformations using distances between atoms
 
 In this example, conformations of G-Quadruplex DNA is clustered according to distances between
 three atom-pairs. These atom-pairs form hydrogen bonds during the simulations. However, either 
-only one atom-pair among them could form hydrogen bond at a time or niethr can form hydrogen 
+only one atom-pair among them could form hydrogen bond at a time or neither can form hydrogen 
 bond. The formation of hydrogen bonds are extremely fluctuating between these atom-pairs, and
 therefore, clustering will filter conformations based on these hydrogen bonds and distances
 between atom-pairs.
@@ -50,7 +50,7 @@ using change in SSR/SST ratio (``-cmetric ssr-sst`` and ``-ssrchange 2``)
           
           **b.** Second index group - RMSD group, here it is whole G-Quadruplex DNA.
           
-          **c.** Third group - Used for superposition by least-square fitting, here it is four tettrads of G-Quadruplex DNA.
+          **c.** Third group - Used for superposition by least-square fitting, here it is four tetrads of G-Quadruplex DNA.
           
 Outputs
 --------

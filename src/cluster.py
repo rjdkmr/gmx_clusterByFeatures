@@ -19,7 +19,7 @@ class DoClustering:
     davies_bouldin_score = dict()
 
     #########################################################################################
-    def __init__(self, filename, nFeatures=2, algo='kmeans', dbscan_eps=0.5, dbscan_min_samples=20, silhouette_score_sample_size=10):
+    def __init__(self, filename, nFeatures=2, algo='kmeans', dbscan_eps=0.5, dbscan_min_samples=20, silhouette_score_sample_size=20):
         self.algo = algo
         self.dbscan_eps = dbscan_eps
         self.dbscan_min_samples = dbscan_min_samples

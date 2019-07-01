@@ -51,7 +51,7 @@ public:
     /*
      * Initialize DoClustering Class as doCluster object in python
      */
-    static void initializeClustering(const char* filename, int nPC=2, const char* algo="kmeans", float dbscan_eps=0.5, int dbscan_min_samples=20, float silhouette_score_sample_size=10);
+    static void initializeClustering(const char* filename, int nPC=2, const char* algo="kmeans", float dbscan_eps=0.5, int dbscan_min_samples=20, float silhouette_score_sample_size=20);
 
     /*
      * Perform clustering for a given number of cluster

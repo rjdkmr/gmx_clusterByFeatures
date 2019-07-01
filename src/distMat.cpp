@@ -522,7 +522,7 @@ int gmx_distMat(int argc,char *argv[])
 			{ "-ct",   FALSE, etREAL, {&cutoff}, "cut-off distance (nm) for contact map" },
 			{ "-nt",   FALSE, etINT, {&NTHREADS}, "number of threads for multi-threading" },
             { "-gx",   FALSE, etINT, {&gapX}, "Gap between residues along X-axis in distance-matrix for PCA trajectory" },
-            { "-gy",   FALSE, etINT, {&gapY}, "ap between residues along Y-axis in distance-matrix for PCA trajectory" },
+            { "-gy",   FALSE, etINT, {&gapY}, "Gap between residues along Y-axis in distance-matrix for PCA trajectory" },
             { "-power", FALSE, etREAL, {&power}, "Distances will be raised by this power and then dumped in xtc file."} 	};
 
 	t_filenm   fnm[] = {

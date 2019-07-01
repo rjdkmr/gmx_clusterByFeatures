@@ -352,20 +352,26 @@ int ClusteringStuffs::rmsd_bw_central_structure( int *fitAtomIndex, int fitAtomI
     sfree(w_rms);
     sfree(w_rls);
 
+    // Writing RMSD matrix
+    char out[12], out1[12];
     lstream->setprecision(3);
     *lstream<<"\n\n=====================================\n";
     *lstream<<" Central structurs - RMSD matrix \n";
     *lstream<<"=====================================\n";
-    for (size_t cref=0; cref < sortedClusterIds.size(); cref++)
-        *lstream<<"c"<<sortedClusterIds[cref]<<"\t";
+    for (size_t cref=0; cref < sortedClusterIds.size(); cref++) {
+        sprintf(out1, "%s%-d", "c", sortedClusterIds[cref]);
+        sprintf(out, "%6s ", out1);
+        *lstream<<out;
+    }
     *lstream<<"\n";
     for (size_t cref=0; cref < sortedClusterIds.size(); cref++) {
         for (size_t ci=0; ci < sortedClusterIds.size(); ci++) {
-            *lstream<<centrlRmsdMatrix[cref][ci]<<"\t";
+            sprintf(out, "%6.3f ", centrlRmsdMatrix[cref][ci]);
+            *lstream<<out;
         }
         *lstream<<"\n";
     }
-    *lstream<<"\n\n=====================================\n";
+    *lstream<<"=====================================\n";
     lstream->resetprecision();
 
     this->centrlRmsdMatrix = centrlRmsdMatrix;
@@ -849,19 +855,27 @@ int ClusteringStuffs::performClusterMetrics(int eClusterMetrics, int n_clusters,
     int finalClustersNumber = 1;
     bool bGotFinalClusterNumber = false;
     real prevSsrSstRatio = ClusteringStuffs::ssrSstRatio.at(1), changeInSsrSstRatio = 0;
+    char output[1024];
 
     lstream->setprecision(3);
-    *lstream<< "\n\n################################ Cluster Metrics Summary ################################\n";
-    *lstream<<"Clust. No.\tssr/sst (%)\tDelta(ssr/sst)\tpsuedo F-stat\tSilhouette-score\tDavies-bouldin-score\n";
+    *lstream<<"\n\n===========================================================================================================\n";
+    *lstream<<"                                          Cluster Metrics Summary                                          \n";
+    *lstream<<"-----------------------------------------------------------------------------------------------------------\n";
+    sprintf(output, "%-14s %-10s %-18s %-18s %-18s %-18s\n", "Clusters  ", "SSR/SST", "D(SSR/SST)", "(Psuedo)F-stat.", "Silhouette-score", "Davies-bouldin-score");
+    *lstream<<output;
+    //*lstream<<"Clust. No.\tssr/sst (%)\tDelta(ssr/sst)\tpsuedo F-stat\tSilhouette-score\tDavies-bouldin-score\n";
     for(int i = 2; i <= n_clusters; i++){
         changeInSsrSstRatio = ClusteringStuffs::ssrSstRatio.at(i) -prevSsrSstRatio;
 
-        *lstream<<i<<"\t\t";
-        *lstream<<ClusteringStuffs::ssrSstRatio.at(i)<<"\t\t";
-        *lstream<<changeInSsrSstRatio<<"\t\t";
-        *lstream<<ClusteringStuffs::pFS.at(i)<<"\t\t";
-        *lstream<<ClusteringStuffs::silhouetteScore.at(i)<<"\t\t\t";
-        *lstream<<ClusteringStuffs::daviesBouldinScore.at(i)<<"\n";
+        sprintf(output, "%-14d %3.2f %11.3f %26.3f %9.3f %18.3f \n" , i, ClusteringStuffs::ssrSstRatio.at(i), changeInSsrSstRatio, \
+                ClusteringStuffs::pFS.at(i), ClusteringStuffs::silhouetteScore.at(i), ClusteringStuffs::daviesBouldinScore.at(i));
+        *lstream<<output;
+        //*lstream<<i<<"\t\t";
+        //*lstream<<ClusteringStuffs::ssrSstRatio.at(i)<<"\t\t";
+        //*lstream<<changeInSsrSstRatio<<"\t\t";
+        //*lstream<<ClusteringStuffs::pFS.at(i)<<"\t";
+        //*lstream<<ClusteringStuffs::silhouetteScore.at(i)<<"\t\t";
+        //*lstream<<ClusteringStuffs::daviesBouldinScore.at(i)<<"\n";
 
         prevSsrSstRatio = ClusteringStuffs::ssrSstRatio.at(i);
 
@@ -904,7 +918,7 @@ int ClusteringStuffs::performClusterMetrics(int eClusterMetrics, int n_clusters,
 
         }
     }
-    *lstream<< "##################### ############################################### ################### \n";
+    *lstream<<"===========================================================================================================\n";
     lstream->resetprecision();
 
     return finalClustersNumber;
@@ -1350,7 +1364,7 @@ int gmx_clusterByFeatures(int argc,char *argv[])    {
         " * prior: Number of clusters already known.",
         " * rmsd: RMSD between central structures.",
         " * ssr-sst: Relative change in SSR/SST ratio in percentage. Also known as elbow method (https://en.wikipedia.org/wiki/Elbow_method_(clustering))",
-        " * pFS: Psuedo F-statatics determined from SSR/SST ratio. Highest value is considered.",
+        " * silhouette: Silhouette score (https://en.wikipedia.org/wiki/Silhouette_(clustering))",
         " * DBI: Davies–Bouldin index (https://en.wikipedia.org/wiki/Davies%E2%80%93Bouldin_index). Lowest value is considered.[PAR]",
         "For summary of command line options. see more details here: https://gmx-clusterbyfeatures.readthedocs.io/en/latest/usage.html[PAR]",
         "For description of command line options, see more details here: https://gmx-clusterbyfeatures.readthedocs.io/en/latest/cmdline.html"
@@ -1371,7 +1385,7 @@ int gmx_clusterByFeatures(int argc,char *argv[])    {
     int eClusterMethod;
     real dbscan_eps = 0.5;
     int dbscan_min_samples = 20;
-    real silhouette_score_sample_size = 10;
+    real silhouette_score_sample_size = 20;
     int n_clusters=5;
 
     const char *plotfile = "pca_cluster.png";
@@ -1660,7 +1674,7 @@ int gmx_clusterByFeatures(int argc,char *argv[])    {
 
         while(1)    {
             double tempSsrSstRatio, tempPFS, tempSilhouetteScore, tempDaviesBouldinScore;
-            lstream<<"\n###########################################\n";
+            lstream<<"\n\n###########################################\n";
             lstream<<"########## NUMBER OF CLUSTERS : "<<curr_n_cluster<<" ########\n";
             lstream<<"###########################################\n";
 

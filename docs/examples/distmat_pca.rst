@@ -2,7 +2,7 @@ Clustering conformations using distance-matrix PCA
 ======================================================
 
 In this example, conformational clustering of a flexible protein will be performed using the distance-matrix PCA (dmPCA).
-This protein is extremely fleixble and, superposition of conformations are not accurate that is required during the 
+This protein is extremely flexible and, superposition of conformations are not accurate that is required during the 
 conventional PCA. Therefore, to avoid the superposition step, distance-matrix can be used in place of atom-coordinates
 for PCA.
 

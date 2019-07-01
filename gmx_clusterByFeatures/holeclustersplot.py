@@ -23,7 +23,7 @@ def get_output_formats(fmt=False):
 description=\
 """DESCRIPTION
 ===========
-It can be used to plot radius of cavity/channel for clusters seperately.
+It can be used to plot radius of cavity/channel for clusters separately.
 It reads radius file from "hole" and cluster-id file  from "cluster",
 and extract radius of each cluster separately and plot them in one plot.
 This plot could be extremely useful to compare radius along the 
@@ -33,7 +33,7 @@ channel/cavity in all clusters.
 
 inputFileHelp=\
 """Name of input file.
-Name of input radius file. Radius file shoudl be obtained from "hole" as an 
+Name of input radius file. Radius file should be obtained from "hole" as an 
 output file.
 
 """
@@ -113,14 +113,14 @@ If its ``end = -1``, All frames till the end will be read.
 """
 
 dataOccupancyHelp=\
-"""Precentage of radius-data occupancy for axis-points.
+"""Percentage of radius-data occupancy for axis-points.
 If an axis-point has radius-data
 less than this percentage of frame, the axis-point will not be considered 
 for average calculation and features output.
 
 This is critical for axis-points, which are at the 
-opening of cahnnel/cavity. In several frames, radius-value could be missing
-and therefore, dataOccupancy thershold could be used to discard those axis 
+opening of channel/cavity. In several frames, radius-value could be missing
+and therefore, dataOccupancy threshold could be used to discard those axis 
 points with lots of missing radius values.
 
 """
@@ -146,7 +146,7 @@ If legends overflow into the plot area, margin can be increased to fit the legen
 legendcolsHelp=\
 """Number of legend columns
 If legend overflow into the plot area, legends can be made of more than 
-one column to accomodate all legends.
+one column to accommodate all legends.
 
 """
 

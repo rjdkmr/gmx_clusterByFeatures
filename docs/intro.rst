@@ -18,6 +18,11 @@
 
   <a href="https://en.wikipedia.org/wiki/Davies%E2%80%93Bouldin_index" target="_blank">DBI : Davies–Bouldin index</a>
 
+.. |silhouette-score| raw:: html
+
+  <a href="https://en.wikipedia.org/wiki/Silhouette_(clustering)" target="_blank">
+    Silhouette score
+  </a>
 
 gmx_clusterByFeatures
 =====================
@@ -63,5 +68,5 @@ Clustering metrics
 To determine the number of clustering, following metrics are implemented:
   * RMSD : Root Mean Square deviation between central structures of clusters.
   * SSR/SST ratio ( |elbow| ) : Relative change in SSR/SST ratio in percentage.
-  * pFS : Psuedo F-statatics determined from SSR/SST ratio.
+  * |silhouette-score|
   * |DBI|

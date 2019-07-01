@@ -141,21 +141,21 @@ By default ( ``-e -1``), all frames till the end will be read.
 
 ``-do 90``, ``--data-occupancy 90``
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-Precentage of radius-data occupancy for axis-points.
+Percentage of radius-data occupancy for axis-points.
 If an axis-point has radius-data less than this percentage of frames, 
 the axis-point will not be considered for average calculation and 
 features output.
 
-This is critical for axis-points, which are at the opening of cahnnel/cavity. 
+This is critical for axis-points, which are at the opening of channel/cavity. 
 In several frames, radius-value could be missing and therefore, ``dataOccupancy`` 
-thershold could be used to discard those axis points with lots of missing 
+threshold could be used to discard those axis points with lots of missing 
 radius values over the trajectories.
 
 ******
 
 ``-rfreq 50``, ``--residue-frequency 50``
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-Frequency percentage of residue occurence during the simulations at a
+Frequency percentage of residue occurrence during the simulations at a
 given axis points. If frequency is less than this threshold, it will 
 not considered for plotting. 
 

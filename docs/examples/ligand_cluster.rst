@@ -16,7 +16,7 @@ Atom-coordinates PCA
     
 Here, ``13`` is index group of receptor atoms, which were used for superposition by least-square fitting.
 ``14`` is index group of ligand without any hydrogen atoms. Above command generated ``eigenvec.trr`` and 
-``eigenval.xvg`` files. ``eigenvec.trr`` is neccessary in next command as input.
+``eigenval.xvg`` files. ``eigenvec.trr`` is necessary in next command as input.
 
 2. **Projections on eigenvectors**
 

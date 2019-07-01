@@ -135,7 +135,7 @@ Following colormaps might be available:
     tab20            tab20b           tab20c           terrain          viridis          
     winter           
 
-**Reverse of the available colormaps** are also available with same name suffxed by 
+**Reverse of the available colormaps** are also available with same name suffixed by 
 "_r". For example, reverse of binary colormap is binary_r, reverse of gist_earth
 is gist_earth_r etc.
 
@@ -146,14 +146,14 @@ is gist_earth_r etc.
 ``-vmin VMIN``, ``--min-value VMIN``
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 Minimum value to begin color-mapping.
-If not provided, minimum value of whole matrix will be considerd.
+If not provided, minimum value of whole matrix will be considered.
 
 ******
 
 ``-vmax VMAX``, ``--max-value VMAX``
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 Maximum value to end color-mapping.
-If not provided, maximum value of whole matrix will be considerd.
+If not provided, maximum value of whole matrix will be considered.
 
 ******
 

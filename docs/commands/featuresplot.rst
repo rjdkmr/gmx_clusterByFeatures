@@ -123,7 +123,7 @@ If legends overflow into the plot area, margin can be increased to fit the legen
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 Number of legend columns.
 If legend overflow the plot area, legends can be made of more than 
-one rows by limiting number of columns to accomodate all legends.
+one rows by limiting number of columns to accommodate all legends.
 
 ******
 

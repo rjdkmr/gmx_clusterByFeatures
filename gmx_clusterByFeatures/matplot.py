@@ -68,13 +68,13 @@ Following output formats are available:
 
 minValueHelp=\
 """Minimum value to begin color-mapping
-If not provided, minimum value of whole matrix will be considerd.
+If not provided, minimum value of whole matrix will be considered.
 
 """
 
 maxValueHelp=\
 """Maximum value to end color-mapping
-If not provided, maximum value of whole matrix will be considerd.
+If not provided, maximum value of whole matrix will be considered.
 
 """
 
@@ -99,7 +99,7 @@ https://matplotlib.org/tutorials/colors/colormaps.html#classes-of-colormaps
 Following colormaps are available:
 {0}
 
-All the above colormaps are also available in reverse with same name suffxed by 
+All the above colormaps are also available in reverse with same name suffixed by 
 "_r". For example, reverse of binary colormap is binary_r, reverse of gist_earth
 is gist_earth_r etc.
 

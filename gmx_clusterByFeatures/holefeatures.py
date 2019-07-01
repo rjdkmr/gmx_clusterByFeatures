@@ -25,11 +25,18 @@ Radius file obtained from hole as an output file.
 outputFileHelp=\
 """Name of output file.
 Output file containing radius as function of time at each axis points.
-This file can be used as features file for clustersing. This file can be
+This file can be used as features file for clustering. This file can be
 also used to plot radius vs time with external plotting program.
 
 The file name should end with xvg extension, which is recognized by 
 "cluster" command.
+
+"""
+
+pcaHelp=\
+"""Number of eigenvectors to be considered for the features.
+In place for taking radius as features, this option enable PCA of radii
+and the resultant projections on eigenvectors can be used as features.
 
 """
 
@@ -70,14 +77,14 @@ If its ``end = -1``, All frames till the end will be read.
 """
 
 dataOccupancyHelp=\
-"""Precentage of radius-data occupancy for axis-points.
+"""Percentage of radius-data occupancy for axis-points.
 If an axis-point has radius-data less than this percentage of frame, 
 the axis-point will not be considered for average calculation and 
 features output.
 
 This is critical for axis-points, which are at the opening of 
-cahnnel/cavity. In several frames, radius-value could be missing 
-and therefore, dataOccupancy thershold could be used to discard 
+channel/cavity. In several frames, radius-value could be missing 
+and therefore, dataOccupancy threshold could be used to discard 
 those axis points with lots of missing radius values.
 
 """
@@ -105,7 +112,7 @@ def main():
     holeProcessor = HoleOutputProcessor(inputFile, axis=args.axis, endrad=args.endrad, xmin=args.xmin, 
                                         xmax=args.xmax, gap=args.gap, begin=args.begin, end=args.end,
                                         dataOccupancy=args.dataOccupancy)
-    holeProcessor.write_features(outputFile)
+    holeProcessor.write_features(outputFile, pca=args.pca)
 
 
 
@@ -123,6 +130,10 @@ def parseArguments():
     parser.add_argument('-o', '--output', action='store',
                         type=str, metavar='output.xvg', 
                         dest='outputFile', help=outputFileHelp)
+    
+    parser.add_argument('-pca', '--pca-pcs', action='store',
+                        type=int, dest='pca', default=5,
+                        metavar='5', help=pcaHelp)
     
     parser.add_argument('-xmin', '--axis-min', action='store',
                         type=float, dest='xmin', 

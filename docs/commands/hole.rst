@@ -15,9 +15,9 @@ Description
 
 It can be used to calculate radius of protein channel/cavity for GROMACS MD
 trajectory. It uses |hole| program to calculate radius of cavity/channel
-and dumps the output to a text file as a function of tiime. It also extract
+and dumps the output to a text file as a function of time. It also extract
 channel's outlining residues and dumps to same output file. This output file
-can be further read to perform final statistcal operations and plotting.
+can be further read to perform final statistical operations and plotting.
 
 Please cite the original publication of hole:
   O.S. Smart, J.M. Goodfellow and B.A. Wallace (1993).
@@ -173,7 +173,7 @@ as a function of time.
 ``-pdb sphpdb.pdb``
 ~~~~~~~~~~~~~~~~~~~~~~
 Output PDB file containing coordinates of sphere inside the channel/Cavity.
-Radius of these spehere is channel/cavity radius.
+Radius of these sphere is channel/cavity radius.
 This file can be used to visualize whether obtained radii are from inside
 the intended channel/cavity.
 
@@ -207,7 +207,7 @@ will be used. This point will be used a seed to start calcualtion for
 channel/cavity radius.
 
 .. note:: Due to this option, superimposition of structures on reference 
-          structure is neccessary.
+          structure is necessary.
           
 .. note:: Conformations changtes during the simulations, therefore, this 
           coordinate may not be inside the cavity. To dynamically select seed coordinate, 

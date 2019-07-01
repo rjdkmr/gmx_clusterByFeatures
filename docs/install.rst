@@ -102,7 +102,7 @@ If GROMACS is not installed at standard location, define ``GMX_PATH`` environmen
 Python3
 ~~~~~~~
 
-To compile gmx_clusterByFeatures, Python3 developement files should be installed previously.
+To compile gmx_clusterByFeatures, Python3 development files should be installed previously.
 
 On Debian like distribution (Debian, Ubuntu, Linux Mint etc.), which uses apt as
 package manager, python3-development files can be installed as follows:
@@ -160,7 +160,7 @@ Now, gmx_clusterByFeatures command will be accessible in terminal.
 Compilation and Installation using cmake for C++ IDEs
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-This method can be used for developement purpose using C++ IDE like QT creator and KDevelop etc.
+This method can be used for development purpose using C++ IDE like QT creator and KDevelop etc.
 
 **To install and use gmx_clusterByFeatrues from source location:**
 
@@ -176,8 +176,8 @@ This method can be used for developement purpose using C++ IDE like QT creator a
 In this installation, only ``gmx_clusterByFeatures`` executable file is installed at default
 location (mostly ``/usr/local/bin``) while whole package remains at the source location.
 
-This method is extremely useful for developement because ``make install`` is only required
-for first time to install executable file. During subsequent developement, only command 
+This method is extremely useful for development because ``make install`` is only required
+for first time to install executable file. During subsequent development, only command 
 ``make`` need to be repeated. In IDEs ``make`` command is executed by ``build``. In IDEs 
 project build setting, cmake arguments ``-DGMX_PATH=/path/to/installed/gromacs -DINPLACE=ON``
 needs to be added manually.

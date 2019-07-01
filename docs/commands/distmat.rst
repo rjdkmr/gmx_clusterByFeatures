@@ -21,7 +21,7 @@ To calculate  fluctuations (MSF - variance  or RMSF - std. deviation in distance
 in a trajectory with respect to average distances from another trajectory, use ``-f
 traj_for_average.xtc``  and ``-f2 traj_for_rmsf.xtc``. The averages will be calculated
 from first trajectory ``traj_for_average.xtc``. Subsequently, variances and deviation will
-be calculated for ``traj_for_variance.xtc`` with respect to previosly calculated averages.
+be calculated for ``traj_for_variance.xtc`` with respect to previously calculated averages.
 
 **Trajectory and pdb for distance-matrix PCA:**
 To speed up the calculation, it uses all available cores of the CPU using
@@ -34,11 +34,11 @@ Command summary
 
 .. code-block:: bash
 
-  gmx_clusterByFeatures distmat [-f [<.xtc/.trr/...>]] [-s [<.tpr/.gro/...>]] [-n [<.ndx>]]
-                                [-f2 [<.xtc/.trr/...>]] [-mean [<.dat>]] [-var [<.dat>]]
-                                [-std [<.dat>]] [-cmap [<.dat>]] [-pca [<.xtc>]] [-b <time>]
-                                [-e <time>] [-dt <time>] [-ct <real>] [-nt <int>] [-gx <int>]
-                                [-gy <int>]
+    gmx_clusterByFeatures distmat [-f [<.xtc/.trr/...>]] [-s [<.tpr/.gro/...>]]
+                                  [-n [<.ndx>]] [-f2 [<.xtc/.trr/...>]] [-mean [<.dat>]]
+                                  [-var [<.dat>]] [-std [<.dat>]] [-cmap [<.dat>]] [-pca [<.xtc>]]
+                                  [-b <time>] [-e <time>] [-dt <time>] [-ct <real>] [-nt <int>]
+                                  [-gx <int>] [-gy <int>] [-power <real>]
 
 
                                 
@@ -140,6 +140,10 @@ Command summary
       - 1
       - Gap between residues along Y-axis in distance-matrix for PCA
 
+    * - `-power <real> <distmat.html#power-1>`_
+      - 1
+      - Distances will be raised by this power and then dumped in xtc file
+
         
 Options to specify input files
 --------------------------------
@@ -174,7 +178,7 @@ Input trajectory file of ``xtc`` ``trr`` ``cpt`` ``gro`` ``g96`` ``pdb`` or
 ``tng`` format.
 
 Second input trajectory. If this trajectory is provided, fluctuations in this trajectory
-will be calculated with referece to average-distance matrix of first trajectory.
+will be calculated with reference to average-distance matrix of first trajectory.
 
 ******
 
@@ -203,7 +207,7 @@ entire trajectory.
 ``-cmap contact_map.dat``
 ~~~~~~~~~~~~~~~~~~~~~~~~~
 Output file containing contact map over entire trajectory. The contact is determined
-using the thershold distance given by ``-ct`` option;
+using the threshold distance given by ``-ct`` option;
 
 ******
 
@@ -254,3 +258,9 @@ for further PCA. This gap reduces the distance-matrix size and subsequently spee
 the PCA performance.
 
 .. note:: This option **ONLY** affect output from ``-pca`` option.
+
+******
+
+``-power 1``
+~~~~~~~~~~~~~~~~~~~~~~
+Distances will be raised by this power and then dumped in xtc file.
