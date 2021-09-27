@@ -254,7 +254,7 @@ int ClusteringStuffs::write_central_pdbfiles(std::vector < std::string > pdbName
     else {
         for (size_t c=0; c < sortedClusterIds.size(); c++) {
             bRet = xtc_seek_time(fio, this->timeInInput[this->centralStructDict[sortedClusterIds[c]]], inpTrajStuff.natoms, FALSE);
-            if (bRet == -1) {
+            if (bRet == 0) {
                 gmx_fatal(FARGS, "Frame for this time is not found in trajectory");
             }
             read_next_x(inpTrajStuff.oenv, inpTrajStuff.status, &inpTrajStuff.time, inpTrajStuff.x, inpTrajStuff.box);
@@ -353,7 +353,7 @@ int ClusteringStuffs::rmsd_bw_central_structure( int *fitAtomIndex, int fitAtomI
     sfree(w_rls);
 
     // Writing RMSD matrix
-    char out[12], out1[12];
+    char out[15], out1[12];
     lstream->setprecision(3);
     *lstream<<"\n\n=====================================\n";
     *lstream<<" Central structurs - RMSD matrix \n";
@@ -803,7 +803,7 @@ int ClusteringStuffs::read_features_input(const char *fnDataIn,
             // Check if feature array size is same
             if(!bPushTime) {
                 if(features_local[0].size() != tempFeatureVector.size()) {
-                    gmx_fatal(FARGS,"Size of features array does not match between feature-1 and feature-%d...\n", features_local.size()+1);
+                    gmx_fatal(FARGS,"Size of features array does not match between feature-1 and feature-%d...\n", (int)features_local.size()+1);
                 }
             }
             
@@ -1466,7 +1466,7 @@ int gmx_clusterByFeatures(int argc,char *argv[])    {
     gmx_bool bFeatures = FALSE, bCentralPDB = FALSE, bDoCluster = FALSE, bTrajRMSD=FALSE, bTrajRMSDist=FALSE;
 
     t_topology top;
-    int ePBC;
+    PbcType ePBC;
     rvec *x;
     matrix box;
 
