@@ -11,13 +11,12 @@
 
 	// "runArgs": ["--name", "${localEnv:USER}_devcontainer"]
 	"runArgs": ["--name", "rk-test"],
-    "onCreateCommand": "git submodule update --init"
 
 	// Use 'forwardPorts' to make a list of ports inside the container available locally.
 	// "forwardPorts": [],
 
 	// Uncomment the next line to run commands after the container is created - for example installing curl.
-	//"postCreateCommand": "apt-get update && git submodule update --init"
+	"postCreateCommand": "apt-get update && git submodule update --init"
 
 	// Uncomment when using a ptrace-based debugger like C++, Go, and Rust
 	// "runArgs": [ "--cap-add=SYS_PTRACE", "--security-opt", "seccomp=unconfined" ],
