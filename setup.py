@@ -93,6 +93,16 @@ def check_gromacs_dirs():
     
     return out
 
+def include_gromacs_source_headers():
+    global  gromacs_flags
+    if 'GMX_SRC' not in os.environ:
+        raise LookupError('GMX_SRC environment variable not found...')
+        
+    gmx_src = os.environ['GMX_SRC']
+    
+    gromacs_flags['include'].append(os.path.join(gmx_src, 'src'))
+    
+
 def extract_gromacs_flags():
     ''' Extract gromacs include, lib and other flags for compilation
     '''
@@ -101,24 +111,26 @@ def extract_gromacs_flags():
     # At first check if gromacs is already available in standard path
     gromacs_flags = check_gromacs_dirs()
 
-    # If gromacs is not available at standard path check for GMX_PATH environment variable,
+    # If gromacs is not available at standard path check for GMX_INSTALL environment variable,
     # add it to pkg-config and then extract GROMACS directories and flags
-    if gromacs_flags is None or 'GMX_PATH' in os.environ:
-        if 'GMX_PATH' not in os.environ:
-            raise LookupError('GMX_PATH environment variable not found...')
-        gmx_path = os.environ['GMX_PATH']
-        if not os.path.isdir(gmx_path):
-            raise LookupError('GROMACS directory {0} not exist...'.format(gmx_path))
+    if gromacs_flags is None or 'GMX_INSTALL' in os.environ:
+        if 'GMX_INSTALL' not in os.environ:
+            raise LookupError('GMX_INSTALL environment variable not found...')
+        gmx_install = os.environ['GMX_INSTALL']
+        if not os.path.isdir(gmx_install):
+            raise LookupError('GROMACS directory {0} not exist...'.format(gmx_install))
         # Check lib name: it could be lib or lib64
         lib_dir = None
-        for entry in os.listdir(gmx_path):
+        for entry in os.listdir(gmx_install):
             if 'lib' in entry:
                 lib_dir = entry
                 break
-        os.environ['PKG_CONFIG_PATH'] = os.path.join(gmx_path, lib_dir, 'pkgconfig')
+        os.environ['PKG_CONFIG_PATH'] = os.path.join(gmx_install, lib_dir, 'pkgconfig')
         gromacs_flags = check_gromacs_dirs()
     if gromacs_flags is None:
         raise LookupError("gromacs package not found")
+        
+    include_gromacs_source_headers()
 
 
 class get_pybind_include(object):
@@ -181,7 +193,9 @@ def cpp_flag(compiler):
 
     The c++14 is prefered over c++11 (when it is available).
     """
-    if has_flag(compiler, '-std=c++14'):
+    if has_flag(compiler, '-std=c++17'):
+        return '-std=c++17'
+    elif has_flag(compiler, '-std=c++14'):
         return '-std=c++14'
     elif has_flag(compiler, '-std=c++11'):
         return '-std=c++11'

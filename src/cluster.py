@@ -61,7 +61,8 @@ class DoClustering:
     #########################################################################################
     def calculate_clusters(self, n_clusters):
         if self.algo == 'kmeans':
-            db = getCluster.KMeans(n_clusters=n_clusters)
+            # db = getCluster.KMeans(n_clusters=n_clusters)
+            db = getCluster.MiniBatchKMeans(n_clusters=n_clusters)
 
         if self.algo == 'dbscan':
             db = getCluster.DBSCAN(eps=self.dbscan_eps, min_samples=self.dbscan_min_samples)
@@ -72,7 +73,7 @@ class DoClustering:
         db.fit(self.features)
 
         if hasattr(db, 'labels_'):
-            labels = db.labels_.astype(np.int)
+            labels = db.labels_.astype(int)
         else:
             labels = db.predict(self.features)
             
@@ -125,7 +126,7 @@ class DoClustering:
 
         for gui in mpl.rcsetup.non_interactive_bk:
             try:
-                mpl.use(gui, warn=True, force=True)
+                mpl.use(gui, force=True)
                 from matplotlib import pyplot as plt
                 break
             except:
