@@ -41,6 +41,7 @@ from distutils.command.build import build
 import sys
 import setuptools
 import os
+import glob
 
 from pyCode2Hex import pyCode2Hex
 pyCode2Hex('src/cluster.py', 'src/cluster.pyhex')
@@ -98,9 +99,10 @@ def include_gromacs_source_headers():
     if 'GMX_SRC' not in os.environ:
         raise LookupError('GMX_SRC environment variable not found...')
         
-    gmx_src = os.environ['GMX_SRC']
-    
-    gromacs_flags['include'].append(os.path.join(gmx_src, 'src'))
+    gmx_src = os.path.join(os.environ['GMX_SRC'], 'src')
+    gromacs_flags['include'].append(gmx_src)
+    for dir_name in glob.glob(f'{gmx_src}/gromacs/*/include'):
+        gromacs_flags['include'].append(dir_name)
     
 
 def extract_gromacs_flags():
@@ -253,7 +255,7 @@ setup(
     version=__version__,
     ext_modules=extensions,
     cmdclass={'build_ext': BuildExt},
-    install_requires=['pkgconfig>=1.3', 'pybind11>=2.2', 'numpy>=1.6',  'scipy>=0.9', 'matplotlib>=1.1.0', 'scikit-learn>=0.19.0'],
+    install_requires=['pkgconfig>=1.3', 'pybind11==2.9.2', 'numpy>=1.6',  'scipy>=0.9', 'matplotlib>=1.1.0', 'scikit-learn>=0.19.0'],
     entry_points={'console_scripts': [ 'gmx_clusterByFeatures=gmx_clusterByFeatures:main.main',], },
     packages=find_packages(),
     include_package_data=True,
