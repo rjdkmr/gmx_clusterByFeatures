@@ -61,13 +61,12 @@ class DoClustering:
     #########################################################################################
     def calculate_clusters(self, n_clusters):
         if self.algo == 'kmeans':
-            # db = getCluster.KMeans(n_clusters=n_clusters)
-            db = getCluster.MiniBatchKMeans(n_clusters=n_clusters)
+            db = getCluster.KMeans(n_clusters=n_clusters, n_init=5, random_state=np.random.RandomState(12345))
 
         if self.algo == 'dbscan':
             db = getCluster.DBSCAN(eps=self.dbscan_eps, min_samples=self.dbscan_min_samples)
 
-        if self.algo == 'gaussmix':
+        if self.algo == 'gmixture':
             db = mixture.GaussianMixture(n_components=n_clusters, covariance_type='full')
 
         db.fit(self.features)
@@ -88,7 +87,10 @@ class DoClustering:
         labels[trueIdx] = labels[trueIdx] + 1
 
         self.labels[n_clusters] = list(self._sort_clusters(labels, n_clusters))
-        self.sse[n_clusters] = db.inertia_
+        if hasattr(db, 'inertia_'):
+            self.sse[n_clusters] = db.inertia_
+        else:
+            self.sse[n_clusters] = 1
 
     #########################################################################################
     def _sort_clusters(self, labels, n_clusters):
