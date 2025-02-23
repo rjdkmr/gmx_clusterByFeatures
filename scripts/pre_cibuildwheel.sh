@@ -11,10 +11,13 @@ if [ -d build ]; then
 fi
 
 mkdir build
-cd buiild
+cd build
 
-export GMX_INSTALL=/app-src/external/gmx_installed
-export GMX_SRC=/app-src/external/gromacs
+export GMX_INSTALL=${CWD}/external/gmx_installed
+export GMX_SRC=${CWD}/external/gromacs
+
+echo $CWD
+ls -lrta
 
 cmake .. -DGMX_SIMD=SSE2 -DGMX_GPU=off -DGMXAPI=OFF -DGMX_INSTALL_LEGACY_API=on -DGMX_FFT_LIBRARY=fftpack -DCMAKE_INSTALL_PREFIX=${GMX_INSTALL}
 make
