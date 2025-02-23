@@ -65,3 +65,15 @@ Usage
       - To plot or write radius for clusters separately
 
 For more details, visit `usage <https://gmx-clusterbyfeatures.readthedocs.io/en/latest/usage.html>`_ section. 
+
+
+Development Setup for conda
+---------------------------
+Following steps are for development setup. However, these steps can be used for installation using conda
+
+  # Clone the repository and setup development environment
+  git clone --recursive https://github.com/rjdkmr/gmx_clusterByFeatures.git
+  cd gmx_clusterByFeatures
+  conda env create -y --prefix ./venv --file environment.yaml # Create development conda environment
+  conda activate ./venv # Activate the environment
+  bash -i scripts/build_dev_setup_conda.sh # all build and setup steps are in this script
