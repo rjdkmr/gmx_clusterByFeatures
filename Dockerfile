@@ -1,28 +1,28 @@
-FROM ubuntu:20.04
+FROM quay.io/pypa/manylinux_2_28_x86_64
 
-RUN apt-get update
-RUN DEBIAN_FRONTEND=noninteractive TZ=Europe/London apt-get -y install tzdata
-RUN apt-get install -y gcc g++ curl libssl-dev build-essential pkg-config git python3 python3-dev
+COPY gmx_clusterByFeatures /app-src/gmx_clusterByFeatures
+COPY external/gromacs /app-src/external/gromacs
+COPY src /app-src/src
+COPY .git /app-src/.git
+COPY pyCode2Hex.py /app-src/pyCode2Hex.py
+COPY setup.py /app-src/setup.py
 
-RUN mkdir /build
-RUN mkdir /build/external
-WORKDIR /build/external
+WORKDIR /app-src/external
+RUN mkdir gmx_installed 
+WORKDIR /app-src/external/gromacs
+RUN rm -rf build 
+RUN mkdir build
+WORKDIR /app-src/external/gromacs/build
 
-RUN curl -O https://cmake.org/files/v3.27/cmake-3.27.7.tar.gz && tar -zxvf cmake-3.27.7.tar.gz
-RUN curl -L -O https://ftp.gromacs.org/gromacs/gromacs-2023.2.tar.gz && tar -zxvf gromacs-2023.2.tar.gz
+ENV GMX_PATH=/app-src/external/gmx_installed
+ENV GMX_SRC=/app-src/external/gromacs
 
-WORKDIR /build/external/cmake-3.27.7
-RUN ./bootstrap && make && make install
+RUN cmake .. -DGMX_SIMD=SSE2 -DGMX_GPU=off -DGMXAPI=OFF -DGMX_INSTALL_LEGACY_API=on -DGMX_FFT_LIBRARY=fftpack -DCMAKE_INSTALL_PREFIX=${GMX_PATH}
+RUN make
+RUN make install
 
-WORKDIR /build/external/gromacs-2023.2
-RUN mkdir build installed
-WORKDIR /build/external/gromacs-2023.2/build
-RUN /usr/local/bin/cmake .. -DGMX_SIMD=SSE2 -DGMX_GPU=off -DGMXAPI=OFF -DGMX_INSTALL_LEGACY_API=on -DGMX_FFT_LIBRARY=fftpack \
-    -DCMAKE_INSTALL_PREFIX=/build/external/gromacs-2023.2/installed && \
-    make && \
-    make install
-
-ENV GMX_PATH=/build/external/gromacs-2023.2/installed
-ENV GMX_SRC=/build/external/gromacs-2023.2
+COPY scripts /app-src/scripts
+WORKDIR /app-src
+RUN bash -i scripts/build_wheels.sh
 
 CMD ["echo", "testing"]

@@ -220,7 +220,7 @@ int ClusteringStuffs::write_central_pdbfiles(std::vector < std::string > pdbName
     std::vector< int > sortedClusterIds = getSortedKeys(this->clusterDict);
     int ftp = fn2ftp(inpTrajStuff.filename);
     t_fileio *fio = trx_get_fileio(inpTrajStuff.status);
-    gmx_bool bRet;
+    int bRet;
     rvec **centralCoords;
     bool bWriteFile = false;
 
@@ -353,7 +353,7 @@ int ClusteringStuffs::rmsd_bw_central_structure( int *fitAtomIndex, int fitAtomI
     sfree(w_rls);
 
     // Writing RMSD matrix
-    char out[12], out1[12];
+    char out[15], out1[12];
     lstream->setprecision(3);
     *lstream<<"\n\n=====================================\n";
     *lstream<<" Central structurs - RMSD matrix \n";
@@ -803,7 +803,7 @@ int ClusteringStuffs::read_features_input(const char *fnDataIn,
             // Check if feature array size is same
             if(!bPushTime) {
                 if(features_local[0].size() != tempFeatureVector.size()) {
-                    gmx_fatal(FARGS,"Size of features array does not match between feature-1 and feature-%d...\n", features_local.size()+1);
+                    gmx_fatal(FARGS,"Size of features array does not match between feature-1 and feature-%d...\n", (int)features_local.size()+1);
                 }
             }
             
@@ -854,7 +854,7 @@ int ClusteringStuffs::any_central_rmsd_below_thershold(real thres){
 int ClusteringStuffs::performClusterMetrics(int eClusterMetrics, int n_clusters, real ssrSstChangeCutoff, LogStream *lstream){
     int finalClustersNumber = 1;
     bool bGotFinalClusterNumber = false;
-    real prevSsrSstRatio = ClusteringStuffs::ssrSstRatio.at(1), changeInSsrSstRatio = 0;
+    real prevSsrSstRatio = 0, changeInSsrSstRatio = 0;
     char output[1024];
 
     lstream->setprecision(3);
@@ -865,17 +865,11 @@ int ClusteringStuffs::performClusterMetrics(int eClusterMetrics, int n_clusters,
     *lstream<<output;
     //*lstream<<"Clust. No.\tssr/sst (%)\tDelta(ssr/sst)\tpsuedo F-stat\tSilhouette-score\tDavies-bouldin-score\n";
     for(int i = 2; i <= n_clusters; i++){
-        changeInSsrSstRatio = ClusteringStuffs::ssrSstRatio.at(i) -prevSsrSstRatio;
+        changeInSsrSstRatio = ClusteringStuffs::ssrSstRatio.at(i) - prevSsrSstRatio;
 
         sprintf(output, "%-14d %3.2f %11.3f %26.3f %9.3f %18.3f \n" , i, ClusteringStuffs::ssrSstRatio.at(i), changeInSsrSstRatio, \
                 ClusteringStuffs::pFS.at(i), ClusteringStuffs::silhouetteScore.at(i), ClusteringStuffs::daviesBouldinScore.at(i));
         *lstream<<output;
-        //*lstream<<i<<"\t\t";
-        //*lstream<<ClusteringStuffs::ssrSstRatio.at(i)<<"\t\t";
-        //*lstream<<changeInSsrSstRatio<<"\t\t";
-        //*lstream<<ClusteringStuffs::pFS.at(i)<<"\t";
-        //*lstream<<ClusteringStuffs::silhouetteScore.at(i)<<"\t\t";
-        //*lstream<<ClusteringStuffs::daviesBouldinScore.at(i)<<"\n";
 
         prevSsrSstRatio = ClusteringStuffs::ssrSstRatio.at(i);
 
@@ -918,8 +912,14 @@ int ClusteringStuffs::performClusterMetrics(int eClusterMetrics, int n_clusters,
 
         }
     }
+
     *lstream<<"===========================================================================================================\n";
     lstream->resetprecision();
+    
+    if (!bGotFinalClusterNumber) {
+        gmx_fatal(FARGS, "Not enough clusters to determine number cluster based on the selected cluster-metric. \n"
+                         "Increase the number of clusters (-ncluster option)!!");
+    }
 
     return finalClustersNumber;
 }
@@ -1386,7 +1386,7 @@ int gmx_clusterByFeatures(int argc,char *argv[])    {
     real dbscan_eps = 0.5;
     int dbscan_min_samples = 20;
     real silhouette_score_sample_size = 20;
-    int n_clusters=5;
+    int n_clusters = 5;
 
     const char *plotfile = "pca_cluster.png";
     int fontsize = 14;
@@ -1466,7 +1466,7 @@ int gmx_clusterByFeatures(int argc,char *argv[])    {
     gmx_bool bFeatures = FALSE, bCentralPDB = FALSE, bDoCluster = FALSE, bTrajRMSD=FALSE, bTrajRMSDist=FALSE;
 
     t_topology top;
-    int ePBC;
+    PbcType ePBC;
     rvec *x;
     matrix box;
 
@@ -1691,20 +1691,6 @@ int gmx_clusterByFeatures(int argc,char *argv[])    {
             // Construct cluster dictionary and cluster-index
             clustStuff->constructClusterDict(numMinFrameCluster, &lstream);
 
-            // Determine index of central structure
-            if(!(clustStuff->calculate_central_struct(&lstream)))
-                return EXIT_FAILURE;
-
-            // Extract central structures and calculate RMSD between them
-            if(inpTrajStuff.bTraj)  {
-                clustStuff->write_central_pdbfiles(fnOutPDBs, outIndex, outIndexSize, inpTrajStuff);
-                if (curr_n_cluster > 1) {
-                    clustStuff->rmsd_bw_central_structure(fitAtomIndex, fitAtomIndexSize, \
-                                                 rmsdAtomIndex, rmsdAtomIndexSize,\
-                                                 inpTrajStuff, &lstream);
-                  }
-              }
-
 
             if ( (eClusterMetrics == ePriorClusterMetric) || (eClusterMethod == eDbscan) ){
                 // If cluster-metric is not needed or DBSCAN method is used, iterate only once
@@ -1714,6 +1700,21 @@ int gmx_clusterByFeatures(int argc,char *argv[])    {
             }
             else if (eClusterMetrics == eCRmsdClusterMetric)  {
                 // If RMSD is used, start with maximum clusters number and reduce it untill criteria met
+                
+                // RMSD between central structures are neccessary to calculate here
+                // Determine index of central structure
+                if(!(clustStuff->calculate_central_struct(&lstream)))
+                    return EXIT_FAILURE;
+
+                // Extract central structures and calculate RMSD between them
+                if(inpTrajStuff.bTraj)  {
+                    clustStuff->write_central_pdbfiles(fnOutPDBs, outIndex, outIndexSize, inpTrajStuff);
+                    if (curr_n_cluster > 1) {
+                        clustStuff->rmsd_bw_central_structure(fitAtomIndex, fitAtomIndexSize, \
+                                                     rmsdAtomIndex, rmsdAtomIndexSize,\
+                                                     inpTrajStuff, &lstream);
+                      }
+                  }
 
                 // If cluster-count is one -- break here
                 if (curr_n_cluster == 1) {
@@ -1763,6 +1764,22 @@ int gmx_clusterByFeatures(int argc,char *argv[])    {
 
         // Load the final one here
         clustStuff = allClusterStuffs.at(finalClustersNumber);
+        
+        // Calculate central structures of each cluster if not previously calculated
+        if(clustStuff->centralStructDict.empty()) {
+            if(!(clustStuff->calculate_central_struct(&lstream)))
+                return EXIT_FAILURE;
+            
+            // Also Extract central structures and calculate RMSD between them, useful
+            if(inpTrajStuff.bTraj)  {
+                clustStuff->write_central_pdbfiles(fnOutPDBs, outIndex, outIndexSize, inpTrajStuff);
+                if (curr_n_cluster > 1) {
+                    clustStuff->rmsd_bw_central_structure(fitAtomIndex, fitAtomIndexSize, \
+                                                 rmsdAtomIndex, rmsdAtomIndexSize,\
+                                                 inpTrajStuff, &lstream);
+                  }
+              }
+        }
 
         // Remove all other ClustStuffs
         for (std::map< int, ClusteringStuffs* >::iterator it=allClusterStuffs.begin(); it!=allClusterStuffs.end(); ++it)  {

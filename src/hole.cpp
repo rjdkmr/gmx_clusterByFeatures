@@ -369,14 +369,15 @@ int gmx_hole (int argc,char *argv[])	{
     t_topology top;
     //t_atoms    atoms;
     //char title[STRLEN];
-    int        ePBC, natoms, nframe=0;
+    PbcType        ePBC;
+    int natoms, nframe=0;
     real       t ;
     matrix     box;
     int 		  indsize, nfit;
     char       *grpnm=NULL,*fitname;
     int    *index=NULL,*ifit=NULL;
     rvec       *xp, *x, x_shift = {0, 0, 0};
-    char       prefix_name[32], pdbfile[32], hole_outfile[32], hole_outPDB[32];
+    char       prefix_name[32], pdbfile[256], hole_outfile[256], hole_outPDB[256];
     const char *fnOutPDB=NULL;
     char       hole_cmd[1024];
     FILE *tmpf;

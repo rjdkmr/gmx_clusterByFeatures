@@ -479,7 +479,7 @@ bool is_index_group_same(int *indexA, int isizeA, int *indexB, int isizeB) {
     return same;
 }
 
-void write_pca_dummy_pdb(t_topology top, int *indexA, int isizeA, std::string fnPcaPdb, rvec *x, int ePBC, matrix box){
+void write_pca_dummy_pdb(t_topology top, int *indexA, int isizeA, std::string fnPcaPdb, rvec *x, PbcType ePBC, matrix box){
     int *outindex, i= 0, j=0;
     FILE *fPDB = gmx_ffopen(fnPcaPdb.c_str(), "w");
     
@@ -541,7 +541,7 @@ int gmx_distMat(int argc,char *argv[])
 
 	FILE *fMean, *fVar=NULL, *fStd=NULL, *fCmap=NULL;
 	t_topology top;
-	int ePBC;
+	PbcType ePBC;
 
 	int isizeA, isizeB;
 	int *indexA, *indexB;
@@ -552,7 +552,6 @@ int gmx_distMat(int argc,char *argv[])
 	long nt;
 	t_trxstatus *trjstatus;
 	rvec *x;
-	char title[256];
     
     struct t_fileio *fioXTC=NULL;
     std::string fnPcaTraj, fnPcaPdb;
@@ -560,7 +559,7 @@ int gmx_distMat(int argc,char *argv[])
 	real time;
 	matrix box;
 	gmx_output_env_t *oenv;
-	gmx_rmpbc_t gpbc = NULL;
+    gmx_rmpbc_t gpbc;
 
 	// Copyright message
 	CopyRightMsgDistMat();

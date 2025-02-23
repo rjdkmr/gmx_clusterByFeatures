@@ -56,7 +56,7 @@ struct TrajectoryStuffs {
     rvec *x;
     real time;
     real dTime = 1;
-    int ePBC;
+    PbcType ePBC;
     matrix box;
     int natoms;
     gmx_output_env_t *oenv;

@@ -41,6 +41,7 @@ from distutils.command.build import build
 import sys
 import setuptools
 import os
+import glob
 
 from pyCode2Hex import pyCode2Hex
 pyCode2Hex('src/cluster.py', 'src/cluster.pyhex')
@@ -93,6 +94,17 @@ def check_gromacs_dirs():
     
     return out
 
+def include_gromacs_source_headers():
+    global  gromacs_flags
+    if 'GMX_SRC' not in os.environ:
+        raise LookupError('GMX_SRC environment variable not found...')
+        
+    gmx_src = os.path.join(os.environ['GMX_SRC'], 'src')
+    gromacs_flags['include'].append(gmx_src)
+    for dir_name in glob.glob(f'{gmx_src}/gromacs/*/include'):
+        gromacs_flags['include'].append(dir_name)
+    
+
 def extract_gromacs_flags():
     ''' Extract gromacs include, lib and other flags for compilation
     '''
@@ -101,24 +113,26 @@ def extract_gromacs_flags():
     # At first check if gromacs is already available in standard path
     gromacs_flags = check_gromacs_dirs()
 
-    # If gromacs is not available at standard path check for GMX_PATH environment variable,
+    # If gromacs is not available at standard path check for GMX_INSTALL environment variable,
     # add it to pkg-config and then extract GROMACS directories and flags
-    if gromacs_flags is None or 'GMX_PATH' in os.environ:
-        if 'GMX_PATH' not in os.environ:
-            raise LookupError('GMX_PATH environment variable not found...')
-        gmx_path = os.environ['GMX_PATH']
-        if not os.path.isdir(gmx_path):
-            raise LookupError('GROMACS directory {0} not exist...'.format(gmx_path))
+    if gromacs_flags is None or 'GMX_INSTALL' in os.environ:
+        if 'GMX_INSTALL' not in os.environ:
+            raise LookupError('GMX_INSTALL environment variable not found...')
+        gmx_install = os.environ['GMX_INSTALL']
+        if not os.path.isdir(gmx_install):
+            raise LookupError('GROMACS directory {0} not exist...'.format(gmx_install))
         # Check lib name: it could be lib or lib64
         lib_dir = None
-        for entry in os.listdir(gmx_path):
+        for entry in os.listdir(gmx_install):
             if 'lib' in entry:
                 lib_dir = entry
                 break
-        os.environ['PKG_CONFIG_PATH'] = os.path.join(gmx_path, lib_dir, 'pkgconfig')
+        os.environ['PKG_CONFIG_PATH'] = os.path.join(gmx_install, lib_dir, 'pkgconfig')
         gromacs_flags = check_gromacs_dirs()
     if gromacs_flags is None:
         raise LookupError("gromacs package not found")
+        
+    include_gromacs_source_headers()
 
 
 class get_pybind_include(object):
@@ -181,7 +195,9 @@ def cpp_flag(compiler):
 
     The c++14 is prefered over c++11 (when it is available).
     """
-    if has_flag(compiler, '-std=c++14'):
+    if has_flag(compiler, '-std=c++17'):
+        return '-std=c++17'
+    elif has_flag(compiler, '-std=c++14'):
         return '-std=c++14'
     elif has_flag(compiler, '-std=c++11'):
         return '-std=c++11'
@@ -239,7 +255,7 @@ setup(
     version=__version__,
     ext_modules=extensions,
     cmdclass={'build_ext': BuildExt},
-    install_requires=['pkgconfig>=1.3', 'pybind11>=2.2', 'numpy>=1.6',  'scipy>=0.9', 'matplotlib>=1.1.0', 'scikit-learn>=0.19.0'],
+    install_requires=['pkgconfig>=1.3', 'pybind11==2.9.2', 'numpy>=1.6',  'scipy>=0.9', 'matplotlib>=1.1.0', 'scikit-learn>=0.19.0'],
     entry_points={'console_scripts': [ 'gmx_clusterByFeatures=gmx_clusterByFeatures:main.main',], },
     packages=find_packages(),
     include_package_data=True,
