@@ -11,21 +11,10 @@ jobs:
       matrix:
         include:
           - os: ubuntu-latest
-            python: 39
-            platform_id: manylinux_x86_64
-            manylinux_image: manylinux_2_28_x86_64
-          - os: ubuntu-latest
             python: 310
             platform_id: manylinux_x86_64
-            manylinux_image: manylinux_2_28_x86_64
-          - os: ubuntu-latest
-            python: 311
-            platform_id: manylinux_x86_64
-            manylinux_image: manylinux_2_28_x86_64
-          - os: ubuntu-latest
-            python: 312
-            platform_id: manylinux_x86_64
-            manylinux_image: manylinux_2_28_x86_64
+            manylinux_image: quay.io/pypa/manylinux_2_28_x86_64
+
 
     steps:
       - uses: actions/checkout@v4
