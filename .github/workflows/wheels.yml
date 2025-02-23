@@ -18,10 +18,8 @@ jobs:
 
     steps:
       - uses: actions/checkout@v4
-
-          # Update references
-      - name: Git Submodule Update
-        run: git submodule update
+        with:
+          submodules: "true"
 
       # Used to host cibuildwheel
       - uses: actions/setup-python@v5
