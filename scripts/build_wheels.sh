@@ -10,7 +10,7 @@ export GMX_INSTALL=/app-src/external/gmx_installed
 export GMX_SRC=/app-src/external/gromacs
 
 pyTags=("cp38-cp38" "cp39-cp39" "cp310-cp310" "cp311-cp311")
-for pyTag in $pyTags; do
+for pyTag in ${pyTags[@]}; do
     PYBIN="/opt/python/${pyTag}/bin"
     GMX_INSTALL=${GMX_INSTALL} GMX_SRC=${GMX_SRC} "${PYBIN}/python" -m pip install -r /io/dev-requirements.txt
     GMX_INSTALL=${GMX_INSTALL} GMX_SRC=${GMX_SRC} "${PYBIN}/python" -m pip wheel -w /io/wheelhouse/ --no-deps --no-cache-dir /io
@@ -24,7 +24,7 @@ done
 
 
 # Install packages and test
-for pyTag in $pyTags; do
+for pyTag in ${pyTags[@]}; do
     PYBIN="/opt/python/${pyTag}/bin"
     "${PYBIN}/python" -m pip install gmx_clusterByFeatures --no-index -f /io/wheelhouse
     "${PYBIN}/python" -c "import gmx_clusterByFeatures; print('=====\nTEST -- gmx_clusterByFeatures GROMACS version: ', gmx_clusterByFeatures.gmx_version, '\n=====')"
