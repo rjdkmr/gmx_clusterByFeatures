@@ -37,7 +37,7 @@ jobs:
           CIBW_MANYLINUX_X86_64_IMAGE: ${{ matrix.manylinux_image }}
           CIBW_BEFORE_ALL: bash {project}/scripts/pre_cibuildwheel.sh
           CIBW_BEFORE_BUILD: python -m pip install -r {project}/dev-requirements.txt
-          CIBW_ENVIRONMENT: GMX_INSTALL={project}/external/gmx_installed GMX_SRC={project}/external/gromacs
+          CIBW_ENVIRONMENT: GMX_INSTALL=/project/external/gmx_installed GMX_SRC=/project/external/gromacs
 
       - uses: actions/upload-artifact@v4
         with:
