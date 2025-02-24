@@ -1,7 +1,6 @@
 #!/bin/bash
 set -e -x
 
-brew uninstall oclint
 brew install gcc@9
 brew install gsl
 brew install fftw
