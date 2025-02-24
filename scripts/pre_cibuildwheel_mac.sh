@@ -18,9 +18,7 @@ cd build
 export GMX_INSTALL=${CWD}/external/gmx_installed
 export GMX_SRC=${CWD}/external/gromacs
 
-CC=clang
-CXX=clang++
-cmake -DCMAKE_CXX_FLAGS="-stdlib=libc++" -DGMX_SIMD=SSE2 -DGMX_GPU=off -DGMXAPI=OFF -DGMX_INSTALL_LEGACY_API=on -DGMX_FFT_LIBRARY=fftpack -DCMAKE_INSTALL_PREFIX=${GMX_INSTALL} ..
+cmake -DCMAKE_C_COMPILER=clang -DCMAKE_CXX_COMPILER=clang++ -DCMAKE_CXX_FLAGS=-stdlib=libc++ -DGMX_SIMD=SSE2 -DGMX_GPU=off -DGMXAPI=OFF -DGMX_INSTALL_LEGACY_API=on -DGMX_FFT_LIBRARY=fftpack -DCMAKE_INSTALL_PREFIX=${GMX_INSTALL} ..
 make
 make install
 
