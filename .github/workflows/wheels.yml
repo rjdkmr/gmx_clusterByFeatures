@@ -11,7 +11,7 @@ jobs:
       matrix:
         include:
           - os: ubuntu-latest
-            python: 310
+            python: 311
             platform_id: manylinux_x86_64
             manylinux_image: quay.io/pypa/manylinux_2_28_x86_64
 
@@ -33,7 +33,7 @@ jobs:
         run: python -m cibuildwheel --output-dir wheelhouse
         # to supply options, put them in 'env', like:
         env:
-          CIBW_BUILD: cp38* cp39* cp310* cp311*
+          CIBW_BUILD: cp38-manylinux_x86_64 cp39-manylinux_x86_64 cp310-manylinux_x86_64 cp311-manylinux_x86_64
           CIBW_MANYLINUX_X86_64_IMAGE: ${{ matrix.manylinux_image }}
           CIBW_BEFORE_ALL: bash {project}/scripts/pre_cibuildwheel.sh
           CIBW_BEFORE_BUILD: python -m pip install -r {project}/dev-requirements.txt
