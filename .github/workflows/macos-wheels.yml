@@ -25,5 +25,5 @@ jobs:
           python-version: "3.11" # update once build dependencies are available
 
       - name: Build wheels
-        run: bash {project}/scripts/build_macos.sh
+        run: bash scripts/build_macos.sh
 
