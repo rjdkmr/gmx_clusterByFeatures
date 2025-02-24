@@ -2,6 +2,7 @@
 set -e -x
 
 brew install gcc@14
+brew install libomp
 brew install gsl
 brew install fftw
 brew install pyenv
