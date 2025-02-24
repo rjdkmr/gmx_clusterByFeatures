@@ -1,11 +1,11 @@
 #!/bin/bash
 set -e -x
 
-brew install gcc@9
+brew install gcc@14
 brew install gsl
 brew install fftw
 brew outdated pyenv || brew upgrade pyenv
-brew upgrade cmake
+brew install --cask cmake
 brew install eigen
 brew cleanup
 
@@ -24,9 +24,9 @@ cd build
 export GMX_INSTALL=${CWD}/external/gmx_installed
 export GMX_SRC=${CWD}/external/gromacs
 
-export C=gcc
-export CXX=g++
-cmake -DGMX_SIMD=SSE2 -DGMX_GPU=off -DGMXAPI=OFF -DGMX_INSTALL_LEGACY_API=on -DGMX_FFT_LIBRARY=fftpack -DCMAKE_INSTALL_PREFIX=${GMX_INSTALL} ..
+export C=gcc-14
+export CXX=g++-14
+cmake -DCMAKE_C_COMIPLER=gcc-14 -DCMAKE_C_COMIPLER=g++-14 -DGMX_SIMD=SSE2 -DGMX_GPU=off -DGMXAPI=OFF -DGMX_INSTALL_LEGACY_API=on -DGMX_FFT_LIBRARY=fftpack -DCMAKE_INSTALL_PREFIX=${GMX_INSTALL} ..
 make
 make install
 
