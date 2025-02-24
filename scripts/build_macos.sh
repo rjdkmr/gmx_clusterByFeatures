@@ -9,6 +9,24 @@ brew install pyenv
 brew install eigen
 brew cleanup
 
+eval "$(pyenv init -)"
+pyenv install --list
+PYVERS=("3.9" "3.10" "3.11" "3.12")
+PYTHONS=()
+for PYVER in ${PYVERS[@]}
+do
+    # Install the latest release of the specified Python version using pyenv.
+    PYVER="$(pyenv install --list | grep -E "^\\s*$PYVER" | sort -n -t. -k3 | tail -n1)"
+    pyenv install $PYVER
+    pyenv global $PYVER
+    PYTHONS+=($PYVER)
+    echo $PYVER
+    echo $(python --version)
+    python -m pip install --upgrade pip
+    python -m python -m pip install -r {project}/dev-requirements.txt
+    python -m pip install delocate
+done
+
 CWD=`pwd`
 cd external
 mkdir gmx_installed 
@@ -33,7 +51,7 @@ cmake -DCMAKE_CC_COMIPLER=gcc-14 -DCMAKE_CXX_COMIPLER=g++-14 -DGMX_SIMD=SSE2 -DG
 make
 make install
 
-cd /project
+cd $CWD
 
 eval "$(pyenv init -)"
 pyenv install --list
