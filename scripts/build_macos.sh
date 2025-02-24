@@ -4,8 +4,7 @@ set -e -x
 brew install gcc@14
 brew install gsl
 brew install fftw
-brew outdated pyenv || brew upgrade pyenv
-brew install --cask cmake
+brew install pyenv
 brew install eigen
 brew cleanup
 
