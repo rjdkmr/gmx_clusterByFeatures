@@ -10,11 +10,13 @@ jobs:
       fail-fast: false
       matrix:
         include:
-          - os: ubuntu-latest
+          #- os: ubuntu-latest
+          #  python: 311
+          #  platform_id: manylinux_x86_64
+          #  manylinux_image: quay.io/pypa/manylinux_2_28_x86_64
+          - os: macos-13
             python: 311
-            platform_id: manylinux_x86_64
-            manylinux_image: quay.io/pypa/manylinux_2_28_x86_64
-
+            platform_id: macosx_x86_64
 
     steps:
       - uses: actions/checkout@v4
@@ -35,7 +37,8 @@ jobs:
         env:
           CIBW_BUILD: cp38-manylinux_x86_64 cp39-manylinux_x86_64 cp310-manylinux_x86_64 cp311-manylinux_x86_64
           CIBW_MANYLINUX_X86_64_IMAGE: ${{ matrix.manylinux_image }}
-          CIBW_BEFORE_ALL: bash {project}/scripts/pre_cibuildwheel.sh
+          CIBW_BEFORE_ALL_LINUX: bash {project}/scripts/pre_cibuildwheel.sh
+          CIBW_BEFORE_ALL_MACOS: bash {project}/scripts/pre_cibuildwheel_mac.sh
           CIBW_BEFORE_BUILD: python -m pip install -r {project}/dev-requirements.txt
           CIBW_ENVIRONMENT: GMX_INSTALL=/project/external/gmx_installed GMX_SRC=/project/external/gromacs
 
