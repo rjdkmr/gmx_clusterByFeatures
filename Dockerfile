@@ -6,6 +6,7 @@ COPY src /app-src/src
 COPY .git /app-src/.git
 COPY pyCode2Hex.py /app-src/pyCode2Hex.py
 COPY setup.py /app-src/setup.py
+COPY setup.py /app-src/pyproject.toml
 
 WORKDIR /app-src/external
 RUN mkdir gmx_installed 

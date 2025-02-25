@@ -1,2 +1,3 @@
 include gmx_clusterByFeatures/top/*
+include pyCode2Hex.py
 global-exclude *.localhistory

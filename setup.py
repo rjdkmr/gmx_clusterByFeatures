@@ -43,13 +43,15 @@ import setuptools
 import os
 import glob
 
+sys.path.append(os.path.dirname(__file__))
+here = os.path.abspath(os.path.dirname(__file__))
+                
 from pyCode2Hex import pyCode2Hex
 pyCode2Hex('src/cluster.py', 'src/cluster.pyhex')
 
-here = os.path.abspath(os.path.dirname(__file__))
 with open(os.path.join(here, 'README.rst'), encoding='utf-8') as f:
     long_description = f.read()
-exec(open('gmx_clusterByFeatures/_version.py').read())
+
 gromacs_flags = None
 extensions = None 
         
@@ -249,8 +251,6 @@ class BuildExt(build_ext):
 extract_gromacs_flags()
 get_extensions()
 setup(
-    name='gmx_clusterByFeatures',
-    version=__version__,
     ext_modules=extensions,
     cmdclass={'build_ext': BuildExt},
     entry_points={'console_scripts': [ 'gmx_clusterByFeatures=gmx_clusterByFeatures:main.main',], },
