@@ -25,7 +25,7 @@ do
     echo $PYVER
     echo $(python --version)
     python -m pip install --upgrade pip
-    python -m python -m pip install -r {project}/dev-requirements.txt
+    python -m pip install -r ${CWD}/dev-requirements.txt
     python -m pip install delocate
 done
 
