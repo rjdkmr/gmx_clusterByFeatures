@@ -1,0 +1,29 @@
+[build-system]
+requires = [ "pybind11==2.9.2", "setuptools", "pkgconfig"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "gmx_clusterByFeatures"
+description = "Features Based Conformational Clustering of Molecular Dynamics trajectories."
+authors = [
+    { name = "Rajendra Kumar", email = "rjdkmr@gmail.com" }
+]
+license = { text = "GNU General Public License v3 (GPLv3)" }
+readme = "README.rst"
+keywords = ["Molecular Modeling", "Molecular Dynamics Simulations", "Computational Chemistry", "Computational Biophysics", "Clustering"]
+dependencies = ['numpy>=1.6',  'scipy>=0.9', 'matplotlib>=1.1.0', 'scikit-learn>=0.19.0']
+classifiers = [
+    'Environment :: Console',
+    'Intended Audience :: Developers',
+    'Intended Audience :: End Users/Desktop',
+    'Intended Audience :: Science/Research',
+    'License :: OSI Approved :: GNU General Public License v3 (GPLv3)',
+    'Natural Language :: English',
+    'Operating System :: MacOS',
+    'Operating System :: POSIX :: Linux',
+    'Topic :: Scientific/Engineering :: Bio-Informatics',
+]
+
+[project.urls]
+homepage = "https://gmx-clusterbyfeatures.readthedocs.io/"
+repository = "https://github.com/rjdkmr/gmx_clusterByFeatures"

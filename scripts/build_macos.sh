@@ -28,6 +28,7 @@ do
     python -m pip install -r ${CWD}/dev-requirements.txt
     python -m pip install delocate
 done
+pyenv global system
 
 cd external
 mkdir gmx_installed 
@@ -66,6 +67,7 @@ done
 delocate-listdeps wheels/*.whl
 delocate-wheel -w fixed_wheels -v wheels/*.whl
 delocate-listdeps fixed_wheels/*.whl
+pyenv global system
 
 ls -lrt wheels/
 

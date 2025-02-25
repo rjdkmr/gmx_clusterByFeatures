@@ -246,8 +246,6 @@ class BuildExt(build_ext):
 
         build_ext.build_extensions(self)
 
-
-
 extract_gromacs_flags()
 get_extensions()
 setup(
@@ -255,28 +253,7 @@ setup(
     version=__version__,
     ext_modules=extensions,
     cmdclass={'build_ext': BuildExt},
-    install_requires=['pkgconfig>=1.3', 'pybind11==2.9.2', 'numpy>=1.6',  'scipy>=0.9', 'matplotlib>=1.1.0', 'scikit-learn>=0.19.0'],
     entry_points={'console_scripts': [ 'gmx_clusterByFeatures=gmx_clusterByFeatures:main.main',], },
     packages=find_packages(),
     include_package_data=True,
-    # metadata for upload to pypi
-    author = "Rajendra Kumar",	
-    author_email = "rjdkmr@gmail.com",
-    url = 'https://github.com/rjdkmr/gmx_clusterByFeatures',
-    description = "Features Based Conformational Clustering of Molecular Dynamics trajectories. ",
-    long_description = long_description,
-    long_description_content_type = 'text/x-rst',
-    keywords = ["Molecular Modeling", "Molecular Dynamics Simulations", "Computational Chemistry", "Computational Biophysics"],
-    license = 'GNU General Public License v3 (GPLv3)',
-    classifiers = [
-        'Environment :: Console',
-        'Intended Audience :: Developers',
-        'Intended Audience :: End Users/Desktop',
-        'Intended Audience :: Science/Research',
-        'License :: OSI Approved :: GNU General Public License v3 (GPLv3)',
-        'Natural Language :: English',
-        'Operating System :: MacOS',
-        'Operating System :: POSIX :: Linux',
-        'Topic :: Scientific/Engineering :: Bio-Informatics',
-    ],
 )
