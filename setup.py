@@ -221,8 +221,13 @@ class BuildExt(build_ext):
     def build_extensions(self):
         # Check for -stdlib=libc++ on macos-clang
         if sys.platform == 'darwin':
+            # first check ""-stdlib=libstdc++" is available,
+            # if available means gcc is used in place of clang
+            if has_flag(self.compiler, '-stdlib=libstdc++'):
+                self.c_opts['unix'] += ['-stdlib=libstdc++']
+                
             # Only in case of clang, so check for this flag
-            if has_flag(self.compiler, '-stdlib=libc++'):
+            elif has_flag(self.compiler, '-stdlib=libc++'):
                 self.c_opts['unix'] += ['-stdlib=libc++', '-mmacosx-version-min=10.7']
 
         ct = self.compiler.compiler_type
