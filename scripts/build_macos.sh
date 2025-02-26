@@ -62,10 +62,12 @@ do
     GMX_INSTALL=${GMX_INSTALL} GMX_SRC=${GMX_SRC} python -m pip install -v --no-deps --no-cache-dir .
     # otool -L build/lib.*/gmx_clusterByFeatures/*.so
     install_name_tool -change @rpath/libgromacs.2.dylib ${GMX_INSTALL}/lib/libgromacs.dylib build/lib.*/gmx_clusterByFeatures/*.so
-    GMX_INSTALL=${GMX_INSTALL} GMX_SRC=${GMX_SRC} python -m pip wheel -v -w wheels/ --no-deps --no-cache-dir .
+    GMX_INSTALL=${GMX_INSTALL} GMX_SRC=${GMX_SRC} python -m pip wheel -v -w temp_wheels/ --no-deps --no-cache-dir .
     python -m pip uninstall -y gmx_clusterByFeatures
-    python -m pip install -v --no-deps --no-cache-dir wheels/*.whl
+    python -m pip install -v --no-deps --no-cache-dir temp_wheels/*.whl
+    cp temp_wheels/*.whl wheels/.
     rm -rf build
+    rm -rf temp_wheels
 done
 
 delocate-listdeps wheels/*.whl
