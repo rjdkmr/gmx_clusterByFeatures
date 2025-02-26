@@ -60,8 +60,12 @@ do
     pyenv global $PYTHON
     echo $(python --version)
     GMX_INSTALL=${GMX_INSTALL} GMX_SRC=${GMX_SRC} python -m pip install -v --no-deps --no-cache-dir .
+    # otool -L build/lib.*/gmx_clusterByFeatures/*.so
     install_name_tool -change @rpath/libgromacs.2.dylib ${GMX_INSTALL}/lib/libgromacs.dylib build/lib.*/gmx_clusterByFeatures/*.so
     GMX_INSTALL=${GMX_INSTALL} GMX_SRC=${GMX_SRC} python -m pip wheel -v -w wheels/ --no-deps --no-cache-dir .
+    python -m pip uninstall -y gmx_clusterByFeatures
+    python -m pip install -v --no-deps --no-cache-dir wheels/*.whl
+    rm -rf build
 done
 
 delocate-listdeps wheels/*.whl

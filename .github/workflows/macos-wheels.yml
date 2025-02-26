@@ -24,6 +24,17 @@ jobs:
         with:
           python-version: "3.11" # update once build dependencies are available
 
-      - name: Build wheels
+      - name: Build Wheels
         run: bash scripts/build_macos.sh
+
+      - name: Test Wheels
+        run: |
+          for PYTHON in ${PYTHONS[@]}
+          do
+            pyenv global $PYTHON
+            echo $(python --version)
+            python -c "import gmx_clusterByFeatures; print('=====\nTEST -- gmx_clusterByFeatures GROMACS version: ', gmx_clusterByFeatures.gmx_version, '\n=====')"
+          done
+          pyenv global system
+
 
