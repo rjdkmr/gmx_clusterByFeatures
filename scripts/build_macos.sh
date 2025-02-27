@@ -55,6 +55,8 @@ make install
 
 cd $CWD
 
+mkdir wheels
+mkdir fixed_wheels
 for PYTHON in ${PYTHONS[@]}
 do
     pyenv global $PYTHON
