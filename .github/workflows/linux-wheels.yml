@@ -46,13 +46,21 @@ jobs:
 
   publish:
     needs: build_wheels
-    runs-on: ubuntu-latest
+    runs-on: ${{ matrix.os }}
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - os: ubuntu-latest
+            python: 311
+            platform_id: manylinux_x86_64
+            manylinux_image: quay.io/pypa/manylinux_2_28_x86_64
 
     steps:
       - name: Download wheel artifact
         uses: actions/download-artifact@v2
         with:
-          name: cibw-wheels-${{ matrix.os }}-0
+          name: cibw-wheels-${{ matrix.os }}-${{ strategy.job-index }}
           path: dist
 
       - name: Set up Python
