@@ -52,7 +52,7 @@ jobs:
     - name: Download wheel artifact
       uses: actions/download-artifact@v2
       with:
-        name: cibw-wheels-${{ matrix.os }}-${{ strategy.job-index }}
+        name: cibw-wheels-${{ matrix.os }}-0
         path: dist
 
     - name: Set up Python

@@ -47,7 +47,6 @@ export CPPFLAGS="-I/usr/local/opt/libomp/include"
 export GMX_INSTALL=${CWD}/external/gmx_installed
 export GMX_SRC=${CWD}/external/gromacs
 
-export MACOSX_DEPLOYMENT_TARGET="11" 
 export CC=gcc-14
 export CXX=g++-14
 cmake -DCMAKE_CC_COMIPLER=gcc-14 -DCMAKE_CXX_COMIPLER=g++-14 -DGMX_SIMD=SSE2 -DGMX_GPU=off -DGMXAPI=OFF -DGMX_INSTALL_LEGACY_API=on -DGMX_FFT_LIBRARY=fftpack -DCMAKE_INSTALL_PREFIX=${GMX_INSTALL} ..

@@ -13,12 +13,18 @@ jobs:
           - os: macos-12
             python: 311
             platform_id: macosx_x86_64
+            env:
+              MACOSX_DEPLOYMENT_TARGET: 12.0
           - os: macos-13
             python: 311
             platform_id: macosx_x86_64
+            env:
+              MACOSX_DEPLOYMENT_TARGET: 13.0            
           - os: macos-14
             python: 311
             platform_id: macosx_x86_64
+            env:
+              MACOSX_DEPLOYMENT_TARGET: 14.0
 
     steps:
       - uses: actions/checkout@v4
@@ -65,7 +71,7 @@ jobs:
     - name: Download wheel artifact
       uses: actions/download-artifact@v2
       with:
-        name: cibw-wheels-${{ matrix.os }}-${{ strategy.job-index }}
+        name: cibw-wheels-${{ matrix.os }}-0
         path: dist
 
     - name: Set up Python
