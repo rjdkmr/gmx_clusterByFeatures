@@ -71,6 +71,8 @@ Development Setup for conda
 ---------------------------
 Following steps are for development setup. However, these steps can be used for installation using conda
 
+.. code-block:: bash
+
   # Clone the repository and setup development environment
   git clone --recursive https://github.com/rjdkmr/gmx_clusterByFeatures.git
   cd gmx_clusterByFeatures
