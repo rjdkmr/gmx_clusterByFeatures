@@ -258,7 +258,6 @@ get_extensions()
 setup(
     ext_modules=extensions,
     cmdclass={'build_ext': BuildExt},
-    entry_points={'console_scripts': [ 'gmx_clusterByFeatures=gmx_clusterByFeatures:main.main',], },
     packages=find_packages(),
     include_package_data=True,
 )

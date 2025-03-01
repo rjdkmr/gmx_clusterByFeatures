@@ -24,6 +24,6 @@ RUN make install
 
 COPY scripts /app-src/scripts
 WORKDIR /app-src
-RUN bash -i scripts/build_wheels.sh
+RUN bash -i scripts/build_linux_wheels.sh
 
 CMD ["echo", "testing"]

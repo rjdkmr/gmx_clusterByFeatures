@@ -28,3 +28,6 @@ classifiers = [
 [project.urls]
 homepage = "https://gmx-clusterbyfeatures.readthedocs.io/"
 repository = "https://github.com/rjdkmr/gmx_clusterByFeatures"
+
+[project.scripts]
+gmx_clusterByFeatures = "gmx_clusterByFeatures:main.main"
