@@ -26,14 +26,19 @@
 
 # If your documentation needs a minimal Sphinx version, state it here.
 #
-needs_sphinx = '1.6'
 
 # Add any Sphinx extension module names here, as strings. They can be
 # extensions coming with Sphinx (named 'sphinx.ext.*') or your custom
 # ones.
-extensions = ['sphinx.ext.mathjax',
-    'sphinx.ext.githubpages',
-    'sphinx.ext.autosectionlabel']
+extensions = [
+    'sphinx.ext.autodoc',
+    'sphinx.ext.mathjax',
+    'sphinx.ext.ifconfig',
+    'sphinx.ext.viewcode',
+    'sphinx.ext.autosummary',
+	'sphinx.ext.graphviz',
+	'sphinx.ext.napoleon',
+]
 
 
 # Add any paths that contain templates here, relative to this directory.
@@ -76,7 +81,7 @@ language = None
 exclude_patterns = ['_build', 'Thumbs.db', '.DS_Store']
 
 # The name of the Pygments (syntax highlighting) style to use.
-pygments_style = 'sphinx'
+pygments_style = 'colorful'
 
 # If true, `todo` and `todoList` produce output, else they produce nothing.
 todo_include_todos = False
@@ -100,11 +105,11 @@ html_theme = 'sphinx_rtd_theme'
 # so a file named "default.css" will overwrite the builtin "default.css".
 html_static_path = ['_static']
 
-html_context = {
-    'css_files': [
-        '_static/theme_overrides.css',  # override wide tables in RTD theme
-        ],
-     }
+#html_context = {
+#    'css_files': [
+#        '_static/theme_overrides.css',  # override wide tables in RTD theme
+#        ],
+#     }
 
 # Custom sidebar templates, must be a dictionary that maps document names
 # to template names.
