@@ -15,6 +15,8 @@ distances, angles, channel radius etc.
 
 **See details at:** `gmx_clusterByFeatures homepage <https://gmx-clusterbyfeatures.readthedocs.io>`_
 
+
+
 .. note:: It is developed for **GROMACS MD trajectory.** However, it can be used with
   any other trajectory format after converting it to GROMACS format trajectory.
 
@@ -23,7 +25,7 @@ Installation on Linux and MacOS
 
 .. code-block:: bash
 
-    sudo pip3 install gmx-clusterByFeatures
+    sudo python3 -m pip install gmx-clusterByFeatures
 
 No dependency on GROMACS. Install and use it.
 

@@ -2,7 +2,7 @@
  * This file is part of gmx_clusterByFeatures
  *
  * Author: Rajendra Kumar
- * Copyright (C) 2018-2019  Rajendra Kumar
+ * Copyright (C) 2018-2025  Rajendra Kumar
  *
  * gmx_clusterByFeatures is a free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by

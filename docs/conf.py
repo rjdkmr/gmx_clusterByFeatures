@@ -50,7 +50,7 @@ master_doc = 'index'
 
 # General information about the project.
 project = 'gmx_clusterByFeatures'
-copyright = '2018, Rajendra Kumar'
+copyright = '2018-2025, Rajendra Kumar'
 author = 'Rajendra Kumar'
 
 # The version info for the project you're documenting, acts as replacement for

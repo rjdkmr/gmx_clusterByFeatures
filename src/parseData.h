@@ -1,10 +1,10 @@
 /*
- * This file is part of gmx_hole
+ * This file is part of gmx_clusterByFeatures
  *
  * Author: Rajendra Kumar
- * Copyright (C) 2014-2017  Rajendra Kumar
+ * Copyright (C) 2014-2025  Rajendra Kumar
  *
- * gmx_hole uses hole program for which documentation is available in the
+ * gmx_clusterByFeatures uses hole program for which documentation is available in the
  * following link:
  * http://www.csb.yale.edu/userguides/graphics/hole/doc/hole_d00.html
  * Please cite the original publication of hole:
@@ -12,18 +12,18 @@
  * The Pore Dimensions of Gramicidin A
  * Biophysical Journal 65:2455-2460.
  *
- * gmx_hole is a free software: you can redistribute it and/or modify
+ * gmx_clusterByFeatures is a free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation, either version 3 of the License, or
  * (at your option) any later version.
  *
- * gmx_hole is distributed in the hope that it will be useful,
+ * gmx_clusterByFeatures is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  * GNU General Public License for more details.
  *
  * You should have received a copy of the GNU General Public License
- * along with gmx_hole.  If not, see <http://www.gnu.org/licenses/>.
+ * along with gmx_clusterByFeatures.  If not, see <http://www.gnu.org/licenses/>.
  *
  * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
  * "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT

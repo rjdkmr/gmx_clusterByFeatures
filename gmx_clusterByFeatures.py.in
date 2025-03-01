@@ -1,8 +1,0 @@
-#!/usr/bin/env @PYTHON_EXECUTABLE@
-
-import sys
-if "@PYTHON_INSTDIR@" not in sys.path:
-    sys.path.insert(1, "@PYTHON_INSTDIR@")
-
-import gmx_clusterByFeatures
-gmx_clusterByFeatures.main.main()

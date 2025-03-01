@@ -32,31 +32,42 @@ Quick Installation using ``pip``
 
 It is **recommended** method to install gmx_clusterByFeatrues.
 
-**Not require to install GROMACS**
+Following Python versions are supported:
 
-**Only available on Linux, MacOS-10.12 (Sierra), MacOS-10.13 (High Sierra) and MacOS-10.14 (Mojave)**
+* Python 3.9
+* Python 3.10
+* Python 3.11
+* Python 3.12
+
+**No dependency on GROMACS. Install and use it.**
 
 On Linux
 ~~~~~~~~
 
-1. Python3 is available through package managers such as **yum** (Fedora, CentOs), **YaST** (OpenSuse) and **apt-get**
-   (Ubuntu, Linux Mint). For example on ubuntu: run ``sudo apt-get install python3`` command to install Python3.
+Distributions with **glibc version 2.28 or later** are supported. Some of the supported distributions are:
 
-2. Install **gmx_clusterByFeatrues** by ``sudo pip3 install gmx-clusterByFeatures`` command.
+* Debian 10+
+* Ubuntu 18.10+
+* Fedora 29+
+* CentOS/RHEL 8+
 
+Use following steps to install gmx_clusterByFeatrues:
+
+.. code::bash
+
+    sudo python3 -m pip install gmx-clusterByFeatures
 
 
 On MacOS
 ~~~~~~~~
 
-1. Python3 is available through |Homebrew| package manager. After installing Homebrew, run ``brew install python3`` command to install Python3.
+Python3 is available through |Homebrew| package manager.
 
-2. Install **gmx_clusterByFeatrues** by ``pip3 install gmx-clusterByFeatures`` command.
+Currently, MacOS versions **12.0+** and **13.0+** versions are supported.
 
+.. code::bash
 
-.. note:: Presently, installation with pip on MacOS is restricted to **10.12 (Sierra)**, **10.13 (High Sierra)** 
-          and 10.14 (Mojave) versions. For other MacOS versions, install gmx_clusterByFeatrues from source as 
-          described further below.
+    python3 -m pip install gmx-clusterByFeatures
 
 
 Updating gmx_clusterByFeatrues
@@ -65,7 +76,7 @@ To update the gmx_clusterByFeatrues package use following command:
 
 .. code-block:: bash
 
-    pip3 install --upgrade --no-deps gmx-clusterByFeatures
+    python3 -m pip install --upgrade --no-deps gmx-clusterByFeatures
 
 
 ``--upgrade`` flag is used to update the package and ``--no-deps`` prevents
@@ -79,105 +90,34 @@ update of dependent packages like numpy, scipy, matplotlib etc.
 Installation from source-code
 -----------------------------
 
-Requirements
-~~~~~~~~~~~~~~
+Installation from source-code is recommended through `conda` environment.
 
-It depends on following two packages:
-  * **GROMACS** : 2016 and above version
-  * **Python** : 3.4 and above version
+1. Clone the repository:
 
+.. code:: bash
 
-GROMACS
-~~~~~~~
+    git clone --recursive https://github.com/rjdkmr/gmx_clusterByFeatures.git
 
-A standard installation of GROMACS is sufficient. GROMACS library
-(``libgromacs.a`` or ``libgromacs.so``) and header files are required for compilation.
+2. Change directory to ``gmx_clusterByFeatures``:
+  
+.. code:: bash
 
-If GROMACS is not installed at standard location, define ``GMX_PATH`` environment variable as follows:
+  cd gmx_clusterByFeatures
 
-.. code-block:: bash
+3. Create conda environment and install dependencies:
+   
+.. code:: bash
 
-    export GMX_PATH=/path/to/installed/gromacs
-    
-Python3
-~~~~~~~
+  conda env create -y --prefix ./venv --file environment.yaml
 
-To compile gmx_clusterByFeatures, Python3 development files should be installed previously.
+4. Activate the environment:
 
-On Debian like distribution (Debian, Ubuntu, Linux Mint etc.), which uses apt as
-package manager, python3-development files can be installed as follows:
+.. code:: bash
 
-.. code-block:: bash
+  conda activate ./venv
 
-  sudo apt-get install python3 python3-dev
+5. Run the following script to install local GROMACS and subsequently install gmx_clusterByFeatures:
 
+.. code:: bash
 
-On OS such as fedora/centos/RHEL, which uses yum as package manager, python3-
-development files can be installed as follows:
-
-.. code-block:: bash
-
-  sudo yum install python3 python3-devel
-
-
-Four other Python packages |numpy|, |scipy|, |scikit-learn|, and |matplotlib| are required 
-that can be installed as follows:
-
-.. code-block:: bash
-
-  sudo pip3 install numpy scipy sklearn matplotlib
-
-
-****
-
-Downloading source-code
-~~~~~~~~~~~~~~~~~~~~~~~~~
-
-It can be downloaded using git as follows
-
-.. code-block:: bash
-
-  git clone -b master https://github.com/rjdkmr/gmx_clusterByFeatures
-
-It can be also downloaded as `zip file <https://github.com/rjdkmr/gmx_clusterByFeatures/archive/master.zip>`_.
-
-
-
-Compilation and Installation using python
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-
-Clone the repository from github as directed above then follow these steps.
-
-.. code-block:: bash
-
-  cd gmx_clusterByFeatures # or gmx_clusterByFeatures-master (zip file download)
-  export GMX_PATH=/path/to/installed/gromacs
-  sudo GMX_PATH=$GMX_PATH python3 setup.py install
-
-
-Now, gmx_clusterByFeatures command will be accessible in terminal.
-
-Compilation and Installation using cmake for C++ IDEs
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-
-This method can be used for development purpose using C++ IDE like QT creator and KDevelop etc.
-
-**To install and use gmx_clusterByFeatrues from source location:**
-
-.. code-block:: bash
-
-  cd gmx_clusterByFeatures # or gmx_clusterByFeatures-master (zip file download)
-  mkdir build
-  cd build
-  cmake -DGMX_PATH=/path/to/installed/gromacs -DINPLACE=ON ..
-  make
-  sudo make install  # Only needed for first time install 
-
-In this installation, only ``gmx_clusterByFeatures`` executable file is installed at default
-location (mostly ``/usr/local/bin``) while whole package remains at the source location.
-
-This method is extremely useful for development because ``make install`` is only required
-for first time to install executable file. During subsequent development, only command 
-``make`` need to be repeated. In IDEs ``make`` command is executed by ``build``. In IDEs 
-project build setting, cmake arguments ``-DGMX_PATH=/path/to/installed/gromacs -DINPLACE=ON``
-needs to be added manually.
+  bash -i scripts/build_dev_setup_conda.sh
