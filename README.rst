@@ -1,9 +1,13 @@
+.. image:: https://github.com/rjdkmr/gmx_clusterByFeatures/actions/workflows/linux-wheels.yml/badge.svg
+    :target: https://github.com/rjdkmr/gmx_clusterByFeatures/actions/workflows/linux-wheels.yml
+    :alt: Linux-Wheels-Build
 
-.. image:: https://travis-ci.org/rjdkmr/gmx_clusterByFeatures.svg?branch=master
-    :target: https://travis-ci.org/rjdkmr/gmx_clusterByFeatures
+.. image:: https://github.com/rjdkmr/gmx_clusterByFeatures/actions/workflows/macos-wheels.yml/badge.svg
+    :target: https://github.com/rjdkmr/gmx_clusterByFeatures/actions/workflows/macos-wheels.yml
+    :alt: MacOS-Wheels-Build
 
 .. image:: https://readthedocs.org/projects/gmx-clusterbyfeatures/badge/?version=latest
-    :target: https://gmx-clusterbyfeatures.readthedocs.io/en/latest/?badge=latest
+    :target: https://gmx-clusterbyfeatures.readthedocs.io/
     :alt: Documentation Status
 
 gmx_clusterByFeatures
