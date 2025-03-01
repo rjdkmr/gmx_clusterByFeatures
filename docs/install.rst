@@ -53,7 +53,7 @@ Distributions with **glibc version 2.28 or later** are supported. Some of the su
 
 Use following steps to install gmx_clusterByFeatrues:
 
-.. code::bash
+.. code:: bash
 
     sudo python3 -m pip install gmx-clusterByFeatures
 
@@ -65,7 +65,7 @@ Python3 is available through |Homebrew| package manager.
 
 Currently, MacOS versions **12.0+** and **13.0+** versions are supported.
 
-.. code::bash
+.. code:: bash
 
     python3 -m pip install gmx-clusterByFeatures
 
