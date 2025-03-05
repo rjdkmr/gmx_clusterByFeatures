@@ -67,15 +67,14 @@ void register_ctrl_c_signal() {
 
 template<typename F>
 void wrapped_gmx_function(std::vector<std::string> argument_vector, F *func) {
-    /* Acquire GIL before calling Python code */
-    py::gil_scoped_acquire acquire;
-
     char *argv[argument_vector.size()];
     for(size_t n =0; n<argument_vector.size(); n++)
         argv[n] = &argument_vector.at(n)[0];
     
     gmx_run_cmain(argument_vector.size(), argv, func);
-    
+
+    /* Acquire GIL before calling Python code */
+    py::gil_scoped_acquire acquire;
 }
 
 /*
