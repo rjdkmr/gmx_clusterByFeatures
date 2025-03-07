@@ -61,10 +61,10 @@ class DoClustering:
 
     #########################################################################################
     def calculate_clusters(self, n_clusters):
-        if self.algo == 'kmeans' and self.nframes <= 10000:
+        if self.algo == 'kmeans' and self.nframes <= 100000:
             db = getCluster.KMeans(n_clusters=n_clusters, n_init=5, random_state=np.random.RandomState(12345))
 
-        if self.algo == 'kmeans' and self.nframes > 10000:
+        if self.algo == 'kmeans' and self.nframes > 100000:
             db = getCluster.MiniBatchKMeans(n_clusters=n_clusters, random_state=np.random.RandomState(12345))
 
         if self.algo == 'dbscan':
@@ -98,30 +98,19 @@ class DoClustering:
 
     #########################################################################################
     def _sort_clusters(self, labels, n_clusters):
-        clusters = dict()
-        clid = []
-
-        # Store index of each cluster
-        for i in range(len(labels)):
-            if labels[i] == -1:
-                continue
-            if labels[i] not in clusters:
-                clusters[labels[i]] = [ i ]
-                clid.append(labels[i])
-            else:
-                clusters[labels[i]] = clusters[labels[i]] + [ i ]
-
-        # Make a sorted list of clusters-id
-        clid = list(sorted(clid))
+        if n_clusters == 1:
+            return labels
+        
+        clusterIds = sorted(list(set(labels)))
         length = []
-        for c in clid:
-            length.append( len(clusters[c]) )
+        for cid in clusterIds:
+            length.append(np.sum(labels == cid))
 
         # Change the cluster-ids using stored index above
-        idx = np.argsort(length)[::-1]
+        sorted_by_length_idx = np.argsort(length)[::-1]
         newIdx = 1
-        for i in idx:
-            labels[ clusters[ clid[i] ] ] = newIdx
+        for old_cid in sorted_by_length_idx:
+            labels[ np.nonzero( labels == old_cid ) ] = newIdx
             newIdx += 1
 
         return labels
