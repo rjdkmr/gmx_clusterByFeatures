@@ -12,6 +12,7 @@ class DoClustering:
     silhouette_score_sample_size = 50
 
     features = None
+    nframes = None
     time = []
     labels = dict()
     sse = dict()
@@ -27,7 +28,6 @@ class DoClustering:
 
         # Read features file here
         fin = open(filename, 'r')
-        nframes = None
         time = []
         coords = []
         features = []
@@ -54,14 +54,18 @@ class DoClustering:
                 ppc.append(float(temp[1]))
 
         fin.close()
+        self.nframes = len(self.time)
         self.features = np.asarray(features).T
         if silhouette_score_sample_size > 0:
             self.silhouette_score_sample_size = int(len(self.time) * (silhouette_score_sample_size/100))
 
     #########################################################################################
     def calculate_clusters(self, n_clusters):
-        if self.algo == 'kmeans':
+        if self.algo == 'kmeans' and self.nframes <= 10000:
             db = getCluster.KMeans(n_clusters=n_clusters, n_init=5, random_state=np.random.RandomState(12345))
+
+        if self.algo == 'kmeans' and self.nframes > 10000:
+            db = getCluster.MiniBatchKMeans(n_clusters=n_clusters, random_state=np.random.RandomState(12345))
 
         if self.algo == 'dbscan':
             db = getCluster.DBSCAN(eps=self.dbscan_eps, min_samples=self.dbscan_min_samples)
