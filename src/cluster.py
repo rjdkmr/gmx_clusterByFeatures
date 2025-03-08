@@ -65,7 +65,7 @@ class DoClustering:
             db = getCluster.KMeans(n_clusters=n_clusters, n_init=5, random_state=np.random.RandomState(12345))
 
         if self.algo == 'kmeans' and self.nframes > 100000:
-            db = getCluster.MiniBatchKMeans(n_clusters=n_clusters, random_state=np.random.RandomState(12345))
+            db = getCluster.MiniBatchKMeans(n_clusters=n_clusters, n_init=5, random_state=np.random.RandomState(12345))
 
         if self.algo == 'dbscan':
             db = getCluster.DBSCAN(eps=self.dbscan_eps, min_samples=self.dbscan_min_samples)

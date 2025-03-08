@@ -1,10 +1,10 @@
 [build-system]
-requires = [ "pybind11==2.9.2", "setuptools", "pkgconfig"]
+requires = [ "pybind11==2.13.6", "setuptools", "pkgconfig"]
 build-backend = "setuptools.build_meta"
 
 [project]
 name = "gmx_clusterByFeatures"
-version = "0.1.23"
+version = "0.1.24"
 description = "Features Based Conformational Clustering of Molecular Dynamics trajectories."
 authors = [
     { name = "Rajendra Kumar", email = "rjdkmr@gmail.com" }

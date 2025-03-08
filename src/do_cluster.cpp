@@ -47,7 +47,7 @@ namespace py = pybind11;
 py::object PyCluster::scope;
 
 void PyCluster::InitPythonAndLoadFunc(){
-    py::object scope = py::module::import("__main__").attr("__dict__");
+    py::object scope = py::module_::import("__main__").attr("__dict__");
     py::exec(PyCluster::PyDoClusteringClusteringClassCode(), scope);
     PyCluster::scope = scope;
 }
@@ -85,15 +85,9 @@ void PyCluster::performClustering(int n_clusters){
 
 std::vector< int > PyCluster::getClusterLabels(int n_clusters){
     std::vector< int > labels;
-    py::list pyList;
 
     // Run the code and return python list
-    pyList = py::eval("doCluster.get_labels( " + std::to_string(n_clusters) + " ) \n", PyCluster::scope);
-
-    if (pyList == NULL)   {
-        std::cout<<"ERROR: Error in python execution. No python object returned from getClusterLabels(). \n";
-        exit(1);
-    }
+    py::list pyList = py::eval("doCluster.get_labels( " + std::to_string(n_clusters) + " ) \n", PyCluster::scope);
 
     // Read Python list and convert back it to C++ vector
     for (size_t i =0; i<pyList.size(); i++){
@@ -104,15 +98,9 @@ std::vector< int > PyCluster::getClusterLabels(int n_clusters){
 }
 
 void PyCluster::getClusterMetrics(int n_clusters, double *ratio, double *pFS, double *silhouette_score, double *davies_bouldin_score) {
-    py::tuple pyReturnValues;
 
     // Run the code and return python tuple
-    pyReturnValues = py::eval("doCluster.get_cluster_metrics( " + std::to_string(n_clusters) + " ) \n", PyCluster::scope );
-
-    if (pyReturnValues == NULL)   {
-        std::cout<<"ERROR: Error in python execution. No python object returned from getSsrSstStats().\n";
-        exit(1);
-    }
+    py::tuple pyReturnValues = py::eval("doCluster.get_cluster_metrics( " + std::to_string(n_clusters) + " ) \n", PyCluster::scope );
 
     *ratio = pyReturnValues[0].cast<float>() ;
     *pFS = pyReturnValues[1].cast<float>() ;

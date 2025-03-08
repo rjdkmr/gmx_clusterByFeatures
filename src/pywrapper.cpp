@@ -113,7 +113,7 @@ void wrap_gmx_clusterByFeatures(py::module &m) {
     };
     
     m.def("gmx_version", &gmx_version);
-    m.def("cluster", wrapped_gmx_clusterByFeatures, py::call_guard<py::gil_scoped_release>());
+    m.def("cluster", wrapped_gmx_clusterByFeatures);
     m.def("distmat", wrapped_gmx_distMat, py::call_guard<py::gil_scoped_release>());
     m.def("hole", wrapped_gmx_hole, py::call_guard<py::gil_scoped_release>());
 }
