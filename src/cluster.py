@@ -56,8 +56,11 @@ class DoClustering:
         fin.close()
         self.nframes = len(self.time)
         self.features = np.asarray(features).T
-        if silhouette_score_sample_size > 0:
-            self.silhouette_score_sample_size = int(len(self.time) * (silhouette_score_sample_size/100))
+
+        if self.nframes > 10000:
+            self.silhouette_score_sample_size = 10000
+        else:
+            self.silhouette_score_sample_size = silhouette_score_sample_size
 
     #########################################################################################
     def calculate_clusters(self, n_clusters):
@@ -100,8 +103,8 @@ class DoClustering:
     def _sort_clusters(self, labels, n_clusters):
         if n_clusters == 1:
             return labels
-        
-        clusterIds = sorted(list(set(labels)))
+
+        clusterIds = sorted(list(set(list(labels))))
         length = []
         for cid in clusterIds:
             length.append(np.sum(labels == cid))
@@ -109,11 +112,12 @@ class DoClustering:
         # Change the cluster-ids using stored index above
         sorted_by_length_idx = np.argsort(length)[::-1]
         newIdx = 1
-        for old_cid in sorted_by_length_idx:
-            labels[ np.nonzero( labels == old_cid ) ] = newIdx
+        newLabels = np.ones(labels.shape, dtype=int)
+        for old_cid_idx in sorted_by_length_idx:
+            newLabels[ np.nonzero(labels == old_cid_idx+1) ] = newIdx
             newIdx += 1
 
-        return labels
+        return newLabels
 
     #########################################################################################
     def plotFeaturesClusters(self, n_clusters, plotfile, central_id=None, fsize=14, width=12, height=20):
@@ -129,7 +133,7 @@ class DoClustering:
 
         labels = self.labels[n_clusters]
 
-        fig = plt.figure(figsize=(height, width))
+        fig = plt.figure(figsize=(width, height))
         fig.subplots_adjust(top=0.95, bottom=0.1, wspace=0.3, hspace=0.5)
         mpl.rcParams['font.size'] = fsize
         handles, legend_labels = None, None
