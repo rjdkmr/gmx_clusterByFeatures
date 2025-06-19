@@ -25,4 +25,4 @@ Contents
    Introduction <intro>
    Download and Installation <install>
    How to use gmx_clusterByFeatures? <usage>
-   Working Examples <examples>
+   Tutorials <tutorials>
