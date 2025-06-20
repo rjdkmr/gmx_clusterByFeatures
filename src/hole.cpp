@@ -69,7 +69,7 @@ void CopyRightMsgHole() {
         
         Author: Rajendra Kumar
         
-        Copyright (C) 2018-2019  Rajendra Kumar
+        Copyright (C) 2018-2025  Rajendra Kumar
         
         
         gmx_clusterByFeatures is a free software: you can redistribute it and/or modify
