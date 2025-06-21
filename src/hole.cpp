@@ -489,7 +489,7 @@ int gmx_hole (int argc,char *argv[])	{
         
         
         tmpf = gmx_ffopen(pdbfile,"w");
-        write_pdbfile_indexed(tmpf,NULL,&top.atoms,x,ePBC,box,' ',-1,indsize,index,NULL,TRUE);
+        write_pdbfile_indexed(tmpf,NULL,&top.atoms,x,ePBC,box,' ',-1,indsize,index,NULL,FALSE);
         gmx_ffclose(tmpf);
         
         // Assign cpoint from input atom coordinate
