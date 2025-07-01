@@ -272,7 +272,7 @@ def parseArguments():
                         dest='stdbar', help=stdbarHelp)
     
     parser.add_argument('-dl', '--discard-lasts', action='store',
-                        type=int, metavar=0, 
+                        type=int, metavar=0, default=0,
                         dest='discard_lasts', help=discardLastsHelp)
     
     parser.add_argument('-ymin', '--y-axis-min', action='store',

@@ -217,7 +217,7 @@ def parseArguments():
     
     parser.add_argument('-csv', '--out-csv', action='store',
                         type=str, metavar='output.csv', 
-                        help=outCsvFileHelp)
+                        dest='outCsvFile', help=outCsvFileHelp)
     
     parser.add_argument('-xmin', '--axis-min', action='store',
                         type=float, dest='xmin', 
