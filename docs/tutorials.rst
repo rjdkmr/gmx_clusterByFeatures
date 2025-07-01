@@ -8,4 +8,5 @@ Tutorials
    PCA-based ligand clustering <tutorials/ligand-pca.ipynb>
    Distances-based clustering <tutorials/distances-hbonds.ipynb>
    Clustering of flexible Proteins using distance-matrix PCA <tutorials/distmat-pca-TFAM.ipynb>
+   Clustering of cavity/channel shapes <tutorials/ligand-cavity-clustering.ipynb>
    Protein-Ligand Interaction Clustering <tutorials/protein-ligand-interaction.ipynb>
