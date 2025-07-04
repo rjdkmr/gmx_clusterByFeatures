@@ -134,8 +134,17 @@ def main():
     if args.clidfile is not None:
         clidfile = args.clidfile.name
         args.clidfile.close()
-    else:
-        showErrorAndExit(parser, "No cluster-id File!!!\n")
+
+    if clidfile is None and not args.histogram:
+        showErrorAndExit(parser, "No Cluster ID File!!!\n"
+                         "Cluster ID file is required to plot features vs features plot to highlights the clusters in feature sub-space.\n"
+                         "Use -hist option to plot histogram of features instead.")
+
+    # Cluster log file
+    clusterLogFile = None
+    if args.clusterLogFile is not None:
+        clusterLogFile = args.clusterLogFile.name
+        args.clusterLogFile.close()
 
     # output file
     outputFile = None
@@ -153,9 +162,16 @@ def main():
                          .format(outputFileExtension, output_formats))
         
     featurePlot = featuresplotter.FeaturesPlotter(inputFile, clidfile, featuresfile, 
-                                                  nFeatures=None, clusterlogfile=None, 
+                                                  nFeatures=None, clusterLogFile=clusterLogFile, 
                                                   begin=args.begin, end=args.end)
-    featurePlot.plot_features(outputFile, width=args.width, height=args.height,
+    
+    if args.histogram:
+        # Plot histogram of features
+        featurePlot.plot_histograms(outputFile, width=args.width, height=args.height,
+                                   topmargin=args.topmargin, fontsize=args.fontsize,
+                                   dpi=args.dpi, bins=args.histbins)
+    else:
+        featurePlot.plot_features(outputFile, width=args.width, height=args.height,
                               topmargin=args.topmargin, legendcols=args.legendcols,
                               fontsize=args.fontsize, dpi=args.dpi)
         
@@ -176,9 +192,17 @@ def parseArguments():
                         type=argparse.FileType('r'), metavar='features.xvg',
                         dest='featuresfile', required=False, help=featuresfileHelp)
     
+    parser.add_argument('-hist', '--histogram', action='store_true',
+                        dest='histogram', default=False,
+                        help="Plot histogram of features instead of features vs features plot")
+    
     parser.add_argument('-clid', '--cluster-id', action='store',
                         type=argparse.FileType('r'), metavar='clid.xvg',
                         dest='clidfile', required=False, help=clidfileHelp)
+    
+    parser.add_argument('-clog', '--cluster-log', action='store',
+                        type=argparse.FileType('r'), metavar='cluster.log',
+                        dest='clusterLogFile', required=False, help=clidfileHelp)
     
     parser.add_argument('-o', '--output', action='store',
                         type=str, metavar='output.png', 
@@ -204,6 +228,9 @@ def parseArguments():
                         type=int, metavar=18, default=18,
                         dest='fontsize', help="Font-size of all texts in plot")
     
+    parser.add_argument('-bins', '--histogram-bins', action='store',
+                        type=int, metavar=50, default=50,
+                        dest='histbins', help="Number of bins in histogram plot")
     
     parser.add_argument('-wd', '--width', action='store',
                         type=float, metavar=8, default=8,

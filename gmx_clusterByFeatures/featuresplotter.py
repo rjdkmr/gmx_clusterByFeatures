@@ -23,11 +23,11 @@ from collections import OrderedDict
 
 
 class FeaturesPlotter:
-    def __init__(self, inputfile, clidfile, featuresfile, nFeatures=None, clusterlogfile=None, begin=0, end=-1):
+    def __init__(self, inputfile, clidfile, featuresfile, nFeatures=None, clusterLogFile=None, begin=0, end=-1):
         self.inputfile = inputfile
         self.clidfile = clidfile
         self.featuresfile = featuresfile
-        self.clusterlogfile = clusterlogfile
+        self.clusterLogFile = clusterLogFile
         self.begin = begin
         self.end = end
         self.nFeatures = nFeatures
@@ -37,31 +37,13 @@ class FeaturesPlotter:
         self.clidstime = None
         self.features = None
         self.featurestime = None
+        self.central_frames = None
+        self.total_frames = None
         
         self.metaplotdata = None
         
     def plot_features(self, outfile, topmargin=0.1, legendcols=5, width=12, height=10, fontsize=12, dpi=300):
-        
-        if self.features is None:
-            self.read_featuresfile()
-        
-        if self.clids is None:
-            self.read_clidfile()
-            
-        self.checkFeaturesVsClidTime()
-            
-        if self.metaplotdata is None:
-            self.read_input_file()
-            
-        for mpltdata in self.metaplotdata:
-            if (   (mpltdata['x'] > len(self.features))
-                or (mpltdata['y'] > len(self.features))):
-                raise ValueError('The requested feature is not found or read from features file.')
-            
-        if len(self.metaplotdata) % 2 != 0:
-            nrows = int(len(self.metaplotdata)/2) + 1
-        else:
-            nrows = int(len(self.metaplotdata)/2)
+        nrows = self.read_validate_data()
         
         # TODO: make input colormap
         cmap_list = [(0, '#c2c0c1'), (0.25, '#46a6e4'), (0.75, '#c01755'), (1.0, '#000000')]
@@ -105,7 +87,70 @@ class FeaturesPlotter:
         fig.set_tight_layout(tight={'rect':(None,None,None,1-topmargin)})
         plt.savefig(outfile, dpi=dpi)
 
+    def plot_histograms(self, outfile, topmargin=0.1, width=12, height=10, fontsize=12, dpi=300, bins=50):
+        nrows = self.read_validate_data()
+        fig = plt.figure(figsize=(height, width))
+        axes = []
+        mpl.rcParams['font.size'] = fontsize
+        handles, legend_labels = None, None
         
+        for i in range(len(self.metaplotdata)):
+            ax = fig.add_subplot(nrows,2,i+1)
+            axes.append(ax)
+            xid = self.metaplotdata[i]['x']
+            yid = self.metaplotdata[i]['y']
+            x = self.features[xid-1]
+            y = self.features[yid-1]
+            #hist, xedges, yedges = np.histogram2d(x, y, bins=bins, density=True)
+            #cs = ax.contourf(hist.T, origin='lower', extent=[xedges[0], xedges[-1], yedges[0], yedges[-1]], cmap=plt.cm.binary)
+            hb = ax.hexbin(x, y, bins=bins, gridsize=int(max(y) - min(y))*2, cmap=plt.cm.binary)
+            plt.colorbar(hb)
+
+            if self.central_frames is not None:
+                central_frames_id = list(self.central_frames.values())
+                ax.scatter(x[central_frames_id], y[central_frames_id], c='red')
+
+            if 'xlabel' in self.metaplotdata[i]:
+                ax.set_xlabel(self.metaplotdata[i]['xlabel'])
+            else:
+                ax.set_xlabel('feature-{0}'.format(xid))
+
+            if 'ylabel' in self.metaplotdata[i]:
+                ax.set_ylabel(self.metaplotdata[i]['ylabel'])
+            else:
+                ax.set_ylabel('feature-{0}'.format(yid))
+
+
+
+        fig.set_tight_layout(tight={'rect':(None,None,None,1-topmargin)})
+        plt.savefig(outfile, dpi=dpi)
+        
+    def read_validate_data(self):
+        if self.features is None:
+            self.read_featuresfile()
+        
+        if self.clids is None and self.clidfile is not None:
+            self.read_clidfile()
+            self.checkFeaturesVsClidTime()
+            
+        if self.metaplotdata is None:
+            self.read_input_file()
+            
+        for mpltdata in self.metaplotdata:
+            if (   (mpltdata['x'] > len(self.features))
+                or (mpltdata['y'] > len(self.features))):
+                raise ValueError('The requested feature is not found or read from features file.')
+            
+        if len(self.metaplotdata) % 2 != 0:
+            nrows = int(len(self.metaplotdata)/2) + 1
+        else:
+            nrows = int(len(self.metaplotdata)/2)
+
+        if self.clusterLogFile is not None:
+            self.read_clusterLogFile()
+
+        return nrows
+    
     def read_input_file(self):
         metaplotdata = []
         fin = open(self.inputfile, 'r')
@@ -226,4 +271,40 @@ class FeaturesPlotter:
         
         if not np.allclose(self.clidstime, self.featurestime):
             raise AssertionError("time in features file does not match with time in cluster-id file.")
+                
+
+    def read_clusterLogFile(self):
+        if self.clusterLogFile is None:
+            return
+        
+        fin = open(self.clusterLogFile, 'r')
+        
+        self.central_frames = OrderedDict()
+        self.total_frames = OrderedDict()  
+        start_data = False
+        for line in fin:
+            line = line.rstrip().lstrip()
+            if not line:
+                continue
+
+            if re.search('^Cluster-ID	Central Frame	Total Frames', line) is not None:
+                start_data = True
+                continue
+
+            if start_data and re.search('^=========', line) is not None:
+                start_data = False
+                break
+
+            if start_data:
+                temp = re.split('\s+', line)
+                if len(temp) < 3:
+                    continue
+                
+                clid = int(temp[0])
+                central_frame = int(temp[1])
+                total_frames = int(temp[2])
+
+                self.central_frames[clid] = central_frame
+                self.total_frames[clid] = total_frames
+
                 
