@@ -10,6 +10,10 @@
 
    <a href="https://en.wikipedia.org/wiki/Mixture_model" target="_blank">Gaussian mixture model clustering</a>
 
+.. |hdbscan| raw:: html
+
+   <a href="https://en.wikipedia.org/wiki/HDBSCAN" target="_blank">HDBSCAN - Hierarchical density-based spatial clustering of applications with noise</a>
+
 .. |elbow| raw:: html
 
    <a href="https://en.wikipedia.org/wiki/Elbow_method_(clustering)" target="_blank">Elbow method</a>
@@ -57,11 +61,11 @@ other conformational fluctuations.
 
 Clustering methods
 ------------------
-Presently three methods are implemented:
+Presently four methods are implemented:
   * |kmeans|
   * |DBSCAN|
   * |gmixture|
-
+  * |hdbscan|
 
 Clustering metrics
 ------------------

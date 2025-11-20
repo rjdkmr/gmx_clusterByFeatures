@@ -6,6 +6,10 @@
 
    <a href="https://en.wikipedia.org/wiki/DBSCAN" target="_blank">DBSCAN - Density-based spatial clustering of applications with noise</a>
 
+.. |hdbscan| raw:: html
+
+   <a href="https://en.wikipedia.org/wiki/HDBSCAN" target="_blank">HDBSCAN - Hierarchical density-based spatial clustering of applications with noise</a>
+
 .. |gmixture| raw:: html
 
    <a href="https://en.wikipedia.org/wiki/Mixture_model" target="_blank">Gaussian mixture model clustering</a>
@@ -41,6 +45,10 @@
 .. |gmixture-detail| raw:: html
 
   <a href="http://scikit-learn.org/stable/modules/mixture.html#mixture" target="_blank">here</a>
+
+.. |hdbscan-detail| raw:: html
+
+  <a href="https://hdbscan.readthedocs.io/en/latest/how_hdbscan_works.html" target="_blank">here</a>
   
 .. |silhouette-score| raw:: html
 
@@ -184,7 +192,7 @@ Options summary
 
     * - `-method \<keyword\> <cluster.html#method-kmeans>`_
       - kmeans
-      - Clustering methods. Accepted methods are:: kmeans, dbscan, gmixture
+      - Clustering methods. Accepted methods are:: kmeans, dbscan, gmixture, hdbscan
 
     * - `-nfeature \<int\> <cluster.html#nfeature-10>`_
       - 10
@@ -479,6 +487,11 @@ Presently following methods are implemented:
      Therefore, one should know beforehand how many cluster is there in data.
      To automatically determine the cluster number, see `-cmetric <#cmetric-prior>`_
      For more details about k-means method, see |gmixture-detail|.
+
+  4. ``-method hdbscan``
+      |hdbscan| - It does not require cluster number beforehand.
+      The clusters are controlled by minimum cluster size parameter.
+      For more details about HDBSCAN method, see |hdbscan-detail|.  
 
 ******
 
