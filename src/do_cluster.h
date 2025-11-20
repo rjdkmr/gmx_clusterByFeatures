@@ -56,7 +56,7 @@ public:
     /*
      * Perform clustering for a given number of cluster
      */
-    static void performClustering(int n_clusters);
+    static int performClustering(int n_clusters);
 
     /*
      * Get cluster-id for a given number of cluster from Python to C++

@@ -77,10 +77,12 @@ void PyCluster::initializeClustering(const char* filename, int nFeatures, const 
     py::exec(code.str(), PyCluster::scope);
 }
 
-void PyCluster::performClustering(int n_clusters){
+int PyCluster::performClustering(int n_clusters){
     std::stringstream code;
     code<<"doCluster.calculate_clusters("<<n_clusters<<")";
-    py::exec(code.str(), PyCluster::scope);
+    py::object result = py::eval(code.str(), PyCluster::scope);
+    int new_n_clusters = result.cast<int>();
+    return new_n_clusters;
 }
 
 std::vector< int > PyCluster::getClusterLabels(int n_clusters){

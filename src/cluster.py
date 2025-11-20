@@ -4,6 +4,16 @@ from sklearn import mixture
 from sklearn import metrics
 import re, os, sys
 import shlex, subprocess, shutil
+import matplotlib as mpl
+
+mpl.backends.backend_registry.list_builtin(mpl.backends.BackendFilter.NON_INTERACTIVE)
+from matplotlib import pyplot as plt
+
+try:
+    import hdbscan
+    has_hdbscan = True
+except ImportError:
+    has_hdbscan = False
 
 class DoClustering:
     algo = 'kmeans'
@@ -21,6 +31,11 @@ class DoClustering:
 
     #########################################################################################
     def __init__(self, filename, nFeatures=2, algo='kmeans', dbscan_eps=0.5, dbscan_min_samples=20, silhouette_score_sample_size=20):
+        
+        if algo == 'hdbscan' and not has_hdbscan:
+            print("HDBSCAN library not found. Please install it or use another clustering algorithm.")
+            sys.exit(1)
+
         self.algo = algo
         self.dbscan_eps = dbscan_eps
         self.dbscan_min_samples = dbscan_min_samples
@@ -76,7 +91,13 @@ class DoClustering:
         if self.algo == 'gmixture':
             db = mixture.GaussianMixture(n_components=n_clusters, covariance_type='full')
 
+        if self.algo == 'hdbscan':
+            db = hdbscan.HDBSCAN(cluster_selection_epsilon=self.dbscan_eps, min_samples=self.dbscan_min_samples )
+
         db.fit(self.features)
+
+        if self.algo in ['dbscan', 'hdbscan']:
+            n_clusters = len(set(db.labels_)) - (1 if -1 in db.labels_ else 0)
 
         if hasattr(db, 'labels_'):
             labels = db.labels_.astype(int)
@@ -93,44 +114,50 @@ class DoClustering:
         trueIdx = np.nonzero(labels >= 0)
         labels[trueIdx] = labels[trueIdx] + 1
 
-        self.labels[n_clusters] = list(self._sort_clusters(labels, n_clusters))
+        ordered_newLabels, old_to_new_ordered_map = self._sort_clusters(labels, n_clusters)
+        self.labels[n_clusters] = list(ordered_newLabels)
         if hasattr(db, 'inertia_'):
             self.sse[n_clusters] = db.inertia_
         else:
             self.sse[n_clusters] = 1
 
+        if self.algo == 'hdbscan':
+            cmap_list = [(0, '#c2c0c1'), (0.25, '#46a6e4'), (0.75, '#c01755'), (1.0, '#000000')]
+            cmap = mpl.colors.LinearSegmentedColormap.from_list('dummy', cmap_list, N=n_clusters)
+            colors = cmap(np.linspace(0, 1, n_clusters))
+            ordered_colors = [colors[old_to_new_ordered_map[i]-1] for i in range(1, n_clusters+1)]
+            fig = plt.figure(figsize=(11, 8))
+            ax = fig.add_subplot(1,1,1)
+            db.condensed_tree_.plot(select_clusters=True, axis=ax, selection_palette=ordered_colors)
+            fig.savefig('hdbscan_condensed_tree.png', dpi=300)
+
+        return n_clusters
+
     #########################################################################################
     def _sort_clusters(self, labels, n_clusters):
         if n_clusters == 1:
-            return labels
+            return labels, {1: 1}
 
         clusterIds = sorted(list(set(list(labels))))
         length = []
         for cid in clusterIds:
-            length.append(np.sum(labels == cid))
+            if cid != -1:
+                length.append(np.sum(labels == cid))
 
         # Change the cluster-ids using stored index above
         sorted_by_length_idx = np.argsort(length)[::-1]
         newIdx = 1
-        newLabels = np.ones(labels.shape, dtype=int)
+        newLabels = np.ones(labels.shape, dtype=int) * -1
+        old_to_new_map = dict()
         for old_cid_idx in sorted_by_length_idx:
             newLabels[ np.nonzero(labels == old_cid_idx+1) ] = newIdx
+            old_to_new_map[old_cid_idx+1] = newIdx
             newIdx += 1
 
-        return newLabels
+        return newLabels, old_to_new_map
 
     #########################################################################################
     def plotFeaturesClusters(self, n_clusters, plotfile, central_id=None, fsize=14, width=12, height=20):
-        import matplotlib as mpl
-
-        for gui in mpl.rcsetup.non_interactive_bk:
-            try:
-                mpl.use(gui, force=True)
-                from matplotlib import pyplot as plt
-                break
-            except:
-                continue
-
         labels = self.labels[n_clusters]
 
         fig = plt.figure(figsize=(width, height))

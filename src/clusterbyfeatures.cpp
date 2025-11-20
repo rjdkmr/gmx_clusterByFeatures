@@ -1380,8 +1380,8 @@ int gmx_clusterByFeatures(int argc,char *argv[])    {
     real cmRmsdThershold = 0.1;
     real ssrSstChange = 2;
 
-    const char     *clusterAlgo[] = { NULL, "kmeans", "dbscan", "gmixture", NULL };
-    enum { eKmeans = 1, eDbscan, eGMixture };
+    const char     *clusterAlgo[] = { NULL, "kmeans", "dbscan", "gmixture", "hdbscan", NULL };
+    enum { eKmeans = 1, eDbscan, eGMixture, eHdbscan };
     int eClusterMethod;
     real dbscan_eps = 0.5;
     int dbscan_min_samples = 20;
@@ -1674,27 +1674,29 @@ int gmx_clusterByFeatures(int argc,char *argv[])    {
 
         while(1)    {
             double tempSsrSstRatio, tempPFS, tempSilhouetteScore, tempDaviesBouldinScore;
-            lstream<<"\n\n###########################################\n";
-            lstream<<"########## NUMBER OF CLUSTERS : "<<curr_n_cluster<<" ########\n";
-            lstream<<"###########################################\n";
-
-            // Initialize ClusteringStuffs
-            clustStuff = new ClusteringStuffs();
-            allClusterStuffs.emplace(curr_n_cluster, clustStuff);
-
+            if (!((eClusterMethod == eDbscan)  || (eClusterMethod == eHdbscan))) {
+                lstream<<"\n\n###########################################\n";
+                lstream<<"########## NUMBER OF CLUSTERS : "<<curr_n_cluster<<" ########\n";
+                lstream<<"###########################################\n";
+            } else {
+                lstream<<"\n\n###########################################\n";
+                lstream<<"########## DENSITY BASED CLUSTERING ########\n";
+                lstream<<"###########################################\n";
+            }
 
             // Perform clustering
-            pycluster.performClustering(curr_n_cluster);
+            // In case of DBSCAN or HDBSCAN, it will return the actual number of clusters found
+            curr_n_cluster = pycluster.performClustering(curr_n_cluster); 
+
+            // Initialize ClusteringStuffs and store cluster labels
+            clustStuff = new ClusteringStuffs();
+            allClusterStuffs.emplace(curr_n_cluster, clustStuff);
             clustStuff->clidAlongTime = pycluster.getClusterLabels(curr_n_cluster);
-            
-
-            // Construct cluster dictionary and cluster-index
-            clustStuff->constructClusterDict(numMinFrameCluster, &lstream);
+            clustStuff->constructClusterDict(numMinFrameCluster, &lstream); // Construct cluster dictionary and cluster-index
 
 
-            if ( (eClusterMetrics == ePriorClusterMetric) || (eClusterMethod == eDbscan) ){
-                // If cluster-metric is not needed or DBSCAN method is used, iterate only once
-
+            if ( (eClusterMetrics == ePriorClusterMetric) || (eClusterMethod == eDbscan)  || (eClusterMethod == eHdbscan)){
+                // If cluster-metric is not needed or DBSCAN or HDBSCAN is used here, break after first iteration
                 finalClustersNumber = curr_n_cluster;
                 break;
             }
