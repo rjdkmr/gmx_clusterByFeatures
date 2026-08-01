@@ -47,7 +47,6 @@
 #include <algorithm>
 #include <omp.h>
 
-
 #include "gromacs/commandline/pargs.h"
 #include "gromacs/commandline/cmdlineinit.h"
 #include "gromacs/commandline/viewit.h"
@@ -61,7 +60,7 @@
 #include "gromacs/topology/atoms.h"
 #include "gromacs/topology/topology.h"
 #include "gromacs/topology/index.h"
-#include "gromacs/math/vec.h"
+#include "gromacs/utility/vec.h"
 #include "gromacs/math/do_fit.h"
 #include "gromacs/utility/smalloc.h"
 #include "gromacs/utility/arraysize.h"
@@ -74,39 +73,43 @@
 #include "logstream.h"
 #include "do_cluster.h"
 
-
-template<typename Out>
-void split(const std::string &s, char delim, Out result) {
+template <typename Out>
+void split(const std::string &s, char delim, Out result)
+{
     std::stringstream ss(s);
     std::string item;
-    while (std::getline(ss, item, delim)) {
-    	if (! item.empty() )
-    		*(result++) = item;
+    while (std::getline(ss, item, delim))
+    {
+        if (!item.empty())
+            *(result++) = item;
     }
 }
 
-std::vector<std::string> split(const std::string &s, char delim) {
+std::vector<std::string> split(const std::string &s, char delim)
+{
     std::vector<std::string> elems;
     split(s, delim, std::back_inserter(elems));
     return elems;
 }
 
 template <typename T>
-std::vector<size_t> argsort(std::vector<T> const& values) {
+std::vector<size_t> argsort(std::vector<T> const &values)
+{
     std::vector<size_t> indices(values.size());
     std::iota(begin(indices), end(indices), static_cast<size_t>(0));
 
     std::sort(
         begin(indices), end(indices),
-        [&](size_t a, size_t b) { return values[a] < values[b]; }
-    );
+        [&](size_t a, size_t b)
+        { return values[a] < values[b]; });
     return indices;
 }
 
-
-std::vector< int > getSortedKeys(std::map< int, std::vector< long > > dict) {
-    std::vector< int > keys;
-    for (std::map< int, std::vector< long > >::iterator it= dict.begin(); it!= dict.end(); ++it) {
+std::vector<int> getSortedKeys(std::map<int, std::vector<long>> dict)
+{
+    std::vector<int> keys;
+    for (std::map<int, std::vector<long>>::iterator it = dict.begin(); it != dict.end(); ++it)
+    {
         keys.push_back(it->first);
     }
     std::sort(keys.begin(), keys.end());
@@ -114,27 +117,31 @@ std::vector< int > getSortedKeys(std::map< int, std::vector< long > > dict) {
 }
 
 template <class T>
-T **convert2DVectorToArray(std::vector< std::vector< T > > *Vector, int N){
+T **convert2DVectorToArray(std::vector<std::vector<T>> *Vector, int N)
+{
     T **array;
     snew(array, N);
-    for(int i=0; (i < N); i++)  {
+    for (int i = 0; (i < N); i++)
+    {
         array[i] = &Vector->at(i)[0];
     }
     return array;
 }
 
-real calculate_distance(real *v1, real *v2, int n, bool square)   {
-    int i=0;
+real calculate_distance(real *v1, real *v2, int n, bool square)
+{
+    int i = 0;
     real distance2 = 0;
     real distance = 0;
 
-    for(i=0; i<n; i++)  {
-        distance2 += ( (v1[i] - v2[i]) * (v1[i] - v2[i]) );
+    for (i = 0; i < n; i++)
+    {
+        distance2 += ((v1[i] - v2[i]) * (v1[i] - v2[i]));
     }
 
     distance = std::sqrt(distance2);
 
-    if(square)
+    if (square)
         return distance2;
     else
         return distance;
@@ -143,18 +150,19 @@ real calculate_distance(real *v1, real *v2, int n, bool square)   {
 /*
  * get the vector of filenames according to the cluster index and a prefix.
  */
-std::vector < std::string > get_outFile_names(const char *fname, std::vector< int > clusterIndex, std::string ext, std::string prefix) {
-    std::vector < std::string > outNames, temp;
+std::vector<std::string> get_outFile_names(const char *fname, std::vector<int> clusterIndex, std::string ext, std::string prefix)
+{
+    std::vector<std::string> outNames, temp;
     std::string filename(fname), basename;
     temp = split(filename, '.');
-    basename = temp[temp.size()-2];
+    basename = temp[temp.size() - 2];
 
-    for (size_t i=0; i<clusterIndex.size(); i++)  {
-        if (! prefix.empty() )
-            outNames.push_back(basename + "_" + prefix +"_c" + std::to_string(clusterIndex[i]) + ext);
+    for (size_t i = 0; i < clusterIndex.size(); i++)
+    {
+        if (!prefix.empty())
+            outNames.push_back(basename + "_" + prefix + "_c" + std::to_string(clusterIndex[i]) + ext);
         else
             outNames.push_back(basename + "_c" + std::to_string(clusterIndex[i]) + ext);
-
     }
 
     /*
@@ -165,32 +173,35 @@ std::vector < std::string > get_outFile_names(const char *fname, std::vector< in
     return outNames;
 }
 
-
-void set_dTime(TrajectoryStuffs *inpTrajStuff)   {
+void set_dTime(TrajectoryStuffs *inpTrajStuff)
+{
     real oldTime, dTime;
 
     // Determine dt from original trajectory
     rewind_trj(inpTrajStuff->status);
     oldTime = inpTrajStuff->time;
-    do {
+    do
+    {
         dTime = inpTrajStuff->time - oldTime;
-        if (nframes_read(inpTrajStuff->status)>3)
+        if (nframes_read(inpTrajStuff->status) > 3)
             break;
         oldTime = inpTrajStuff->time;
         // std::cout<<"\n\n Input Trajectory dt = "<<inpTrajStuff->time<<"\n\n";
-    } while( read_next_x(inpTrajStuff->oenv, inpTrajStuff->status, &inpTrajStuff->time, inpTrajStuff->x, inpTrajStuff->box) );
+    } while (read_next_x(inpTrajStuff->oenv, inpTrajStuff->status, &inpTrajStuff->time, inpTrajStuff->x, inpTrajStuff->box));
     rewind_trj(inpTrajStuff->status);
 
     inpTrajStuff->dTime = dTime;
 
-    std::cout<<"\n\n Input Trajectory dt = "<<dTime*output_env_get_time_factor(inpTrajStuff->oenv)<<" "<<output_env_get_time_unit(inpTrajStuff->oenv)<<"\n\n";
+    std::cout << "\n\n Input Trajectory dt = " << dTime * output_env_get_time_factor(inpTrajStuff->oenv) << " " << output_env_get_time_unit(inpTrajStuff->oenv) << "\n\n";
 }
 
-rvec * copy_rvec_coord(rvec *inpRvec, int natoms) {
+rvec *copy_rvec_coord(rvec *inpRvec, int natoms)
+{
 
     rvec *outRvec;
     snew(outRvec, natoms);
-    for (int i=0; i < natoms; i++) {
+    for (int i = 0; i < natoms; i++)
+    {
         outRvec[i][XX] = inpRvec[i][XX];
         outRvec[i][YY] = inpRvec[i][YY];
         outRvec[i][ZZ] = inpRvec[i][ZZ];
@@ -199,25 +210,23 @@ rvec * copy_rvec_coord(rvec *inpRvec, int natoms) {
     return outRvec;
 }
 
-
 // ############################### ClusteringStuffs ##########################
 
-
 // Initialization of static variables
-std::vector< std::vector<real> > ClusteringStuffs::features;
-std::vector< real > ClusteringStuffs::timeInInput;
+std::vector<std::vector<real>> ClusteringStuffs::features;
+std::vector<real> ClusteringStuffs::timeInInput;
 bool ClusteringStuffs::bSortByFeatures = false;
-std::map< int, real > ClusteringStuffs::ssrSstRatio;
-std::map< int, real > ClusteringStuffs::pFS;
-std::map< int, real > ClusteringStuffs::silhouetteScore;
-std::map< int, real > ClusteringStuffs::daviesBouldinScore;
+std::map<int, real> ClusteringStuffs::ssrSstRatio;
+std::map<int, real> ClusteringStuffs::pFS;
+std::map<int, real> ClusteringStuffs::silhouetteScore;
+std::map<int, real> ClusteringStuffs::daviesBouldinScore;
 
-
-int ClusteringStuffs::write_central_pdbfiles(std::vector < std::string > pdbNames,
-                                              int *outAtomIndex, int outAtomIndexSize,
-                                              TrajectoryStuffs inpTrajStuff)  {
+int ClusteringStuffs::write_central_pdbfiles(std::vector<std::string> pdbNames,
+                                             int *outAtomIndex, int outAtomIndexSize,
+                                             TrajectoryStuffs inpTrajStuff)
+{
     std::string title;
-    std::vector< int > sortedClusterIds = getSortedKeys(this->clusterDict);
+    std::vector<int> sortedClusterIds = getSortedKeys(this->clusterDict);
     int ftp = fn2ftp(inpTrajStuff.filename);
     t_fileio *fio = trx_get_fileio(inpTrajStuff.status);
     int bRet;
@@ -225,84 +234,95 @@ int ClusteringStuffs::write_central_pdbfiles(std::vector < std::string > pdbName
     bool bWriteFile = false;
 
     // If a null pointer is provided, only return central coords, no output file
-    if (pdbNames.empty())  {
-        std::cout<<"\n\nExtracting coordinates of the central structure...\n";
+    if (pdbNames.empty())
+    {
+        std::cout << "\n\nExtracting coordinates of the central structure...\n";
     }
-    else {
+    else
+    {
         bWriteFile = true;
-        std::cout<<"\n\nWriting central structure to pdb-files...\n";
+        std::cout << "\n\nWriting central structure to pdb-files...\n";
     }
 
     snew(centralCoords, sortedClusterIds.size());
 
-    if (ftp != efXTC)   {
-        do {
-            for (size_t c=0; c < sortedClusterIds.size(); c++) {
-                if (inpTrajStuff.time == this->timeInInput[this->centralStructDict[sortedClusterIds[c]]] )   {
-                    if(bWriteFile) {
+    if (ftp != efXTC)
+    {
+        do
+        {
+            for (size_t c = 0; c < sortedClusterIds.size(); c++)
+            {
+                if (inpTrajStuff.time == this->timeInInput[this->centralStructDict[sortedClusterIds[c]]])
+                {
+                    if (bWriteFile)
+                    {
                         title = "Cluster - " + std::to_string(sortedClusterIds[c]) + "; Time = " + std::to_string(inpTrajStuff.time);
-                        //std::cout<<inpTrajStuff.time<<" "<<ClusteringStuffs::timeInClIdInput[this->centralStructDict[sortedClusterIds[c]]]<<"\n";
-                        write_sto_conf_indexed(pdbNames[c].c_str(), title.c_str(), &inpTrajStuff.atoms, inpTrajStuff.x, \
+                        // std::cout<<inpTrajStuff.time<<" "<<ClusteringStuffs::timeInClIdInput[this->centralStructDict[sortedClusterIds[c]]]<<"\n";
+                        write_sto_conf_indexed(pdbNames[c].c_str(), title.c_str(), &inpTrajStuff.atoms, inpTrajStuff.x,
                                                NULL, inpTrajStuff.ePBC, inpTrajStuff.box, outAtomIndexSize, outAtomIndex);
                     }
                     centralCoords[c] = copy_rvec_coord(inpTrajStuff.x, inpTrajStuff.natoms);
                 }
             }
 
-        } while(read_next_x(inpTrajStuff.oenv, inpTrajStuff.status, &inpTrajStuff.time, inpTrajStuff.x, inpTrajStuff.box));
+        } while (read_next_x(inpTrajStuff.oenv, inpTrajStuff.status, &inpTrajStuff.time, inpTrajStuff.x, inpTrajStuff.box));
     }
-    else {
-        for (size_t c=0; c < sortedClusterIds.size(); c++) {
+    else
+    {
+        for (size_t c = 0; c < sortedClusterIds.size(); c++)
+        {
             bRet = xtc_seek_time(fio, this->timeInInput[this->centralStructDict[sortedClusterIds[c]]], inpTrajStuff.natoms, FALSE);
-            if (bRet == -1) {
+            if (bRet == -1)
+            {
                 gmx_fatal(FARGS, "Frame for this time is not found in trajectory");
             }
             read_next_x(inpTrajStuff.oenv, inpTrajStuff.status, &inpTrajStuff.time, inpTrajStuff.x, inpTrajStuff.box);
 
-            if(bWriteFile) {
+            if (bWriteFile)
+            {
                 title = "Cluster - " + std::to_string(sortedClusterIds[c]) + "; Time = " + std::to_string(inpTrajStuff.time);
-                write_sto_conf_indexed(pdbNames[c].c_str(), title.c_str(), &inpTrajStuff.atoms, inpTrajStuff.x, \
-                                   NULL, inpTrajStuff.ePBC, inpTrajStuff.box, outAtomIndexSize, outAtomIndex);
+                write_sto_conf_indexed(pdbNames[c].c_str(), title.c_str(), &inpTrajStuff.atoms, inpTrajStuff.x,
+                                       NULL, inpTrajStuff.ePBC, inpTrajStuff.box, outAtomIndexSize, outAtomIndex);
             }
             centralCoords[c] = copy_rvec_coord(inpTrajStuff.x, inpTrajStuff.natoms);
         }
     }
 
-
     this->centralCoords = centralCoords;
-    
+
     // rewind trajectory file and Initialize status
     rewind_trj(inpTrajStuff.status);
 
     return TRUE;
 }
 
+int ClusteringStuffs::rmsd_bw_central_structure(int *fitAtomIndex, int fitAtomIndexSize,
+                                                int *rmsdAtomIndex, int rmsdAtomIndexSize,
+                                                TrajectoryStuffs inpTrajStuff,
+                                                LogStream *lstream)
+{
 
-int ClusteringStuffs::rmsd_bw_central_structure( int *fitAtomIndex, int fitAtomIndexSize,
-                                                 int *rmsdAtomIndex, int rmsdAtomIndexSize,
-                                                 TrajectoryStuffs inpTrajStuff,
-                                                 LogStream *lstream)    {
-
-    real *w_rls, *w_rms,  temp;
+    real *w_rls, *w_rms, temp;
     int i = 0;
     rvec x_shift_ref, x_shift_i;
     // int cluster;
     // int clusterLength
-    std::vector< int > sortedClusterIds = getSortedKeys(this->clusterDict);
+    std::vector<int> sortedClusterIds = getSortedKeys(this->clusterDict);
 
-    std::vector< std::vector< real > > centrlRmsdMatrix( sortedClusterIds.size(),  std::vector< real >(sortedClusterIds.size(), 0));
+    std::vector<std::vector<real>> centrlRmsdMatrix(sortedClusterIds.size(), std::vector<real>(sortedClusterIds.size(), 0));
 
-    std::cout<<"\n\nCalculating RMSD between central structures...\n";
+    std::cout << "\n\nCalculating RMSD between central structures...\n";
 
     // Weight factor initialization for fitting and RMSD calculation
     snew(w_rms, inpTrajStuff.atoms.nr);
     snew(w_rls, inpTrajStuff.atoms.nr);
 
     if (fitAtomIndexSize < 3)
-        gmx_fatal(FARGS, "Need >= 3 points to fit!\n" );
+        gmx_fatal(FARGS, "Need >= 3 points to fit!\n");
 
     // Assign weight-factor for fitting
-    for (i = 0; i < fitAtomIndexSize; i++) {
+    for (i = 0; i < fitAtomIndexSize; i++)
+    {
         if (inpTrajStuff.atoms.atom[fitAtomIndex[i]].m != 0)
             w_rls[fitAtomIndex[i]] = inpTrajStuff.atoms.atom[fitAtomIndex[i]].m;
         else
@@ -311,26 +331,25 @@ int ClusteringStuffs::rmsd_bw_central_structure( int *fitAtomIndex, int fitAtomI
 
     // Assign weight-factor for RMSD calculation
     for (i = 0; i < rmsdAtomIndexSize; i++)
-            w_rms[rmsdAtomIndex[i]] = 1;
+        w_rms[rmsdAtomIndex[i]] = 1;
 
-
-    //Loop over cluster start here
-    for (size_t cref=0; cref < sortedClusterIds.size(); cref++) {
+    // Loop over cluster start here
+    for (size_t cref = 0; cref < sortedClusterIds.size(); cref++)
+    {
 
         // cluster = sortedClusterIds[cref];
         // clusterLength = this->clusterDict[cluster].size();
-
 
         // Reset to origin and store the translation factor of reference coordinate
         copy_rvec(this->centralCoords[cref][0], x_shift_ref);
         reset_x(fitAtomIndexSize, fitAtomIndex, inpTrajStuff.atoms.nr, NULL, this->centralCoords[cref], w_rls);
         rvec_dec(x_shift_ref, this->centralCoords[cref][0]);
 
-        for (size_t ci=0; ci < cref; ci++) {
+        for (size_t ci = 0; ci < cref; ci++)
+        {
             copy_rvec(this->centralCoords[ci][0], x_shift_i);
             reset_x(fitAtomIndexSize, fitAtomIndex, inpTrajStuff.atoms.nr, NULL, this->centralCoords[ci], w_rls);
             rvec_dec(x_shift_i, this->centralCoords[ci][0]);
-
 
             do_fit(inpTrajStuff.natoms, w_rls, this->centralCoords[cref], this->centralCoords[ci]);
             temp = calc_similar_ind(FALSE, rmsdAtomIndexSize, rmsdAtomIndex, w_rms, this->centralCoords[ci], this->centralCoords[cref]);
@@ -340,14 +359,13 @@ int ClusteringStuffs::rmsd_bw_central_structure( int *fitAtomIndex, int fitAtomI
             // Translate the central structure to original position
             for (i = 0; i < inpTrajStuff.natoms; i++)
                 rvec_inc(this->centralCoords[ci][i], x_shift_i);
-
         }
 
         // Translate the central structure to original position
         for (i = 0; i < inpTrajStuff.natoms; i++)
             rvec_inc(this->centralCoords[cref][i], x_shift_ref);
     }
-    //Loop over cluster end here
+    // Loop over cluster end here
 
     sfree(w_rms);
     sfree(w_rls);
@@ -355,27 +373,30 @@ int ClusteringStuffs::rmsd_bw_central_structure( int *fitAtomIndex, int fitAtomI
     // Writing RMSD matrix
     char out[15], out1[12];
     lstream->setprecision(3);
-    *lstream<<"\n\n=====================================\n";
-    *lstream<<" Central structurs - RMSD matrix \n";
-    *lstream<<"=====================================\n";
-    for (size_t cref=0; cref < sortedClusterIds.size(); cref++) {
+    *lstream << "\n\n=====================================\n";
+    *lstream << " Central structurs - RMSD matrix \n";
+    *lstream << "=====================================\n";
+    for (size_t cref = 0; cref < sortedClusterIds.size(); cref++)
+    {
         sprintf(out1, "%s%-d", "c", sortedClusterIds[cref]);
         sprintf(out, "%6s ", out1);
-        *lstream<<out;
+        *lstream << out;
     }
-    *lstream<<"\n";
-    for (size_t cref=0; cref < sortedClusterIds.size(); cref++) {
-        for (size_t ci=0; ci < sortedClusterIds.size(); ci++) {
+    *lstream << "\n";
+    for (size_t cref = 0; cref < sortedClusterIds.size(); cref++)
+    {
+        for (size_t ci = 0; ci < sortedClusterIds.size(); ci++)
+        {
             sprintf(out, "%6.3f ", centrlRmsdMatrix[cref][ci]);
-            *lstream<<out;
+            *lstream << out;
         }
-        *lstream<<"\n";
+        *lstream << "\n";
     }
-    *lstream<<"=====================================\n";
+    *lstream << "=====================================\n";
     lstream->resetprecision();
 
     this->centrlRmsdMatrix = centrlRmsdMatrix;
-    
+
     // rewind trajectory file and Initialize status
     rewind_trj(inpTrajStuff.status);
 
@@ -383,65 +404,72 @@ int ClusteringStuffs::rmsd_bw_central_structure( int *fitAtomIndex, int fitAtomI
 }
 
 long ClusteringStuffs::get_index_central_struct(int clusterID, real **features, long *clusterFrameIndex,
-                                                unsigned long clusterFrameIndexSize, int nFeatures)   {
-    real dist = 0, dist_prev=9999999, avg_dist=0, prev_avg_dist=0;
-    long idx = 0, prev_idx=0;
-    std::vector < real > distAll(clusterFrameIndexSize, 0.0);
-    std::vector < real > avgPoint(nFeatures, 0.0);
-    int same_idx_counter=0;
+                                                unsigned long clusterFrameIndexSize, int nFeatures)
+{
+    real dist = 0, dist_prev = 9999999, avg_dist = 0, prev_avg_dist = 0;
+    long idx = 0, prev_idx = 0;
+    std::vector<real> distAll(clusterFrameIndexSize, 0.0);
+    std::vector<real> avgPoint(nFeatures, 0.0);
+    int same_idx_counter = 0;
     unsigned long start = 1, for_limit = 50;
 
-
     // Get the average point
-    for(int i=0; i < nFeatures; i++ )  {
-        for(unsigned long j=0; j < clusterFrameIndexSize; j++ )  {
+    for (int i = 0; i < nFeatures; i++)
+    {
+        for (unsigned long j = 0; j < clusterFrameIndexSize; j++)
+        {
             avgPoint[i] += features[clusterFrameIndex[j]][i];
         }
-        avgPoint[i] = avgPoint[i]/clusterFrameIndexSize;
+        avgPoint[i] = avgPoint[i] / clusterFrameIndexSize;
     }
 
     // determine a point which is closest to average point
-    for(unsigned long i=0; i < clusterFrameIndexSize; i++ )  {
+    for (unsigned long i = 0; i < clusterFrameIndexSize; i++)
+    {
         dist = calculate_distance(features[clusterFrameIndex[i]], avgPoint.data(), nFeatures, true);
-        if( dist < dist_prev) {
+        if (dist < dist_prev)
+        {
             idx = clusterFrameIndex[i];
             dist_prev = dist;
         }
     }
     prev_idx = idx;
 
-
     // Now determine the central point with iterative process
-    while(1) {
+    while (1)
+    {
         std::vector<size_t> sortedIndex;
         avg_dist = 0;
 
         // Calculate distance to all other points from current central point
-        for(unsigned long i=0; i < clusterFrameIndexSize; i++ )  {
+        for (unsigned long i = 0; i < clusterFrameIndexSize; i++)
+        {
             dist = calculate_distance(features[clusterFrameIndex[i]], features[idx], nFeatures, false);
             distAll[i] = dist;
             avg_dist += dist;
         }
 
         // Get average distance for current central point
-        avg_dist = avg_dist/(clusterFrameIndexSize-1);
+        avg_dist = avg_dist / (clusterFrameIndexSize - 1);
         prev_avg_dist = avg_dist;
 
         // Sort the all distances to current central point to get its nearest neighbour points
         sortedIndex = argsort(distAll);
 
-
         // Now check which nearest neighbour point has less average distance value as compared with current central point
-        for(unsigned long i=start; i < sortedIndex.size(); i++ ) {
+        for (unsigned long i = start; i < sortedIndex.size(); i++)
+        {
             avg_dist = 0;
-            for(unsigned long j=0; j < clusterFrameIndexSize; j++ )  {
+            for (unsigned long j = 0; j < clusterFrameIndexSize; j++)
+            {
                 dist = calculate_distance(features[clusterFrameIndex[j]], features[clusterFrameIndex[sortedIndex[i]]], nFeatures, false);
                 avg_dist += dist;
             }
-            avg_dist = avg_dist/(clusterFrameIndexSize-1);
+            avg_dist = avg_dist / (clusterFrameIndexSize - 1);
 
             // If a point is found, assigned this point as current central point
-            if( avg_dist < prev_avg_dist) {
+            if (avg_dist < prev_avg_dist)
+            {
                 idx = clusterFrameIndex[sortedIndex[i]];
                 prev_avg_dist = avg_dist;
                 break;
@@ -449,18 +477,20 @@ long ClusteringStuffs::get_index_central_struct(int clusterID, real **features, 
 
             // Only check first 50 nighbours in first iteration
             // if central point not found, check next 50 and so on in subsequent iterations
-            if ( (i >= for_limit) || (i > clusterFrameIndexSize) )
+            if ((i >= for_limit) || (i > clusterFrameIndexSize))
                 break;
         }
 
         // std::cout<<same_idx_counter<<" "<<start<<" "<<idx<<" "<<prev_idx<<"\n";
 
         // Check if new central point is similar to that of previous iteration
-        if (prev_idx == idx) {               // If similar, then check for new central point among next 50 nighbours in above step
+        if (prev_idx == idx)
+        { // If similar, then check for new central point among next 50 nighbours in above step
             same_idx_counter += 1;
             start = for_limit * same_idx_counter;
         }
-        else {                               // If not similar, then reset counters
+        else
+        { // If not similar, then reset counters
             prev_idx = idx;
             same_idx_counter = 0;
             start = 1;
@@ -473,12 +503,13 @@ long ClusteringStuffs::get_index_central_struct(int clusterID, real **features, 
         // and current central point is considered as final central point
         if (same_idx_counter >= 20)
             break;
-
     }
 
     // Store distances for later use
-    if (this->bSortByFeatures) {
-        for(unsigned long j=0; j < clusterFrameIndexSize; j++ )  {
+    if (this->bSortByFeatures)
+    {
+        for (unsigned long j = 0; j < clusterFrameIndexSize; j++)
+        {
             distAll[j] = 0.0;
             dist = calculate_distance(features[clusterFrameIndex[j]], features[idx], nFeatures, false);
             distAll[j] = dist;
@@ -488,11 +519,11 @@ long ClusteringStuffs::get_index_central_struct(int clusterID, real **features, 
     return idx;
 }
 
-
-int ClusteringStuffs::calculate_central_struct(LogStream *lstream){
-    std::vector< long > clusterFrameIndex;
-    std::vector< int > sortedKeys = getSortedKeys(this->clusterDict);
-    real **featuresArray=NULL;
+int ClusteringStuffs::calculate_central_struct(LogStream *lstream)
+{
+    std::vector<long> clusterFrameIndex;
+    std::vector<int> sortedKeys = getSortedKeys(this->clusterDict);
+    real **featuresArray = NULL;
     long minIdx;
     int nFeatures = this->features.at(0).size();
 
@@ -500,86 +531,95 @@ int ClusteringStuffs::calculate_central_struct(LogStream *lstream){
     featuresArray = convert2DVectorToArray(&this->features, this->features.size());
 
     printf("\n");
-    for (size_t i=0; i<sortedKeys.size(); i++)  {
-        printf("\rCalculating central structure for cluster-%d ...",sortedKeys[i]) ;
+    for (size_t i = 0; i < sortedKeys.size(); i++)
+    {
+        printf("\rCalculating central structure for cluster-%d ...", sortedKeys[i]);
         fflush(stdout);
         clusterFrameIndex = this->clusterDict.at(sortedKeys[i]);
         minIdx = this->get_index_central_struct(sortedKeys[i], featuresArray, &clusterFrameIndex[0], clusterFrameIndex.size(), nFeatures);
-        //std::cout<<it->first<<"\t\t"<<minIdx<<"\t\t"<<clusterFrameIndex.size()<<"\n";
+        // std::cout<<it->first<<"\t\t"<<minIdx<<"\t\t"<<clusterFrameIndex.size()<<"\n";
         this->centralStructDict.emplace(sortedKeys[i], minIdx);
     }
     printf("\n");
 
-    *lstream<<"\n===========================================";
-    *lstream<<"\nCluster-ID\tCentral Frame\tTotal Frames \n";
-    for (size_t i=0; i<sortedKeys.size(); i++)
-        *lstream<<sortedKeys[i]<<"\t\t"<<this->centralStructDict[sortedKeys[i]]<<"\t\t"<<this->clusterDict.at(sortedKeys[i]).size()<<"\n";
-    *lstream<<"===========================================\n\n";
+    *lstream << "\n===========================================";
+    *lstream << "\nCluster-ID\tCentral Frame\tTotal Frames \n";
+    for (size_t i = 0; i < sortedKeys.size(); i++)
+        *lstream << sortedKeys[i] << "\t\t" << this->centralStructDict[sortedKeys[i]] << "\t\t" << this->clusterDict.at(sortedKeys[i]).size() << "\n";
+    *lstream << "===========================================\n\n";
 
-
-    sfree(featuresArray);  //Free array
+    sfree(featuresArray); // Free array
 
     return TRUE;
 }
 
-std::vector< long > ClusteringStuffs::get_central_ids(){
-    std::vector< int > sortedKeys = getSortedKeys(this->clusterDict);
-    std::vector< long > central_id;
-    //Loop over cluster start here
-    for (size_t i=0; i<sortedKeys.size(); i++)  {
-        central_id.push_back( this->centralStructDict.at(sortedKeys[i]) );
+std::vector<long> ClusteringStuffs::get_central_ids()
+{
+    std::vector<int> sortedKeys = getSortedKeys(this->clusterDict);
+    std::vector<long> central_id;
+    // Loop over cluster start here
+    for (size_t i = 0; i < sortedKeys.size(); i++)
+    {
+        central_id.push_back(this->centralStructDict.at(sortedKeys[i]));
     }
     return central_id;
 }
 
-void ClusteringStuffs::calculateDaviesBouldinIndex() {
-    std::vector< int > sortedKeys = getSortedKeys(this->clusterDict);
+void ClusteringStuffs::calculateDaviesBouldinIndex()
+{
+    std::vector<int> sortedKeys = getSortedKeys(this->clusterDict);
     int n_cluster = sortedKeys.size();
 
-    if (n_cluster == 1){
+    if (n_cluster == 1)
+    {
         ClusteringStuffs::daviesBouldinScore.emplace(n_cluster, 0);
         return;
     }
 
-    std::vector< long > clusterFrameIndex;
+    std::vector<long> clusterFrameIndex;
     int nFeatures = this->features.at(0).size();
-    std::vector< std::vector < real > > centroids(n_cluster, std::vector< real > (nFeatures, 0.0));
-    std::vector< real > variances(n_cluster, 0.0);
+    std::vector<std::vector<real>> centroids(n_cluster, std::vector<real>(nFeatures, 0.0));
+    std::vector<real> variances(n_cluster, 0.0);
     real sums = 0, di_sum = 0, dbi = 0, rij = 0;
 
     // Calculate Ai and Si
-    for(size_t c=0; c < sortedKeys.size(); c++)    {
+    for (size_t c = 0; c < sortedKeys.size(); c++)
+    {
         clusterFrameIndex = this->clusterDict.at(sortedKeys[c]);
 
         // Get the centeroids (Ai)
-        for(int i=0; i < nFeatures; i++ )  {
-            for(unsigned long j=0; j < clusterFrameIndex.size(); j++ )  {
+        for (int i = 0; i < nFeatures; i++)
+        {
+            for (unsigned long j = 0; j < clusterFrameIndex.size(); j++)
+            {
                 centroids[c][i] += features[clusterFrameIndex[j]][i];
             }
-            centroids[c][i] = centroids[c][i]/clusterFrameIndex.size();
+            centroids[c][i] = centroids[c][i] / clusterFrameIndex.size();
         }
 
         // Calculate variances (Si) around the centroids in each cluster
         sums = 0;
-        for(unsigned long j=0; j < clusterFrameIndex.size(); j++ )  {
+        for (unsigned long j = 0; j < clusterFrameIndex.size(); j++)
+        {
             sums += calculate_distance(features[clusterFrameIndex[j]].data(), centroids[c].data(), nFeatures, false);
         }
-        variances[c] = sums/clusterFrameIndex.size();
+        variances[c] = sums / clusterFrameIndex.size();
     }
 
     // calculate Di
-    for(int i=0; i < n_cluster; i++ )  {
+    for (int i = 0; i < n_cluster; i++)
+    {
         real max_rij = 0;
-        for(long j=0; j < n_cluster; j++ )  {
-            if (i==j)
+        for (long j = 0; j < n_cluster; j++)
+        {
+            if (i == j)
                 continue;
 
             // Calculate Rij =  (Si + Sj)/Mij, where Mi is distance between two centroids
             rij = (variances[i] + variances[j]) / calculate_distance(centroids[i].data(), centroids[j].data(), nFeatures, false);
 
-
             // Determine max Rij
-            if(rij > max_rij)
+            if (rij > max_rij)
                 max_rij = rij;
         }
 
@@ -597,17 +637,20 @@ void ClusteringStuffs::calculateDaviesBouldinIndex() {
 }
 
 int ClusteringStuffs::constructClusterDict(int numMinFrameCluster,
-                                           LogStream *lstream) {
+                                           LogStream *lstream)
+{
 
-    std::vector<long> tempIndexVector;   // store a value for making first key-value pair
+    std::vector<long> tempIndexVector; // store a value for making first key-value pair
     int tmpClid;
     long index;
 
-    for(unsigned long i=0; i < this->clidAlongTime.size(); i++) {
+    for (unsigned long i = 0; i < this->clidAlongTime.size(); i++)
+    {
         tmpClid = this->clidAlongTime[i];
 
         // Ignore cluster with -1, particulalry genrated in DBSCAN
-        if (tmpClid == -1) {
+        if (tmpClid == -1)
+        {
             continue;
         }
 
@@ -616,16 +659,20 @@ int ClusteringStuffs::constructClusterDict(int numMinFrameCluster,
         // Make and expand clid->index dictionary
         tempIndexVector.clear();
         tempIndexVector.shrink_to_fit();
-        if ( this->clusterDict.empty() ) {
+        if (this->clusterDict.empty())
+        {
             tempIndexVector.push_back(index);
-            this->clusterDict.emplace( tmpClid, tempIndexVector );
+            this->clusterDict.emplace(tmpClid, tempIndexVector);
         }
-        else    {
-            if (this->clusterDict.count(tmpClid) == 0)   {
+        else
+        {
+            if (this->clusterDict.count(tmpClid) == 0)
+            {
                 tempIndexVector.push_back(index);
                 this->clusterDict.emplace(tmpClid, tempIndexVector);
             }
-            else  {
+            else
+            {
                 tempIndexVector = this->clusterDict.at(tmpClid);
                 this->clusterDict.erase(tmpClid);
                 tempIndexVector.push_back(index);
@@ -634,45 +681,47 @@ int ClusteringStuffs::constructClusterDict(int numMinFrameCluster,
         }
     }
 
-
     // Store cluster-index, order will be used for output files
-    *lstream<<"\n===========================\nCluster-ID\tTotalFrames\n";
-    for (std::map< int, std::vector<long> >::iterator it=this->clusterDict.begin(); it!=this->clusterDict.end(); ++it)  {
+    *lstream << "\n===========================\nCluster-ID\tTotalFrames\n";
+    for (std::map<int, std::vector<long>>::iterator it = this->clusterDict.begin(); it != this->clusterDict.end(); ++it)
+    {
 
-        if (it->second.size() < (unsigned int)numMinFrameCluster) {
+        if (it->second.size() < (unsigned int)numMinFrameCluster)
+        {
             continue;
         }
 
-        *lstream<<it->first<<"\t\t"<<it->second.size()<<"\n";
+        *lstream << it->first << "\t\t" << it->second.size() << "\n";
         this->clusterIndex.push_back(it->first);
     }
-    *lstream<<"===========================\n\n";
+    *lstream << "===========================\n\n";
 
     this->totalClustNum = this->clusterDict.size();
 
     return TRUE;
 }
 
-
 int ClusteringStuffs::read_cluster_input(const char *fnDataIn,
                                          gmx_bool *bFeatures,
                                          int numMinFrameCluster,
                                          gmx_output_env_t *oenv,
-                                         LogStream *lstream) {
+                                         LogStream *lstream)
+{
 
     std::ifstream fpDataIn;
     std::string line;
-    std::vector< std::string > temp;
+    std::vector<std::string> temp;
     real time, tempFeature;
     std::vector<long> tempIndexVector;   // store a value for making first key-value pair
-    std::vector<real> tempFeatureVector;   // store a value for making first key-value pair
+    std::vector<real> tempFeatureVector; // store a value for making first key-value pair
     int tmpClid;
 
     long index = 0;
 
     // Open data file, Do it in C++ way for easy reading and parsing
     fpDataIn.open(fnDataIn, std::ifstream::in);
-    while(1)	{
+    while (1)
+    {
 
         std::getline(fpDataIn, line); // Read each line of the file
 
@@ -684,11 +733,11 @@ int ClusteringStuffs::read_cluster_input(const char *fnDataIn,
         temp = split(line, ' ');
 
         // If blank line skip
-        if ( temp.empty() )
+        if (temp.empty())
             continue;
 
         // Skip line start with # and @, mostly in xvg file
-        if ( (temp[0][0] == '#') || (temp[0][0] == '@') )
+        if ((temp[0][0] == '#') || (temp[0][0] == '@'))
             continue;
 
         // Check if features are present
@@ -697,7 +746,7 @@ int ClusteringStuffs::read_cluster_input(const char *fnDataIn,
 
         // Get current time and clid
         // Also convert time to ps (default unit in trajectory file)
-        time = (real)std::stod(temp[0]) * output_env_get_time_invfactor(oenv); 
+        time = (real)std::stod(temp[0]) * output_env_get_time_invfactor(oenv);
         tmpClid = std::stoi(temp[1]);
 
         // Store current time and clid in the variable
@@ -707,16 +756,20 @@ int ClusteringStuffs::read_cluster_input(const char *fnDataIn,
         // Make and expand clid->index dictionary
         tempIndexVector.clear();
         tempIndexVector.shrink_to_fit();
-        if ( this->clusterDict.empty() ) {
+        if (this->clusterDict.empty())
+        {
             tempIndexVector.push_back(index);
-            this->clusterDict.emplace( tmpClid, tempIndexVector );
+            this->clusterDict.emplace(tmpClid, tempIndexVector);
         }
-        else    {
-            if (this->clusterDict.count(tmpClid) == 0)   {
+        else
+        {
+            if (this->clusterDict.count(tmpClid) == 0)
+            {
                 tempIndexVector.push_back(index);
                 this->clusterDict.emplace(tmpClid, tempIndexVector);
             }
-            else  {
+            else
+            {
                 tempIndexVector = this->clusterDict.at(tmpClid);
                 this->clusterDict.erase(tmpClid);
                 tempIndexVector.push_back(index);
@@ -725,12 +778,14 @@ int ClusteringStuffs::read_cluster_input(const char *fnDataIn,
         }
 
         // Read Feature values here if present
-        if (*bFeatures) {
+        if (*bFeatures)
+        {
             tempFeatureVector.clear();
             tempFeatureVector.shrink_to_fit();
-            for (size_t i=2; i < temp.size(); i++)  {
+            for (size_t i = 2; i < temp.size(); i++)
+            {
                 tempFeature = (real)std::stod(temp[i]);
-                tempFeatureVector.push_back( tempFeature );
+                tempFeatureVector.push_back(tempFeature);
             }
             this->features.push_back(tempFeatureVector);
         }
@@ -738,16 +793,17 @@ int ClusteringStuffs::read_cluster_input(const char *fnDataIn,
     }
 
     // Store cluster-index, order will be used for output files
-    *lstream<<"\n===========================\nCluster-ID\tTotalFrames\n";
-    for (std::map< int, std::vector<long> >::iterator it=this->clusterDict.begin(); it!=this->clusterDict.end(); ++it)  {
+    *lstream << "\n===========================\nCluster-ID\tTotalFrames\n";
+    for (std::map<int, std::vector<long>>::iterator it = this->clusterDict.begin(); it != this->clusterDict.end(); ++it)
+    {
 
         if (it->second.size() < (size_t)numMinFrameCluster)
             continue;
 
-        *lstream<<it->first<<"\t\t"<<it->second.size()<<"\n";
+        *lstream << it->first << "\t\t" << it->second.size() << "\n";
         this->clusterIndex.push_back(it->first);
     }
-    *lstream<<"===========================\n\n";
+    *lstream << "===========================\n\n";
 
     this->totalClustNum = this->clusterDict.size();
 
@@ -755,24 +811,25 @@ int ClusteringStuffs::read_cluster_input(const char *fnDataIn,
 }
 
 int ClusteringStuffs::read_features_input(const char *fnDataIn,
-                                       int minFeatures,
-                                       gmx_output_env_t *oenv,
-                                       LogStream *lstream) {
+                                          int minFeatures,
+                                          gmx_output_env_t *oenv,
+                                          LogStream *lstream)
+{
 
     std::ifstream fpDataIn;
     bool bPushTime = true;
     std::string line;
-    std::vector< std::string > temp;
+    std::vector<std::string> temp;
     real time, tempFeature;
-    std::vector<real> tempFeatureVector;   // store a value for making first key-value pair
-    std::vector< std::vector<real> > features_local;
-
+    std::vector<real> tempFeatureVector; // store a value for making first key-value pair
+    std::vector<std::vector<real>> features_local;
 
     int nFeatures = 0;
 
     // Open data file, Do it in C++ way for easy reading and parsing
     fpDataIn.open(fnDataIn, std::ifstream::in);
-    while(1)	{
+    while (1)
+    {
 
         std::getline(fpDataIn, line); // Read each line of the file
 
@@ -784,29 +841,31 @@ int ClusteringStuffs::read_features_input(const char *fnDataIn,
         temp = split(line, ' ');
 
         // If blank line skip
-        if ( temp.empty() )
+        if (temp.empty())
             continue;
 
         // Skip line start with # and @, mostly in xvg file
-        if ( (temp[0][0] == '#') || (temp[0][0] == '@') )
+        if ((temp[0][0] == '#') || (temp[0][0] == '@'))
             continue;
 
-
-        if (temp[0][0] == '&') {
+        if (temp[0][0] == '&')
+        {
             bPushTime = false;
             features_local.push_back(tempFeatureVector);
             nFeatures += 1;
 
-            if(minFeatures == nFeatures)
+            if (minFeatures == nFeatures)
                 break;
 
             // Check if feature array size is same
-            if(!bPushTime) {
-                if(features_local[0].size() != tempFeatureVector.size()) {
-                    gmx_fatal(FARGS,"Size of features array does not match between feature-1 and feature-%d...\n", (int)features_local.size()+1);
+            if (!bPushTime)
+            {
+                if (features_local[0].size() != tempFeatureVector.size())
+                {
+                    gmx_fatal(FARGS, "Size of features array does not match between feature-1 and feature-%d...\n", (int)features_local.size() + 1);
                 }
             }
-            
+
             // clear and remove memory for tempFeatureVector
             tempFeatureVector.clear();
             tempFeatureVector.shrink_to_fit();
@@ -819,19 +878,21 @@ int ClusteringStuffs::read_features_input(const char *fnDataIn,
         tempFeatureVector.push_back(tempFeature);
 
         // Store current time
-        if(bPushTime) {
+        if (bPushTime)
+        {
             // Also convert time to ps (default unit in trajectory file)
             time = (real)std::stod(temp[0]) * output_env_get_time_invfactor(oenv);
-            ClusteringStuffs::timeInInput.push_back(time); 
+            ClusteringStuffs::timeInInput.push_back(time);
         }
-        
     }
 
     // change (n_features, time) shape to (time, n_features)
-    std::vector< std::vector<real> > features_trans(features_local[0].size(), std::vector<real>(features_local.size()));
-    for(size_t i=0;i<features_local.size(); i++) {
-        for (size_t j=0;j<features_local[i].size(); j++){
-                features_trans[j][i] = features_local[i][j];
+    std::vector<std::vector<real>> features_trans(features_local[0].size(), std::vector<real>(features_local.size()));
+    for (size_t i = 0; i < features_local.size(); i++)
+    {
+        for (size_t j = 0; j < features_local[i].size(); j++)
+        {
+            features_trans[j][i] = features_local[i][j];
         }
     }
     ClusteringStuffs::features = features_trans;
@@ -839,11 +900,13 @@ int ClusteringStuffs::read_features_input(const char *fnDataIn,
     return TRUE;
 }
 
-
-int ClusteringStuffs::any_central_rmsd_below_thershold(real thres){
-    for(size_t i=0; i<this->centrlRmsdMatrix.at(0).size(); i++) {
-        for(size_t j=0; j<i; j++) {
-            if(centrlRmsdMatrix[i][j] < thres)
+int ClusteringStuffs::any_central_rmsd_below_thershold(real thres)
+{
+    for (size_t i = 0; i < this->centrlRmsdMatrix.at(0).size(); i++)
+    {
+        for (size_t j = 0; j < i; j++)
+        {
+            if (centrlRmsdMatrix[i][j] < thres)
                 return TRUE;
         }
     }
@@ -851,72 +914,83 @@ int ClusteringStuffs::any_central_rmsd_below_thershold(real thres){
     return FALSE;
 }
 
-int ClusteringStuffs::performClusterMetrics(int eClusterMetrics, int n_clusters, real ssrSstChangeCutoff, LogStream *lstream){
+int ClusteringStuffs::performClusterMetrics(int eClusterMetrics, int n_clusters, real ssrSstChangeCutoff, LogStream *lstream)
+{
     int finalClustersNumber = 1;
     bool bGotFinalClusterNumber = false;
     real prevSsrSstRatio = 0, changeInSsrSstRatio = 0;
     char output[1024];
 
     lstream->setprecision(3);
-    *lstream<<"\n\n===========================================================================================================\n";
-    *lstream<<"                                          Cluster Metrics Summary                                          \n";
-    *lstream<<"-----------------------------------------------------------------------------------------------------------\n";
+    *lstream << "\n\n===========================================================================================================\n";
+    *lstream << "                                          Cluster Metrics Summary                                          \n";
+    *lstream << "-----------------------------------------------------------------------------------------------------------\n";
     sprintf(output, "%-14s %-10s %-18s %-18s %-18s %-18s\n", "Clusters  ", "SSR/SST", "D(SSR/SST)", "(Psuedo)F-stat.", "Silhouette-score", "Davies-bouldin-score");
-    *lstream<<output;
+    *lstream << output;
     //*lstream<<"Clust. No.\tssr/sst (%)\tDelta(ssr/sst)\tpsuedo F-stat\tSilhouette-score\tDavies-bouldin-score\n";
-    for(int i = 2; i <= n_clusters; i++){
+    for (int i = 2; i <= n_clusters; i++)
+    {
         changeInSsrSstRatio = ClusteringStuffs::ssrSstRatio.at(i) - prevSsrSstRatio;
 
-        sprintf(output, "%-14d %3.2f %11.3f %26.3f %9.3f %18.3f \n" , i, ClusteringStuffs::ssrSstRatio.at(i), changeInSsrSstRatio, \
+        sprintf(output, "%-14d %3.2f %11.3f %26.3f %9.3f %18.3f \n", i, ClusteringStuffs::ssrSstRatio.at(i), changeInSsrSstRatio,
                 ClusteringStuffs::pFS.at(i), ClusteringStuffs::silhouetteScore.at(i), ClusteringStuffs::daviesBouldinScore.at(i));
-        *lstream<<output;
+        *lstream << output;
 
         prevSsrSstRatio = ClusteringStuffs::ssrSstRatio.at(i);
 
-        if(finalClustersNumber == 1) {
+        if (finalClustersNumber == 1)
+        {
             finalClustersNumber = i;
             continue;
         }
 
-
-        if (eClusterMetrics == eSsrSstClusterMetric) {
-            if ((changeInSsrSstRatio < ssrSstChangeCutoff) && (!bGotFinalClusterNumber))    {
-                finalClustersNumber = i-1;
+        if (eClusterMetrics == eSsrSstClusterMetric)
+        {
+            if ((changeInSsrSstRatio < ssrSstChangeCutoff) && (!bGotFinalClusterNumber))
+            {
+                finalClustersNumber = i - 1;
                 bGotFinalClusterNumber = true;
             }
         }
 
-        if (eClusterMetrics == eSilhouetteClusterMetric) {
-            //std::cout<<ClusteringStuffs::pFS.at(finalClustersNumber)<<" "<<ClusteringStuffs::pFS.at(i)<<" "<<bGotFinalClusterNumber<<" "<<finalClustersNumber<<"\n";
+        if (eClusterMetrics == eSilhouetteClusterMetric)
+        {
+            // std::cout<<ClusteringStuffs::pFS.at(finalClustersNumber)<<" "<<ClusteringStuffs::pFS.at(i)<<" "<<bGotFinalClusterNumber<<" "<<finalClustersNumber<<"\n";
 
-            if(  ClusteringStuffs::silhouetteScore.at(i) > ClusteringStuffs::silhouetteScore.at(finalClustersNumber) ) {
-                if(!bGotFinalClusterNumber)
+            if (ClusteringStuffs::silhouetteScore.at(i) > ClusteringStuffs::silhouetteScore.at(finalClustersNumber))
+            {
+                if (!bGotFinalClusterNumber)
                     finalClustersNumber = i;
             }
-            else    {
+            else
+            {
                 bGotFinalClusterNumber = true;
             }
         }
 
-        if (eClusterMetrics == eDbiClusterMetric) {
+        if (eClusterMetrics == eDbiClusterMetric)
+        {
             // std::cout<<ClusteringStuffs::dbi.at(finalClustersNumber)<<" "<<ClusteringStuffs::dbi.at(i)<<" "<<bGotFinalClusterNumber<<" "<<finalClustersNumber<<"\n";
 
-            if(  ClusteringStuffs::daviesBouldinScore.at(i) < ClusteringStuffs::daviesBouldinScore.at(finalClustersNumber)) {
-                if(!bGotFinalClusterNumber) {
+            if (ClusteringStuffs::daviesBouldinScore.at(i) < ClusteringStuffs::daviesBouldinScore.at(finalClustersNumber))
+            {
+                if (!bGotFinalClusterNumber)
+                {
                     finalClustersNumber = i;
                 }
             }
-            else {
+            else
+            {
                 bGotFinalClusterNumber = true;
             }
-
         }
     }
 
-    *lstream<<"===========================================================================================================\n";
+    *lstream << "===========================================================================================================\n";
     lstream->resetprecision();
-    
-    if (!bGotFinalClusterNumber) {
+
+    if (!bGotFinalClusterNumber)
+    {
         gmx_fatal(FARGS, "Not enough clusters to determine number cluster based on the selected cluster-metric. \n"
                          "Increase the number of clusters (-ncluster option)!!");
     }
@@ -924,11 +998,10 @@ int ClusteringStuffs::performClusterMetrics(int eClusterMetrics, int n_clusters,
     return finalClustersNumber;
 }
 
-
 // ############################### ClusteringStuffs END ##########################
 
-
-void CopyRightMsgCluster() {
+void CopyRightMsgCluster()
+{
 
     std::string msg = R"~(
          :-)  gmx_clusterByFeatures cluster (-:
@@ -964,14 +1037,13 @@ NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
 SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
     )~";
 
-        std::cerr<<msg<<"\n";
+    std::cerr << msg << "\n";
 }
 
-
-void write_clustered_trajs(const char* fname, ClusteringStuffs* clustStuff, int* atomIndex, int atomIndexSize, TrajectoryStuffs inpTrajStuff, gmx_bool bAlignTrajToCentral, int* fitAtomIndex, int fitAtomIndexSize)
+void write_clustered_trajs(const char *fname, ClusteringStuffs *clustStuff, int *atomIndex, int atomIndexSize, TrajectoryStuffs inpTrajStuff, gmx_bool bAlignTrajToCentral, int *fitAtomIndex, int fitAtomIndexSize)
 {
 
-    std::vector< std::string > fnOutTrajs = get_outFile_names(fname, clustStuff->clusterIndex, ".xtc", "");
+    std::vector<std::string> fnOutTrajs = get_outFile_names(fname, clustStuff->clusterIndex, ".xtc", "");
     t_trxstatus *outStatus;
     int ftp = fn2ftp(inpTrajStuff.filename);
     t_fileio *fio = trx_get_fileio(inpTrajStuff.status);
@@ -984,23 +1056,26 @@ void write_clustered_trajs(const char* fname, ClusteringStuffs* clustStuff, int*
     rvec x_shift = {0.0, 0.0, 0.0};
     int i = 0;
 
-    std::cout<<"\n\nWriting trajectory for each cluster...\n";
+    std::cout << "\n\nWriting trajectory for each cluster...\n";
 
-    //Loop over cluster start here
-    for (size_t c=0; c < clustStuff->clusterIndex.size(); c++) {
+    // Loop over cluster start here
+    for (size_t c = 0; c < clustStuff->clusterIndex.size(); c++)
+    {
         outTime = 0;
         cluster = clustStuff->clusterIndex[c];
         clusterLength = clustStuff->clusterDict[cluster].size();
 
         // Initial fitting stuff
-        if( bAlignTrajToCentral) {
+        if (bAlignTrajToCentral)
+        {
             snew(w_rls, inpTrajStuff.atoms.nr);
 
             if (fitAtomIndexSize < 3)
-                gmx_fatal(FARGS, "Need >= 3 points to fit!\n" );
+                gmx_fatal(FARGS, "Need >= 3 points to fit!\n");
 
             // Assign weight-factor for fitting
-            for (i = 0; i < fitAtomIndexSize; i++) {
+            for (i = 0; i < fitAtomIndexSize; i++)
+            {
                 if (inpTrajStuff.atoms.atom[fitAtomIndex[i]].m != 0)
                     w_rls[fitAtomIndex[i]] = inpTrajStuff.atoms.atom[fitAtomIndex[i]].m;
                 else
@@ -1011,37 +1086,41 @@ void write_clustered_trajs(const char* fname, ClusteringStuffs* clustStuff, int*
             copy_rvec(clustStuff->centralCoords[c][fitAtomIndex[0]], x_shift);
             reset_x(fitAtomIndexSize, fitAtomIndex, inpTrajStuff.atoms.nr, NULL, clustStuff->centralCoords[c], w_rls);
             rvec_dec(x_shift, clustStuff->centralCoords[c][fitAtomIndex[0]]);
-
         }
 
         // Open output trajectory here
-        outStatus = open_trx(fnOutTrajs[c].c_str(),"w");
+        outStatus = open_trx(fnOutTrajs[c].c_str(), "w");
 
         // Loop for frame of each cluster start here
-        for(int n = 0; n < clusterLength; n++)  {
+        for (int n = 0; n < clusterLength; n++)
+        {
             currentTime = ClusteringStuffs::timeInInput[clustStuff->clusterDict[cluster][n]];
-            outTime = n*inpTrajStuff.dTime;
+            outTime = n * inpTrajStuff.dTime;
 
-             if (ftp == efXTC) {
+            if (ftp == efXTC)
+            {
                 bRet = xtc_seek_time(fio, currentTime, inpTrajStuff.natoms, FALSE);
-                if (bRet == -1) {
+                if (bRet == -1)
+                {
                     gmx_fatal(FARGS, "Frame for this time is not found in trajectory");
                 }
                 read_next_x(inpTrajStuff.oenv, inpTrajStuff.status, &inpTrajStuff.time, inpTrajStuff.x, inpTrajStuff.box);
             }
-            else {
-                 if (currentTime < inpTrajStuff.time)
-                     rewind_trj(inpTrajStuff.status);
+            else
+            {
+                if (currentTime < inpTrajStuff.time)
+                    rewind_trj(inpTrajStuff.status);
 
-
-                while (inpTrajStuff.time !=  currentTime)   {
+                while (inpTrajStuff.time != currentTime)
+                {
                     bRet = read_next_x(inpTrajStuff.oenv, inpTrajStuff.status, &inpTrajStuff.time, inpTrajStuff.x, inpTrajStuff.box);
                     if (!bRet)
                         break;
                 }
             }
 
-            if( bAlignTrajToCentral)    {
+            if (bAlignTrajToCentral)
+            {
                 reset_x(fitAtomIndexSize, fitAtomIndex, inpTrajStuff.atoms.nr, NULL, inpTrajStuff.x, w_rls);
                 do_fit(inpTrajStuff.natoms, w_rls, clustStuff->centralCoords[c], inpTrajStuff.x);
                 for (i = 0; i < inpTrajStuff.natoms; i++)
@@ -1049,17 +1128,20 @@ void write_clustered_trajs(const char* fname, ClusteringStuffs* clustStuff, int*
             }
 
             write_trx(outStatus, atomIndexSize, atomIndex, &inpTrajStuff.atoms, 0, outTime, inpTrajStuff.box, inpTrajStuff.x, NULL, NULL);
-            
+
             // Break loop when desired number of frame is already output
-            if(inpTrajStuff.maxOutFrame >= 0)   {
-                if(n >= inpTrajStuff.maxOutFrame-1) {
+            if (inpTrajStuff.maxOutFrame >= 0)
+            {
+                if (n >= inpTrajStuff.maxOutFrame - 1)
+                {
                     break;
                 }
             }
 
         } // Loop for frame of each cluster end here
 
-        if( bAlignTrajToCentral)    {
+        if (bAlignTrajToCentral)
+        {
             for (i = 0; i < inpTrajStuff.natoms; i++)
                 rvec_inc(clustStuff->centralCoords[c][i], x_shift);
 
@@ -1068,34 +1150,36 @@ void write_clustered_trajs(const char* fname, ClusteringStuffs* clustStuff, int*
 
         close_trx(outStatus);
 
-    } //Loop over cluster END here
+    } // Loop over cluster END here
 }
 
-std::vector< std::vector< real > > calculate_rmsd(ClusteringStuffs *clustStuff,
-                                                  int *fitAtomIndex, int fitAtomIndexSize,
-                                                  int *rmsdAtomIndex, int rmsdAtomIndexSize,
-                                                  TrajectoryStuffs inpTrajStuff)    {
+std::vector<std::vector<real>> calculate_rmsd(ClusteringStuffs *clustStuff,
+                                              int *fitAtomIndex, int fitAtomIndexSize,
+                                              int *rmsdAtomIndex, int rmsdAtomIndexSize,
+                                              TrajectoryStuffs inpTrajStuff)
+{
 
     real *w_rls, *w_rms, currentTime, temp;
     int i = 0;
     int ftp = fn2ftp(inpTrajStuff.filename);
     t_fileio *fio = trx_get_fileio(inpTrajStuff.status);
-    std::vector< std::vector< real > > clusterRMSD;
+    std::vector<std::vector<real>> clusterRMSD;
     rvec x_shift;
     long clusterLength;
     int cluster, bRet;
 
-    std::cout<<"\n\nCalculating RMSD from central structure for each cluster...\n";
+    std::cout << "\n\nCalculating RMSD from central structure for each cluster...\n";
 
     // Weight factor initialization for fitting and RMSD calculation
     snew(w_rms, inpTrajStuff.atoms.nr);
     snew(w_rls, inpTrajStuff.atoms.nr);
 
     if (fitAtomIndexSize < 3)
-        gmx_fatal(FARGS, "Need >= 3 points to fit!\n" );
+        gmx_fatal(FARGS, "Need >= 3 points to fit!\n");
 
     // Assign weight-factor for fitting
-    for (i = 0; i < fitAtomIndexSize; i++) {
+    for (i = 0; i < fitAtomIndexSize; i++)
+    {
         if (inpTrajStuff.atoms.atom[fitAtomIndex[i]].m != 0)
             w_rls[fitAtomIndex[i]] = inpTrajStuff.atoms.atom[fitAtomIndex[i]].m;
         else
@@ -1103,20 +1187,21 @@ std::vector< std::vector< real > > calculate_rmsd(ClusteringStuffs *clustStuff,
     }
 
     // Assign weight-factor for RMSD calculation
-    for (i = 0; i < rmsdAtomIndexSize; i++) {
+    for (i = 0; i < rmsdAtomIndexSize; i++)
+    {
         if (inpTrajStuff.atoms.atom[rmsdAtomIndex[i]].m != 0)
             w_rms[rmsdAtomIndex[i]] = inpTrajStuff.atoms.atom[rmsdAtomIndex[i]].m;
         else
             w_rms[rmsdAtomIndex[i]] = 1;
     }
 
-    //Loop over cluster start here
-    for (size_t c=0; c < clustStuff->clusterIndex.size(); c++) {
-        std::vector< real > rmsd;
+    // Loop over cluster start here
+    for (size_t c = 0; c < clustStuff->clusterIndex.size(); c++)
+    {
+        std::vector<real> rmsd;
 
         cluster = clustStuff->clusterIndex[c];
         clusterLength = clustStuff->clusterDict[cluster].size();
-
 
         // Reset to origin and store the translation factor of reference coordinate
         copy_rvec(clustStuff->centralCoords[c][0], x_shift);
@@ -1124,23 +1209,27 @@ std::vector< std::vector< real > > calculate_rmsd(ClusteringStuffs *clustStuff,
         rvec_dec(x_shift, clustStuff->centralCoords[c][0]);
 
         // Loop for frame of each cluster start here
-        for(int n = 0; n < clusterLength; n++)  {
+        for (int n = 0; n < clusterLength; n++)
+        {
             currentTime = ClusteringStuffs::timeInInput[clustStuff->clusterDict[cluster][n]];
 
-
-            if (ftp == efXTC) {
+            if (ftp == efXTC)
+            {
                 bRet = xtc_seek_time(fio, currentTime, inpTrajStuff.natoms, FALSE);
-                if (bRet == -1) {
+                if (bRet == -1)
+                {
                     gmx_fatal(FARGS, "Frame for this time is not found in trajectory");
                 }
                 read_next_x(inpTrajStuff.oenv, inpTrajStuff.status, &inpTrajStuff.time, inpTrajStuff.x, inpTrajStuff.box);
             }
-            else {
+            else
+            {
                 // If current time is larger than time in trajectory rewind back
                 if (currentTime < inpTrajStuff.time)
                     rewind_trj(inpTrajStuff.status);
 
-                while (inpTrajStuff.time !=  currentTime)   {
+                while (inpTrajStuff.time != currentTime)
+                {
                     bRet = read_next_x(inpTrajStuff.oenv, inpTrajStuff.status, &inpTrajStuff.time, inpTrajStuff.x, inpTrajStuff.box);
                     if (!bRet)
                         break;
@@ -1152,7 +1241,7 @@ std::vector< std::vector< real > > calculate_rmsd(ClusteringStuffs *clustStuff,
             reset_x(fitAtomIndexSize, fitAtomIndex, inpTrajStuff.atoms.nr, NULL, inpTrajStuff.x, w_rls);
             do_fit(inpTrajStuff.natoms, w_rls, clustStuff->centralCoords[c], inpTrajStuff.x);
             temp = calc_similar_ind(FALSE, rmsdAtomIndexSize, rmsdAtomIndex, w_rms, inpTrajStuff.x, clustStuff->centralCoords[c]);
-            rmsd.push_back( temp );
+            rmsd.push_back(temp);
         }
 
         clusterRMSD.push_back(rmsd);
@@ -1161,125 +1250,136 @@ std::vector< std::vector< real > > calculate_rmsd(ClusteringStuffs *clustStuff,
         for (i = 0; i < inpTrajStuff.natoms; i++)
             rvec_inc(clustStuff->centralCoords[c][i], x_shift);
 
-    } //Loop over cluster end here
+    } // Loop over cluster end here
 
     sfree(w_rms);
     sfree(w_rls);
-    
+
     // rewind trajectory file and Initialize status
     rewind_trj(inpTrajStuff.status);
 
     return clusterRMSD;
 }
 
+void write_rmsd(std::vector<std::vector<real>> rmsd,
+                const char *fnOutRMSD,
+                std::vector<int> clusterIndex,
+                TrajectoryStuffs inpTrajStuff)
+{
 
-void write_rmsd( std::vector< std::vector< real > > rmsd,
-                 const char* fnOutRMSD,
-                 std::vector< int > clusterIndex,
-                 TrajectoryStuffs inpTrajStuff)    {
+    if (fnOutRMSD == NULL)
+        return; // RETURN HERE IF NO RMSD FILE IS PROVIDED
 
-    if (fnOutRMSD == NULL) return;   // RETURN HERE IF NO RMSD FILE IS PROVIDED
-
-    std::vector< std::string > fnOutRMSDs = get_outFile_names(fnOutRMSD, clusterIndex, ".xvg", "");
+    std::vector<std::string> fnOutRMSDs = get_outFile_names(fnOutRMSD, clusterIndex, ".xvg", "");
     FILE *fout;
     std::string title;
 
-    for (size_t c=0; c < clusterIndex.size(); c++) {
+    for (size_t c = 0; c < clusterIndex.size(); c++)
+    {
         title = "RMSD: Cluster-" + std::to_string(clusterIndex[c]);
-        fout = xvgropen(fnOutRMSDs[c].c_str(),title.c_str(), output_env_get_time_label(inpTrajStuff.oenv), "RMSD (nm)", inpTrajStuff.oenv);
-        for (size_t n=0; n < rmsd[c].size(); n++) {
-            //std::cout<<inpTrajStuff.dTime<<" "<<rmsd[c][n]<<std::endl;
-            fprintf(fout,"%12.7f   %f \n",inpTrajStuff.dTime*n*output_env_get_time_factor(inpTrajStuff.oenv), rmsd[c][n]);
+        fout = xvgropen(fnOutRMSDs[c].c_str(), title.c_str(), output_env_get_time_label(inpTrajStuff.oenv), "RMSD (nm)", inpTrajStuff.oenv);
+        for (size_t n = 0; n < rmsd[c].size(); n++)
+        {
+            // std::cout<<inpTrajStuff.dTime<<" "<<rmsd[c][n]<<std::endl;
+            fprintf(fout, "%12.7f   %f \n", inpTrajStuff.dTime * n * output_env_get_time_factor(inpTrajStuff.oenv), rmsd[c][n]);
         }
         xvgrclose(fout);
     }
 }
 
+real calculate_rmsdist(int nind, int index[], const rvec x[], real **d, real **d_ref)
+{
 
-real calculate_rmsdist(int nind, int index[], const rvec x[], real **d, real **d_ref) {
-
-    int      i, j;
-    real     rms_diff = 0, r2 = 0, r = 0;
-    rvec     dx;
+    int i, j;
+    real rms_diff = 0, r2 = 0, r = 0;
+    rvec dx;
     bool dist_ref_exists = false;
-    
+
     if (d_ref != NULL)
         dist_ref_exists = true;
 
     // #pragma omp parallel for schedule(dynamic) shared(r2) private(j)
-    for (i = 0; (i < nind-1); i++)
+    for (i = 0; (i < nind - 1); i++)
     {
-        for (j = i+1; (j < nind); j++)
-        {   
+        for (j = i + 1; (j < nind); j++)
+        {
             dx[XX] = x[index[i]][XX] - x[index[j]][XX];
             dx[YY] = x[index[i]][YY] - x[index[j]][YY];
             dx[ZZ] = x[index[i]][ZZ] - x[index[j]][ZZ];
-                    
-            r = std::sqrt( norm2(dx) );
+
+            r = std::sqrt(norm2(dx));
             d[i][j] = d[j][i] = r;
 
-            if (dist_ref_exists) {
-                r2  += (r - d_ref[i][j]) * (r - d_ref[i][j]);
+            if (dist_ref_exists)
+            {
+                r2 += (r - d_ref[i][j]) * (r - d_ref[i][j]);
             }
-
         }
     }
-    
-    if (dist_ref_exists) {
-        r2 /= (nind*(nind-1))/2;
+
+    if (dist_ref_exists)
+    {
+        r2 /= (nind * (nind - 1)) / 2;
         rms_diff = std::sqrt(r2);
     }
-    
+
     return rms_diff;
 }
 
-
-std::vector< std::vector< real > > calculate_rmsdist_cluster(ClusteringStuffs *clustStuff, int *rmsdAtomIndex, int rmsdAtomIndexSize, TrajectoryStuffs inpTrajStuff)    {
+std::vector<std::vector<real>> calculate_rmsdist_cluster(ClusteringStuffs *clustStuff, int *rmsdAtomIndex, int rmsdAtomIndexSize, TrajectoryStuffs inpTrajStuff)
+{
 
     real currentTime, temp, **dist, **dist_ref;
     int i = 0;
     int ftp = fn2ftp(inpTrajStuff.filename);
     t_fileio *fio = trx_get_fileio(inpTrajStuff.status);
-    std::vector< std::vector< real > > clusterRMSDist;
+    std::vector<std::vector<real>> clusterRMSDist;
     long clusterLength;
     int cluster, bRet;
-    
+
     // Assign memory for dist-matrix
     snew(dist, rmsdAtomIndexSize);
     snew(dist_ref, rmsdAtomIndexSize);
-    for(i=0; i<rmsdAtomIndexSize; i++)  {
+    for (i = 0; i < rmsdAtomIndexSize; i++)
+    {
         snew(dist[i], rmsdAtomIndexSize);
         snew(dist_ref[i], rmsdAtomIndexSize);
     }
 
-    std::cout<<"\n\nCalculating RMSDist from central structure for each cluster...\n";
+    std::cout << "\n\nCalculating RMSDist from central structure for each cluster...\n";
 
-    //Loop over cluster start here
-    for (size_t c=0; c < clustStuff->clusterIndex.size(); c++) {
-        std::vector< real > rmsd;
+    // Loop over cluster start here
+    for (size_t c = 0; c < clustStuff->clusterIndex.size(); c++)
+    {
+        std::vector<real> rmsd;
 
         cluster = clustStuff->clusterIndex[c];
         clusterLength = clustStuff->clusterDict[cluster].size();
-        
+
         temp = calculate_rmsdist(rmsdAtomIndexSize, rmsdAtomIndex, clustStuff->centralCoords[c], dist_ref, NULL);
 
         // Loop for frame of each cluster start here
-        for(int n = 0; n < clusterLength; n++)  {
+        for (int n = 0; n < clusterLength; n++)
+        {
             currentTime = ClusteringStuffs::timeInInput[clustStuff->clusterDict[cluster][n]];
 
-            if (ftp == efXTC) {
+            if (ftp == efXTC)
+            {
                 bRet = xtc_seek_time(fio, currentTime, inpTrajStuff.natoms, FALSE);
-                if (bRet == -1) {
+                if (bRet == -1)
+                {
                     gmx_fatal(FARGS, "Frame for this time is not found in trajectory");
                 }
                 read_next_x(inpTrajStuff.oenv, inpTrajStuff.status, &inpTrajStuff.time, inpTrajStuff.x, inpTrajStuff.box);
             }
-            else {
+            else
+            {
                 // If current time is larger than time in trajectory rewind back
                 if (currentTime < inpTrajStuff.time)
                     rewind_trj(inpTrajStuff.status);
 
-                while (inpTrajStuff.time !=  currentTime)   {
+                while (inpTrajStuff.time != currentTime)
+                {
                     bRet = read_next_x(inpTrajStuff.oenv, inpTrajStuff.status, &inpTrajStuff.time, inpTrajStuff.x, inpTrajStuff.box);
                     if (!bRet)
                         break;
@@ -1288,11 +1388,11 @@ std::vector< std::vector< real > > calculate_rmsdist_cluster(ClusteringStuffs *c
             // Loop for frame of each cluster end here
 
             temp = calculate_rmsdist(rmsdAtomIndexSize, rmsdAtomIndex, inpTrajStuff.x, dist, dist_ref);
-            rmsd.push_back( temp );
+            rmsd.push_back(temp);
         }
         clusterRMSDist.push_back(rmsd);
 
-    } //Loop over cluster end here
+    } // Loop over cluster end here
 
     sfree(dist);
     sfree(dist_ref);
@@ -1303,26 +1403,28 @@ std::vector< std::vector< real > > calculate_rmsdist_cluster(ClusteringStuffs *c
     return clusterRMSDist;
 }
 
-
-void sort_cluster_frame(std::vector< std::vector< real > > sorter,
+void sort_cluster_frame(std::vector<std::vector<real>> sorter,
                         ClusteringStuffs *clustStuff,
-                        std::vector< std::vector< real > > *rmsd )   {
+                        std::vector<std::vector<real>> *rmsd)
+{
 
-    std::vector< size_t > sortedIndex;
-    std::vector< long > clusterFrameIndex;
-    std::vector< long > sortedClusterFrameIndex;
-    std::vector< real > tempRMSD;
-    std::vector< real > sortedRMSD;
+    std::vector<size_t> sortedIndex;
+    std::vector<long> clusterFrameIndex;
+    std::vector<long> sortedClusterFrameIndex;
+    std::vector<real> tempRMSD;
+    std::vector<real> sortedRMSD;
     int cluster;
 
-    for(size_t c = 0; c < clustStuff->clusterIndex.size(); c++ )   {
+    for (size_t c = 0; c < clustStuff->clusterIndex.size(); c++)
+    {
         cluster = clustStuff->clusterIndex[c];
         clusterFrameIndex = clustStuff->clusterDict.at(cluster);
         sortedIndex = argsort(sorter[c]);
 
         // First reorder in clusterDict
-        clustStuff->clusterDict.erase(cluster);      // Erase frame index vector
-        for(size_t n=0; n < clusterFrameIndex.size(); n++)  {
+        clustStuff->clusterDict.erase(cluster); // Erase frame index vector
+        for (size_t n = 0; n < clusterFrameIndex.size(); n++)
+        {
             sortedClusterFrameIndex.push_back(clusterFrameIndex[sortedIndex[n]]);
         }
         clustStuff->clusterDict.emplace(cluster, sortedClusterFrameIndex);
@@ -1332,9 +1434,11 @@ void sort_cluster_frame(std::vector< std::vector< real > > sorter,
         sortedClusterFrameIndex.shrink_to_fit();
 
         // Reorder RMSD
-        if ( ! rmsd->empty() ) {
+        if (!rmsd->empty())
+        {
             tempRMSD = rmsd->at(c);
-            for(size_t n=0; n < clusterFrameIndex.size(); n++)  {
+            for (size_t n = 0; n < clusterFrameIndex.size(); n++)
+            {
                 sortedRMSD.push_back(tempRMSD[sortedIndex[n]]);
             }
             rmsd->at(c) = sortedRMSD;
@@ -1346,9 +1450,8 @@ void sort_cluster_frame(std::vector< std::vector< real > > sorter,
     }
 }
 
-
-
-int gmx_clusterByFeatures(int argc,char *argv[])    {
+int gmx_clusterByFeatures(int argc, char *argv[])
+{
 
     const char *desc[] = {
         "\"gmx_clusterByFeatures cluster\" can be used to cluster the conformations using the input features.",
@@ -1367,21 +1470,32 @@ int gmx_clusterByFeatures(int argc,char *argv[])    {
         " * silhouette: Silhouette score (https://en.wikipedia.org/wiki/Silhouette_(clustering))",
         " * DBI: Davies–Bouldin index (https://en.wikipedia.org/wiki/Davies%E2%80%93Bouldin_index). Lowest value is considered.[PAR]",
         "For summary of command line options. see more details here: https://gmx-clusterbyfeatures.readthedocs.io/en/latest/usage.html[PAR]",
-        "For description of command line options, see more details here: https://gmx-clusterbyfeatures.readthedocs.io/en/latest/cmdline.html"
-	};
+        "For description of command line options, see more details here: https://gmx-clusterbyfeatures.readthedocs.io/en/latest/cmdline.html"};
 
-    gmx_bool bAlignTrajToCentral=FALSE, bFit=TRUE;
-    int numMinFrameCluster = 20, minFeatures=10, maxOutFrame =-1;
-    const char     *sortMethod[] = { NULL, "none", "rmsd", "rmsdist", "features", "user", NULL };
-    enum {eNoSort = 1, eSortByRMSD, eSortByRMSDist, eSortByFeatures, eSortByUser};
+    gmx_bool bAlignTrajToCentral = FALSE, bFit = TRUE;
+    int numMinFrameCluster = 20, minFeatures = 10, maxOutFrame = -1;
+    const char *sortMethod[] = {NULL, "none", "rmsd", "rmsdist", "features", "user", NULL};
+    enum
+    {
+        eNoSort = 1,
+        eSortByRMSD,
+        eSortByRMSDist,
+        eSortByFeatures,
+        eSortByUser
+    };
     int eSortMethod;
 
     int eClusterMetrics;
     real cmRmsdThershold = 0.1;
     real ssrSstChange = 2;
 
-    const char     *clusterAlgo[] = { NULL, "kmeans", "dbscan", "gmixture", NULL };
-    enum { eKmeans = 1, eDbscan, eGMixture };
+    const char *clusterAlgo[] = {NULL, "kmeans", "dbscan", "gmixture", NULL};
+    enum
+    {
+        eKmeans = 1,
+        eDbscan,
+        eGMixture
+    };
     int eClusterMethod;
     real dbscan_eps = 0.5;
     int dbscan_min_samples = 20;
@@ -1394,48 +1508,46 @@ int gmx_clusterByFeatures(int argc,char *argv[])    {
     real plotWidth = 12;
 
     t_pargs pa[] =
-    {
-        { "-method",         FALSE, etENUM, { clusterAlgo },        "Clustering methods. Accepted methods are:" },
-        { "-nfeature",       FALSE, etINT,  {&minFeatures},         "Number of features to use for clustering" },
-        { "-cmetric",        FALSE, etENUM, { clusterMetrics },     "Cluster metrics: Method to determine cluster number. Accepted methods are:" },
-        { "-ncluster",       FALSE, etINT,  {&n_clusters},          "Number of clusters to generate for prior method. Maximum number of cluster for ctrmsd method." },
-        { "-crmsthres",      FALSE, etREAL, {&cmRmsdThershold},     "RMSD (nm) threshold between central structures for RMSD cluster metric method." },
-        { "-ssrchange",      FALSE, etREAL, {&ssrSstChange},        "Thershold relative change % in SSR/SST ratio for ssr-sst cluster metric method." },
-        { "-db_eps",         FALSE, etREAL, {&dbscan_eps},          "The maximum distance between two samples for them to be considered as in the same neighborhood." },
-        { "-db_min_samples", FALSE, etINT,  {&dbscan_min_samples},  "The number of samples (or total weight) in a neighborhood for a point to be considered as a core point. This includes the point itself." },
-        { "-sil_ssize",      FALSE, etREAL, {&silhouette_score_sample_size},  "Percentage of number of frames to be considered as sample size for silhouette score calculation." },
-        { "-nminfr",         FALSE, etINT,  {&numMinFrameCluster},  "Number of nimimum frames in a cluster to consider it for output trajectory" },
-        { "-fit",            FALSE, etBOOL, {&bFit},                "Enable fitting and superimposition of the atoms groups different from RMSD/clustering group before RMSD calculation." },
-        { "-fit2central",    FALSE, etBOOL, {&bAlignTrajToCentral}, "Enable/Disable trajectory superimposition or fitting to central structure in the output trajectory" },
-        { "-outframe",       FALSE, etINT,  { &maxOutFrame },       "Number of maximum frames in the output trajectories." },
-        { "-sort",           FALSE, etENUM, { sortMethod },         "Sort trajectory according to these values. Accepted methods are" },
-        { "-plot",           FALSE, etSTR,  { &plotfile },          "To plot features with clusters in this file." },
-        { "-fsize",          FALSE, etINT,  { &fontsize },          "Font size in plot." },
-        { "-pltw",           FALSE, etREAL, { &plotWidth },         "Width (inch) of the plot." },
-        { "-plth",           FALSE, etREAL, { &plotHeight },        "Height (inch) of the plot."}
-    };
+        {
+            {"-method", FALSE, etENUM, {clusterAlgo}, "Clustering methods. Accepted methods are:"},
+            {"-nfeature", FALSE, etINT, {&minFeatures}, "Number of features to use for clustering"},
+            {"-cmetric", FALSE, etENUM, {clusterMetrics}, "Cluster metrics: Method to determine cluster number. Accepted methods are:"},
+            {"-ncluster", FALSE, etINT, {&n_clusters}, "Number of clusters to generate for prior method. Maximum number of cluster for ctrmsd method."},
+            {"-crmsthres", FALSE, etREAL, {&cmRmsdThershold}, "RMSD (nm) threshold between central structures for RMSD cluster metric method."},
+            {"-ssrchange", FALSE, etREAL, {&ssrSstChange}, "Thershold relative change % in SSR/SST ratio for ssr-sst cluster metric method."},
+            {"-db_eps", FALSE, etREAL, {&dbscan_eps}, "The maximum distance between two samples for them to be considered as in the same neighborhood."},
+            {"-db_min_samples", FALSE, etINT, {&dbscan_min_samples}, "The number of samples (or total weight) in a neighborhood for a point to be considered as a core point. This includes the point itself."},
+            {"-sil_ssize", FALSE, etREAL, {&silhouette_score_sample_size}, "Percentage of number of frames to be considered as sample size for silhouette score calculation."},
+            {"-nminfr", FALSE, etINT, {&numMinFrameCluster}, "Number of nimimum frames in a cluster to consider it for output trajectory"},
+            {"-fit", FALSE, etBOOL, {&bFit}, "Enable fitting and superimposition of the atoms groups different from RMSD/clustering group before RMSD calculation."},
+            {"-fit2central", FALSE, etBOOL, {&bAlignTrajToCentral}, "Enable/Disable trajectory superimposition or fitting to central structure in the output trajectory"},
+            {"-outframe", FALSE, etINT, {&maxOutFrame}, "Number of maximum frames in the output trajectories."},
+            {"-sort", FALSE, etENUM, {sortMethod}, "Sort trajectory according to these values. Accepted methods are"},
+            {"-plot", FALSE, etSTR, {&plotfile}, "To plot features with clusters in this file."},
+            {"-fsize", FALSE, etINT, {&fontsize}, "Font size in plot."},
+            {"-pltw", FALSE, etREAL, {&plotWidth}, "Width (inch) of the plot."},
+            {"-plth", FALSE, etREAL, {&plotHeight}, "Height (inch) of the plot."}};
 
-	t_filenm   fnm[] = {
-            { efTRX, "-f",     NULL,           ffOPTRD },
-            { efTPS, NULL,     NULL,           ffOPTRD },
-            { efXVG, "-feat",  "feature",      ffOPTRD },
-            { efNDX, NULL,     NULL,           ffOPTRD },
-            { efXVG, "-clid",  "clid",         ffOPTWR },
-            { efLOG, "-g",     "cluster.log",  ffOPTWR },
-            { efTRX, "-fout",  "trajout.xtc",  ffOPTWR },
-            { efPDB, "-cpdb",  "central.pdb",  ffOPTWR },
-            { efXVG, "-rmsd",  "rmsd.xvg",     ffOPTWR }
-	};
+    t_filenm fnm[] = {
+        {efTRX, "-f", NULL, ffOPTRD},
+        {efTPS, NULL, NULL, ffOPTRD},
+        {efXVG, "-feat", "feature", ffOPTRD},
+        {efNDX, NULL, NULL, ffOPTRD},
+        {efXVG, "-clid", "clid", ffOPTWR},
+        {efLOG, "-g", "cluster.log", ffOPTWR},
+        {efTRX, "-fout", "trajout.xtc", ffOPTWR},
+        {efPDB, "-cpdb", "central.pdb", ffOPTWR},
+        {efXVG, "-rmsd", "rmsd.xvg", ffOPTWR}};
 
-    #define NFILE asize(fnm)
+#define NFILE asize(fnm)
     gmx_output_env_t *oenv;
-
 
     // Copyright message
     CopyRightMsgCluster();
 
     // Parse command line argument and print all options
-    if ( ! parse_common_args(&argc,argv,PCA_CAN_TIME | PCA_TIME_UNIT,NFILE,fnm,asize(pa),pa,asize(desc),desc,0,NULL,&oenv) )	{
+    if (!parse_common_args(&argc, argv, PCA_CAN_TIME | PCA_TIME_UNIT, NFILE, fnm, asize(pa), pa, asize(desc), desc, 0, NULL, &oenv))
+    {
         return 0;
     }
 
@@ -1448,282 +1560,304 @@ int gmx_clusterByFeatures(int argc,char *argv[])    {
 
     // Variables realting to clustering stuffs
     ClusteringStuffs *clustStuff = nullptr, *tempClustStuff;
-    std::map < int, ClusteringStuffs* >  allClusterStuffs;
-    std::vector< std::vector< real > > clusterRMSD; // RMSD of clusters with reference to central structure
+    std::map<int, ClusteringStuffs *> allClusterStuffs;
+    std::vector<std::vector<real>> clusterRMSD; // RMSD of clusters with reference to central structure
     int finalClustersNumber = 1;
     PyCluster pycluster;
 
-    //OUTPUT FILE STUFFS
-    const char *fnOutPDB = NULL, *fnOutRMSD = NULL, *fnOutLog=NULL;
-    std::vector< std::string > fnOutPDBs;
+    // OUTPUT FILE STUFFS
+    const char *fnOutPDB = NULL, *fnOutRMSD = NULL, *fnOutLog = NULL;
+    std::vector<std::string> fnOutPDBs;
 
-    //INDEX RELATED VARIABLES
-    int outIndexSize, *outIndex; // Output atom index group
-    int *fitAtomIndex, fitAtomIndexSize; // Fitting atom index group
+    // INDEX RELATED VARIABLES
+    int outIndexSize, *outIndex;           // Output atom index group
+    int *fitAtomIndex, fitAtomIndexSize;   // Fitting atom index group
     int *rmsdAtomIndex, rmsdAtomIndexSize; // Group for which clustering has been performed, also used for RMSD calculation
     char *grpnm;
 
-    gmx_bool bFeatures = FALSE, bCentralPDB = FALSE, bDoCluster = FALSE, bTrajRMSD=FALSE, bTrajRMSDist=FALSE;
+    gmx_bool bFeatures = FALSE, bCentralPDB = FALSE, bDoCluster = FALSE, bTrajRMSD = FALSE, bTrajRMSDist = FALSE;
 
     t_topology top;
     PbcType ePBC;
     rvec *x;
     matrix box;
 
-    //TRAJECTORY RELATED VARIABLES
+    // TRAJECTORY RELATED VARIABLES
     TrajectoryStuffs inpTrajStuff;
     const char *inpTrajName, *fnOutTraj;
 
+    fnFeatures = opt2fn_null("-feat", NFILE, fnm);
+    fnClId = opt2fn_null("-clid", NFILE, fnm);
 
-    fnFeatures = opt2fn_null("-feat",NFILE,fnm);
-    fnClId = opt2fn_null("-clid",NFILE,fnm);
-
-    if((fnFeatures == NULL) && (fnClId == NULL)) {
-        gmx_fatal(FARGS,"Input files with either features or cluster-ids and features are missing!!!\n");
+    if ((fnFeatures == NULL) && (fnClId == NULL))
+    {
+        gmx_fatal(FARGS, "Input files with either features or cluster-ids and features are missing!!!\n");
     }
 
-    if(fnFeatures != NULL){
+    if (fnFeatures != NULL)
+    {
         bDoCluster = TRUE;
         bFeatures = TRUE;
-        fnClId = opt2fn("-clid",NFILE,fnm);
+        fnClId = opt2fn("-clid", NFILE, fnm);
     }
-    else {
+    else
+    {
         // Here it only extract the file name as file is input
-        fnClId = opt2fn("-clid",NFILE,fnm);
+        fnClId = opt2fn("-clid", NFILE, fnm);
     }
 
     // check whether sort by features is enabled and store it for later use
     ClusteringStuffs::bSortByFeatures = (eSortMethod == eSortByFeatures) ? true : false;
 
-    //Initialize log output
+    // Initialize log output
     fnOutLog = opt2fn("-g", NFILE, fnm);
     LogStream lstream(fnOutLog);
-    lstream<<"=======================\n";
-    lstream<<"  Cluster Log output   \n";
-    lstream<<"=======================\n";
-    lstream<<"\nCommand:\n=======================\n";
-    lstream<<gmx::CommandLineProgramContext(argc, argv).commandLine()<<"\n";
-    lstream<<"=======================\n";
+    lstream << "=======================\n";
+    lstream << "  Cluster Log output   \n";
+    lstream << "=======================\n";
+    lstream << "\nCommand:\n=======================\n";
+    lstream << gmx::CommandLineProgramContext(argc, argv).commandLine() << "\n";
+    lstream << "=======================\n";
 
     // Read input cluster-id file, if it is the input
-    if (!bDoCluster)    {
+    if (!bDoCluster)
+    {
         clustStuff = new ClusteringStuffs();
-        if (!(clustStuff->read_cluster_input(fnClId, &bFeatures, numMinFrameCluster, oenv, &lstream )))
+        if (!(clustStuff->read_cluster_input(fnClId, &bFeatures, numMinFrameCluster, oenv, &lstream)))
             return EXIT_FAILURE;
 
-            /* May be enable it in future
-        // If given separately, read features file and store in ClusteringStuffs class static variable
-        if( (!bFeatures) && (fnFeatures != NULL) )  {
-            if (!(ClusteringStuffs::read_features_input(fnFeatures, minFeatures, oenv, &lstream)))    {
-                gmx_fatal(FARGS,"Not able to read features file!!!\n");
-              }
-            bFeatures = TRUE;
-          }*/
-      }
+        /* May be enable it in future
+    // If given separately, read features file and store in ClusteringStuffs class static variable
+    if( (!bFeatures) && (fnFeatures != NULL) )  {
+        if (!(ClusteringStuffs::read_features_input(fnFeatures, minFeatures, oenv, &lstream)))    {
+            gmx_fatal(FARGS,"Not able to read features file!!!\n");
+          }
+        bFeatures = TRUE;
+      }*/
+    }
 
     // Check if trajectory is given as input and save filename for later use
-    inpTrajName = opt2fn_null("-f",NFILE,fnm);
-    if(inpTrajName != NULL) {
-      inpTrajStuff.filename = inpTrajName;
-      inpTrajStuff.bTraj = true;
-     }
-
+    inpTrajName = opt2fn_null("-f", NFILE, fnm);
+    if (inpTrajName != NULL)
+    {
+        inpTrajStuff.filename = inpTrajName;
+        inpTrajStuff.bTraj = true;
+    }
 
     // Check if alignment to central structure is possible
-    if ( (bAlignTrajToCentral) && (!bFeatures) ){
-        lstream<<"\n\n======== WARNING ========\n";
-        lstream<<"\nFeatures file is missing. Central structure cannot be calculated !!!\n";
-        lstream<<"Switching-off -fit2central option.\n";
+    if ((bAlignTrajToCentral) && (!bFeatures))
+    {
+        lstream << "\n\n======== WARNING ========\n";
+        lstream << "\nFeatures file is missing. Central structure cannot be calculated !!!\n";
+        lstream << "Switching-off -fit2central option.\n";
         bAlignTrajToCentral = FALSE;
     }
 
-
     // If features are in file, only calculate central structure otherwise exit here
-    if((opt2fn_null("-cpdb", NFILE, fnm) != NULL) && (bFeatures) )
+    if ((opt2fn_null("-cpdb", NFILE, fnm) != NULL) && (bFeatures))
         bCentralPDB = TRUE;
-    if ( !bFeatures && bCentralPDB ){
-        lstream<<"\n\n======== WARNING ========\n";
-        lstream<<"\nFeatures file is missing. Not able to write cnetral structures. \n";
+    if (!bFeatures && bCentralPDB)
+    {
+        lstream << "\n\n======== WARNING ========\n";
+        lstream << "\nFeatures file is missing. Not able to write cnetral structures. \n";
         bCentralPDB = FALSE;
     }
 
     // If trajectory is not given, cnetral structures cannot be extracted. Also, alignment to trajectory cannot be done without trajectory
-    if ( (bCentralPDB) && (!inpTrajStuff.bTraj) ){
-        lstream<<"\n\n======== WARNING ========\n";
-        lstream<<"\nTrajectory file is miising. Central structure needs to be extracted from trajectory!!!\n";
-        lstream<<"Central structure will not be wriiten as pdb file. \n";
+    if ((bCentralPDB) && (!inpTrajStuff.bTraj))
+    {
+        lstream << "\n\n======== WARNING ========\n";
+        lstream << "\nTrajectory file is miising. Central structure needs to be extracted from trajectory!!!\n";
+        lstream << "Central structure will not be wriiten as pdb file. \n";
         bCentralPDB = FALSE;
         bAlignTrajToCentral = FALSE;
     }
-    
-    if (opt2fn_null("-rmsd", NFILE, fnm) != NULL)  {
-        if (inpTrajStuff.bTraj) {
+
+    if (opt2fn_null("-rmsd", NFILE, fnm) != NULL)
+    {
+        if (inpTrajStuff.bTraj)
+        {
             if (eSortMethod == eSortByRMSDist)
                 bTrajRMSDist = TRUE;
             else
                 bTrajRMSD = TRUE;
         }
-        else    {
-            lstream<<"\n\n======== WARNING ========\n";
-            lstream<<"\nTrajectory file is miising. Central structure needs to be extracted from trajectory!!!\n";
-            lstream<<"Therefore, RMSD w.r.t central structure cannot be calculated and trajectory cannot be sorted.\n";
+        else
+        {
+            lstream << "\n\n======== WARNING ========\n";
+            lstream << "\nTrajectory file is miising. Central structure needs to be extracted from trajectory!!!\n";
+            lstream << "Therefore, RMSD w.r.t central structure cannot be calculated and trajectory cannot be sorted.\n";
             eSortMethod = eNoSort;
         }
     }
 
     // If sorted method is given, check for RMSD calculation
-    if (eSortMethod == eSortByRMSD) {
+    if (eSortMethod == eSortByRMSD)
+    {
         if (inpTrajStuff.bTraj)
             bTrajRMSD = TRUE;
-        else    {
-            lstream<<"\n\n======== WARNING ========\n";
-            lstream<<"\nTrajectory file is miising. Central structure needs to be extracted from trajectory!!!\n";
-            lstream<<"Therefore, RMSD w.r.t central structure cannot be calculated and trajectory cannot be sorted.\n";
+        else
+        {
+            lstream << "\n\n======== WARNING ========\n";
+            lstream << "\nTrajectory file is miising. Central structure needs to be extracted from trajectory!!!\n";
+            lstream << "Therefore, RMSD w.r.t central structure cannot be calculated and trajectory cannot be sorted.\n";
             eSortMethod = eNoSort;
         }
     }
-    
+
     // If sorted method is given, check for RMSDist calculation
-    if ( (eSortMethod == eSortByRMSDist) && (!(inpTrajStuff.bTraj)) ) {
-            lstream<<"\n\n======== WARNING ========\n";
-            lstream<<"\nTrajectory file is miising. Central structure needs to be extracted from trajectory!!!\n";
-            lstream<<"Therefore, RMSDist w.r.t central structure cannot be calculated and trajectory cannot be sorted.\n";
-            eSortMethod = eNoSort;        
+    if ((eSortMethod == eSortByRMSDist) && (!(inpTrajStuff.bTraj)))
+    {
+        lstream << "\n\n======== WARNING ========\n";
+        lstream << "\nTrajectory file is miising. Central structure needs to be extracted from trajectory!!!\n";
+        lstream << "Therefore, RMSDist w.r.t central structure cannot be calculated and trajectory cannot be sorted.\n";
+        eSortMethod = eNoSort;
     }
-    
 
     // If trajectory is not given and RMSD cluster metric is given as input, change metric to ssr-sst
-    if( (eClusterMetrics == eCRmsdClusterMetric) && (!inpTrajStuff.bTraj) ) {
-        lstream<<"\n\n======== WARNING ========\n";
-        lstream<<"\nTrajectory file is missing. Central structure needs to be extracted from trajectory!!!\n";
-        lstream<<"Therefore, RMSD between central structure cannot be calculated.\n";
-        lstream<<"Switching to ssr-sst metric with default value.\n";
+    if ((eClusterMetrics == eCRmsdClusterMetric) && (!inpTrajStuff.bTraj))
+    {
+        lstream << "\n\n======== WARNING ========\n";
+        lstream << "\nTrajectory file is missing. Central structure needs to be extracted from trajectory!!!\n";
+        lstream << "Therefore, RMSD between central structure cannot be calculated.\n";
+        lstream << "Switching to ssr-sst metric with default value.\n";
         eClusterMetrics = eSsrSstClusterMetric;
     }
 
     // If trajectory is not given and output clustered trajectory is requested, exit here.
-    if( (opt2fn_null("-fout", NFILE, fnm) != NULL) && (!inpTrajStuff.bTraj) ) {
-        lstream<<"\n\n======== ERROR ========\n";
-        lstream<<"\nInput trajectory file is missing while clustered trajectory is requested for output.\n";
-        lstream<<"Exiting...\n";
+    if ((opt2fn_null("-fout", NFILE, fnm) != NULL) && (!inpTrajStuff.bTraj))
+    {
+        lstream << "\n\n======== ERROR ========\n";
+        lstream << "\nInput trajectory file is missing while clustered trajectory is requested for output.\n";
+        lstream << "Exiting...\n";
         exit(1);
     }
 
     // Reading tpr, index and trajectory file
-    if(inpTrajStuff.bTraj) {
-        read_tps_conf(ftp2fn(efTPS,NFILE,fnm), &top, &ePBC, &x, NULL, box, FALSE);
+    if (inpTrajStuff.bTraj)
+    {
+        read_tps_conf(ftp2fn(efTPS, NFILE, fnm), &top, &ePBC, &x, NULL, box, FALSE);
         inpTrajStuff.atoms = top.atoms;
         inpTrajStuff.ePBC = ePBC;
 
-
         // Selection of output index group
         printf("\nChoose a group for the output:\n");
-        get_index(&top.atoms,ftp2fn_null(efNDX,NFILE,fnm),1,&outIndexSize,&outIndex,&grpnm);
+        get_index(&top.atoms, ftp2fn_null(efNDX, NFILE, fnm), 1, &outIndexSize, &outIndex, &grpnm);
 
-        if(fnFeatures != NULL) {
-          printf("\nChoose a group for clustering/RMSD calculation:\n");
-          get_index(&top.atoms,ftp2fn_null(efNDX,NFILE,fnm),1,&rmsdAtomIndexSize,&rmsdAtomIndex,&grpnm);
+        if (fnFeatures != NULL)
+        {
+            printf("\nChoose a group for clustering/RMSD calculation:\n");
+            get_index(&top.atoms, ftp2fn_null(efNDX, NFILE, fnm), 1, &rmsdAtomIndexSize, &rmsdAtomIndex, &grpnm);
 
-          // Selection for fitting group
-          if (bFit)    {
-              printf("\nChoose a group for fitting or superposition:\n");
-              get_index(&top.atoms,ftp2fn_null(efNDX,NFILE,fnm),1,&fitAtomIndexSize,&fitAtomIndex,&grpnm);
+            // Selection for fitting group
+            if (bFit)
+            {
+                printf("\nChoose a group for fitting or superposition:\n");
+                get_index(&top.atoms, ftp2fn_null(efNDX, NFILE, fnm), 1, &fitAtomIndexSize, &fitAtomIndex, &grpnm);
             }
-          else {
-            fitAtomIndexSize = rmsdAtomIndexSize;
-            fitAtomIndex = rmsdAtomIndex;
+            else
+            {
+                fitAtomIndexSize = rmsdAtomIndexSize;
+                fitAtomIndex = rmsdAtomIndex;
             }
-          }
+        }
 
-      // Read first frame of the input trajectory
-      inpTrajStuff.natoms = read_first_x(oenv, &inpTrajStuff.status, inpTrajName, &inpTrajStuff.time, &inpTrajStuff.x, inpTrajStuff.box);
-      inpTrajStuff.oenv = oenv;
-      if(maxOutFrame >=-1)
-          inpTrajStuff.maxOutFrame = maxOutFrame;
-      else
-          inpTrajStuff.maxOutFrame = -1;
-      set_dTime(&inpTrajStuff);
+        // Read first frame of the input trajectory
+        inpTrajStuff.natoms = read_first_x(oenv, &inpTrajStuff.status, inpTrajName, &inpTrajStuff.time, &inpTrajStuff.x, inpTrajStuff.box);
+        inpTrajStuff.oenv = oenv;
+        if (maxOutFrame >= -1)
+            inpTrajStuff.maxOutFrame = maxOutFrame;
+        else
+            inpTrajStuff.maxOutFrame = -1;
+        set_dTime(&inpTrajStuff);
+    }
 
-      }
-
-
-    if(bFeatures)  {
+    if (bFeatures)
+    {
         // Initialize python and clustering code
         PyCluster pycluster = PyCluster();
         pycluster.InitPythonAndLoadFunc();
         pycluster.initializeClustering(fnFeatures, minFeatures, clusterAlgo[eClusterMethod], (float)dbscan_eps, dbscan_min_samples, (float)silhouette_score_sample_size);
     }
 
-    if(bDoCluster) {
+    if (bDoCluster)
+    {
 
         // Read features file and store in ClusteringStuffs class static variable
-        if (!(ClusteringStuffs::read_features_input(fnFeatures, minFeatures, oenv, &lstream)))    {
-            gmx_fatal(FARGS,"Not able to read features file!!!\n");
+        if (!(ClusteringStuffs::read_features_input(fnFeatures, minFeatures, oenv, &lstream)))
+        {
+            gmx_fatal(FARGS, "Not able to read features file!!!\n");
         }
 
         // Loop to find number of clusters, In case of prior method, run loop only once
         int curr_n_cluster;
-        if ( (eClusterMetrics == eCRmsdClusterMetric) || (eClusterMetrics == ePriorClusterMetric)) {
+        if ((eClusterMetrics == eCRmsdClusterMetric) || (eClusterMetrics == ePriorClusterMetric))
+        {
             // Start with maximum number of cluster
             curr_n_cluster = n_clusters;
         }
-        else {
+        else
+        {
             // Start with minimum number of clusters
             curr_n_cluster = 1;
         }
 
-        while(1)    {
+        while (1)
+        {
             double tempSsrSstRatio, tempPFS, tempSilhouetteScore, tempDaviesBouldinScore;
-            lstream<<"\n\n###########################################\n";
-            lstream<<"########## NUMBER OF CLUSTERS : "<<curr_n_cluster<<" ########\n";
-            lstream<<"###########################################\n";
+            lstream << "\n\n###########################################\n";
+            lstream << "########## NUMBER OF CLUSTERS : " << curr_n_cluster << " ########\n";
+            lstream << "###########################################\n";
 
             // Initialize ClusteringStuffs
             clustStuff = new ClusteringStuffs();
             allClusterStuffs.emplace(curr_n_cluster, clustStuff);
 
-
             // Perform clustering
             pycluster.performClustering(curr_n_cluster);
             clustStuff->clidAlongTime = pycluster.getClusterLabels(curr_n_cluster);
-            
 
             // Construct cluster dictionary and cluster-index
             clustStuff->constructClusterDict(numMinFrameCluster, &lstream);
 
-
-            if ( (eClusterMetrics == ePriorClusterMetric) || (eClusterMethod == eDbscan) ){
+            if ((eClusterMetrics == ePriorClusterMetric) || (eClusterMethod == eDbscan))
+            {
                 // If cluster-metric is not needed or DBSCAN method is used, iterate only once
 
                 finalClustersNumber = curr_n_cluster;
                 break;
             }
-            else if (eClusterMetrics == eCRmsdClusterMetric)  {
+            else if (eClusterMetrics == eCRmsdClusterMetric)
+            {
                 // If RMSD is used, start with maximum clusters number and reduce it untill criteria met
-                
+
                 // RMSD between central structures are neccessary to calculate here
                 // Determine index of central structure
-                if(!(clustStuff->calculate_central_struct(&lstream)))
+                if (!(clustStuff->calculate_central_struct(&lstream)))
                     return EXIT_FAILURE;
 
                 // Extract central structures and calculate RMSD between them
-                if(inpTrajStuff.bTraj)  {
+                if (inpTrajStuff.bTraj)
+                {
                     clustStuff->write_central_pdbfiles(fnOutPDBs, outIndex, outIndexSize, inpTrajStuff);
-                    if (curr_n_cluster > 1) {
-                        clustStuff->rmsd_bw_central_structure(fitAtomIndex, fitAtomIndexSize, \
-                                                     rmsdAtomIndex, rmsdAtomIndexSize,\
-                                                     inpTrajStuff, &lstream);
-                      }
-                  }
+                    if (curr_n_cluster > 1)
+                    {
+                        clustStuff->rmsd_bw_central_structure(fitAtomIndex, fitAtomIndexSize,
+                                                              rmsdAtomIndex, rmsdAtomIndexSize,
+                                                              inpTrajStuff, &lstream);
+                    }
+                }
 
                 // If cluster-count is one -- break here
-                if (curr_n_cluster == 1) {
+                if (curr_n_cluster == 1)
+                {
                     finalClustersNumber = curr_n_cluster;
                     break;
                 }
 
                 // use RMSD threshold here to break
-                if (!clustStuff->any_central_rmsd_below_thershold(cmRmsdThershold)) {
+                if (!clustStuff->any_central_rmsd_below_thershold(cmRmsdThershold))
+                {
                     finalClustersNumber = curr_n_cluster;
                     break;
                 }
@@ -1731,149 +1865,165 @@ int gmx_clusterByFeatures(int argc,char *argv[])    {
                 // reduce cluster count for next iteration
                 curr_n_cluster = curr_n_cluster - 1;
             }
-            else {
+            else
+            {
 
                 // If any of others cluster-metrics, ssr-sst ratio, Psuedo F-statistics and DB index is used,
                 // Start with clusters number one and increase it to maximum clusters number.
                 // For each increased number, compute all quantities
-                pycluster.getClusterMetrics(curr_n_cluster, &tempSsrSstRatio,  &tempPFS, &tempSilhouetteScore, &tempDaviesBouldinScore);
+                pycluster.getClusterMetrics(curr_n_cluster, &tempSsrSstRatio, &tempPFS, &tempSilhouetteScore, &tempDaviesBouldinScore);
                 ClusteringStuffs::ssrSstRatio.emplace(curr_n_cluster, (real)tempSsrSstRatio);
                 ClusteringStuffs::pFS.emplace(curr_n_cluster, (real)tempPFS);
                 ClusteringStuffs::silhouetteScore.emplace(curr_n_cluster, (real)tempSilhouetteScore);
                 ClusteringStuffs::daviesBouldinScore.emplace(curr_n_cluster, (real)tempDaviesBouldinScore);
                 // clustStuff->calculateDaviesBouldinIndex();
 
-
-                if (curr_n_cluster == n_clusters) {
+                if (curr_n_cluster == n_clusters)
+                {
                     break;
                 }
                 curr_n_cluster = curr_n_cluster + 1;
             }
         }
 
-
         // If cluster-metrics, ssr-sst ratio, Psuedo F-statistics and DB index is used, here print summary
         // and select final clusters-number according to the input criteria.
-        if ( ! ((eClusterMetrics == eCRmsdClusterMetric) || (eClusterMetrics == ePriorClusterMetric)) ) {
+        if (!((eClusterMetrics == eCRmsdClusterMetric) || (eClusterMetrics == ePriorClusterMetric)))
+        {
             finalClustersNumber = ClusteringStuffs::performClusterMetrics(eClusterMetrics, n_clusters, ssrSstChange, &lstream);
         }
 
-        lstream<<"\n\n#####################################\n";
-        lstream<<"Final number of cluster selected: "<<finalClustersNumber;
-        lstream<<"\n#####################################\n";
+        lstream << "\n\n#####################################\n";
+        lstream << "Final number of cluster selected: " << finalClustersNumber;
+        lstream << "\n#####################################\n";
 
         // Load the final one here
         clustStuff = allClusterStuffs.at(finalClustersNumber);
-        
+
         // Calculate central structures of each cluster if not previously calculated
-        if(clustStuff->centralStructDict.empty()) {
-            if(!(clustStuff->calculate_central_struct(&lstream)))
+        if (clustStuff->centralStructDict.empty())
+        {
+            if (!(clustStuff->calculate_central_struct(&lstream)))
                 return EXIT_FAILURE;
-            
+
             // Also Extract central structures and calculate RMSD between them, useful
-            if(inpTrajStuff.bTraj)  {
+            if (inpTrajStuff.bTraj)
+            {
                 clustStuff->write_central_pdbfiles(fnOutPDBs, outIndex, outIndexSize, inpTrajStuff);
-                if (curr_n_cluster > 1) {
-                    clustStuff->rmsd_bw_central_structure(fitAtomIndex, fitAtomIndexSize, \
-                                                 rmsdAtomIndex, rmsdAtomIndexSize,\
-                                                 inpTrajStuff, &lstream);
-                  }
-              }
+                if (curr_n_cluster > 1)
+                {
+                    clustStuff->rmsd_bw_central_structure(fitAtomIndex, fitAtomIndexSize,
+                                                          rmsdAtomIndex, rmsdAtomIndexSize,
+                                                          inpTrajStuff, &lstream);
+                }
+            }
         }
 
         // Remove all other ClustStuffs
-        for (std::map< int, ClusteringStuffs* >::iterator it=allClusterStuffs.begin(); it!=allClusterStuffs.end(); ++it)  {
+        for (std::map<int, ClusteringStuffs *>::iterator it = allClusterStuffs.begin(); it != allClusterStuffs.end(); ++it)
+        {
             // std::cout<<"Hellooo "<<it->first<<" "<<it->second<<"\n";
-            if(it->first == finalClustersNumber)
+            if (it->first == finalClustersNumber)
                 continue;
-             tempClustStuff = allClusterStuffs.at(it->first);
-             allClusterStuffs.emplace(it->first, nullptr);
-             delete tempClustStuff;
+            tempClustStuff = allClusterStuffs.at(it->first);
+            allClusterStuffs.emplace(it->first, nullptr);
+            delete tempClustStuff;
         }
         allClusterStuffs.clear();
-
     }
-    else {
-        if (bFeatures)  {
+    else
+    {
+        if (bFeatures)
+        {
             // Determine index of central structure
-            if(!(clustStuff->calculate_central_struct(&lstream)))
+            if (!(clustStuff->calculate_central_struct(&lstream)))
                 return EXIT_FAILURE;
 
             // Extract central structures and calculate RMSD between them
-            if(inpTrajStuff.bTraj)  {
+            if (inpTrajStuff.bTraj)
+            {
                 clustStuff->write_central_pdbfiles(fnOutPDBs, outIndex, outIndexSize, inpTrajStuff);
-                clustStuff->rmsd_bw_central_structure(fitAtomIndex, fitAtomIndexSize, \
-                                                      rmsdAtomIndex, rmsdAtomIndexSize,\
+                clustStuff->rmsd_bw_central_structure(fitAtomIndex, fitAtomIndexSize,
+                                                      rmsdAtomIndex, rmsdAtomIndexSize,
                                                       inpTrajStuff, &lstream);
-              }
+            }
         }
     }
 
     // Plot the features by cluster
-    if((bFeatures) && (opt2parg_bSet("-plot", asize(pa), pa)) ){
+    if ((bFeatures) && (opt2parg_bSet("-plot", asize(pa), pa)))
+    {
         pycluster.plotFeaturesClusters(finalClustersNumber, plotfile, clustStuff->get_central_ids(), fontsize, plotHeight, plotWidth);
     }
 
     // Write cluster-id file
-    if(bDoCluster) {
+    if (bDoCluster)
+    {
         FILE *fClId;
         fClId = xvgropen(fnClId, "Cluster-ID", "Time", "Cluster-ID", oenv);
-        for(unsigned long i=0; i<clustStuff->timeInInput.size(); i++){
+        for (unsigned long i = 0; i < clustStuff->timeInInput.size(); i++)
+        {
             fprintf(fClId, "%5.3f    %d\n", clustStuff->timeInInput.at(i), clustStuff->clidAlongTime.at(i));
         }
         xvgrclose(fClId);
     }
 
     // Write final central pdb files
-    if (bCentralPDB) {
+    if (bCentralPDB)
+    {
         fnOutPDB = opt2fn_null("-cpdb", NFILE, fnm);
 
         fnOutPDBs = get_outFile_names(fnOutPDB, clustStuff->clusterIndex, ".pdb", "");
 
         clustStuff->write_central_pdbfiles(fnOutPDBs, outIndex, outIndexSize, inpTrajStuff);
-
     }
 
-    //std::cout<<sortedClusterIds.size()<<" "<<this->centralStructDict.size()<<"\n";
-
+    // std::cout<<sortedClusterIds.size()<<" "<<this->centralStructDict.size()<<"\n";
 
     // Calculate RMSD of trajectories
-    if ((bTrajRMSD) || (eSortMethod == eSortByRMSD))    {
-        clusterRMSD = calculate_rmsd(clustStuff, fitAtomIndex, fitAtomIndexSize, rmsdAtomIndex, rmsdAtomIndexSize, \
+    if ((bTrajRMSD) || (eSortMethod == eSortByRMSD))
+    {
+        clusterRMSD = calculate_rmsd(clustStuff, fitAtomIndex, fitAtomIndexSize, rmsdAtomIndex, rmsdAtomIndexSize,
                                      inpTrajStuff);
     }
 
     // Calculate RMSDist of trajectories
-    if (eSortMethod == eSortByRMSDist)    {
+    if (eSortMethod == eSortByRMSDist)
+    {
         clusterRMSD = calculate_rmsdist_cluster(clustStuff, rmsdAtomIndex, rmsdAtomIndexSize, inpTrajStuff);
     }
 
-    if ((eSortMethod == eSortByRMSD) || (eSortMethod == eSortByRMSDist))  {
-        lstream<<"\n\nSorting clustered frames according to RMSD/RMSDist...\n";
+    if ((eSortMethod == eSortByRMSD) || (eSortMethod == eSortByRMSDist))
+    {
+        lstream << "\n\nSorting clustered frames according to RMSD/RMSDist...\n";
         sort_cluster_frame(clusterRMSD, clustStuff, &clusterRMSD);
     }
 
-    if ( (eSortMethod == eSortByFeatures) && (clustStuff->avgDistanceToAllDict.empty() == false) ) {
-        std::vector< std::vector< real > > sorter;
-        for(size_t i=0; i<clustStuff->clusterIndex.size(); i++) {
-            sorter.push_back( clustStuff->avgDistanceToAllDict.at(clustStuff->clusterIndex.at(i)) );
+    if ((eSortMethod == eSortByFeatures) && (clustStuff->avgDistanceToAllDict.empty() == false))
+    {
+        std::vector<std::vector<real>> sorter;
+        for (size_t i = 0; i < clustStuff->clusterIndex.size(); i++)
+        {
+            sorter.push_back(clustStuff->avgDistanceToAllDict.at(clustStuff->clusterIndex.at(i)));
         }
-        sort_cluster_frame(sorter, clustStuff, &clusterRMSD );
+        sort_cluster_frame(sorter, clustStuff, &clusterRMSD);
     }
 
     // Write clustered trajectories, but only when input trajectory is present
-    if(inpTrajStuff.bTraj)  {
+    if (inpTrajStuff.bTraj)
+    {
         fnOutTraj = opt2fn_null("-fout", NFILE, fnm);
-        if(fnOutTraj != NULL)
-          write_clustered_trajs(fnOutTraj, clustStuff, outIndex, outIndexSize, \
-                                inpTrajStuff, bAlignTrajToCentral, fitAtomIndex, fitAtomIndexSize);
-      }
+        if (fnOutTraj != NULL)
+            write_clustered_trajs(fnOutTraj, clustStuff, outIndex, outIndexSize,
+                                  inpTrajStuff, bAlignTrajToCentral, fitAtomIndex, fitAtomIndexSize);
+    }
 
     // Calculate and write RMSD
-    if ( (bTrajRMSD) || (bTrajRMSDist) ) {
+    if ((bTrajRMSD) || (bTrajRMSDist))
+    {
         fnOutRMSD = opt2fn_null("-rmsd", NFILE, fnm);
         if (fnOutRMSD != NULL)
-            write_rmsd( clusterRMSD, fnOutRMSD, clustStuff->clusterIndex, inpTrajStuff);
+            write_rmsd(clusterRMSD, fnOutRMSD, clustStuff->clusterIndex, inpTrajStuff);
     }
 
     return 0;

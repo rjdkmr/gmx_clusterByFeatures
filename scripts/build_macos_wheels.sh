@@ -13,7 +13,7 @@ brew cleanup
 
 eval "$(pyenv init -)"
 pyenv install --list
-PYVERS=("3.9" "3.10" "3.11" "3.12")
+PYVERS=("3.9" "3.10" "3.11" "3.12" "3.13" "3.14")
 PYTHONS=()
 for PYVER in ${PYVERS[@]}
 do

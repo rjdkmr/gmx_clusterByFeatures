@@ -13,16 +13,21 @@ jobs:
       fail-fast: false
       matrix:
         include:
-          - os: macos-13
-            python: 311
-            platform_id: macosx_x86_64
-            env:
-              MACOSX_DEPLOYMENT_TARGET: 13.0            
           - os: macos-14
             python: 311
             platform_id: macosx_x86_64
             env:
-              MACOSX_DEPLOYMENT_TARGET: 14.0
+              MACOSX_DEPLOYMENT_TARGET: 14.0            
+          - os: macos-15
+            python: 311
+            platform_id: macosx_x86_64
+            env:
+              MACOSX_DEPLOYMENT_TARGET: 15.0
+          - os: macos-26
+            python: 311
+            platform_id: macosx_x86_64
+            env:
+              MACOSX_DEPLOYMENT_TARGET: 26.0
 
     steps:
       - uses: actions/checkout@v4
@@ -56,31 +61,23 @@ jobs:
 
   publish:
     needs: build_wheels
-    runs-on: ${{ matrix.os }}
-    strategy:
-      fail-fast: false
-      matrix:
-        include:
-          - os: macos-13
-            python: 311
-            platform_id: macosx_x86_64
-            env:
-              MACOSX_DEPLOYMENT_TARGET: 13.0            
-          - os: macos-14
-            python: 311
-            platform_id: macosx_x86_64
-            env:
-              MACOSX_DEPLOYMENT_TARGET: 14.0
+    name: Publish Python 🐍 distribution 📦 to PyPI
+    runs-on: ubuntu-latest
+    environment:
+      name: pypi
+      url: https://pypi.org/p/g-mmpbsa
+    permissions:
+      id-token: write
 
     steps:
       - name: Download wheel artifact
         uses: actions/download-artifact@v4
         with:
-          name: cibw-wheels-${{ matrix.os }}-${{ strategy.job-index }}
+          name: cibw-wheels-mac*
           path: dist
 
       - name: Set up Python
-        uses: actions/setup-python@v2
+        uses: actions/setup-python@v5
         with:
           python-version: '3.11'
 
@@ -91,8 +88,6 @@ jobs:
 
       - name: Publish wheel to PyPI
         env:
-          TWINE_REPOSITORY: gmx-clusterbyfeatures
-          TWINE_REPOSITORY_URL: https://upload.pypi.org/legacy/
           TWINE_USERNAME: ${{ secrets.PYPI_USERNAME }}
           TWINE_PASSWORD: ${{ secrets.PYPI_PASSWORD }}
         run: twine upload dist/*
