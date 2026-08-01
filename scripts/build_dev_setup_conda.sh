@@ -1,10 +1,10 @@
 #!/bin/bash
-set -e -x
+# this script should run in the conda environment
+set -e
 
-# assume that conda is installed and venv environment is created
-conda activate ./venv
+which python
 
-CWD=`pwd` # Current working directory
+CWD=`pwd`
 
 # Build and Install GROMACS
 cd external
