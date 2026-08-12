@@ -83,7 +83,19 @@ To update the gmx_clusterByFeatrues package use following command:
 update of dependent packages like numpy, scipy, matplotlib etc.
 
 
-****
+Installing with `pixi` (https://pixi.sh/latest/installation) on linux/x86_64
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+
+.. code:: bash
+
+    # install pixi 
+    mkdir gmx_clusterByFeatures
+    cd gmx_clusterByFeatures
+    pixi init
+    pixi add python=3.11 numpy scipy matplotlib scikit-learn pybind11 gromacs
+    pixi add --pypi gmx-clusterByFeatures
+    pixi run gmx_clusterByFeatures
 
 
 

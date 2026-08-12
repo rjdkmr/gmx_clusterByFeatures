@@ -1,0 +1,23 @@
+[workspace]
+channels = ["conda-forge"]
+name = "gmx_clusterByFeatures"
+platforms = ["linux-64"]
+version = "0.1.0"
+
+[tasks]
+
+[dependencies]
+python = "3.11.*"
+numpy = ">=2.3.2,<3"
+scipy = ">=1.16.1,<2"
+matplotlib = ">=3.10.5,<4"
+scikit-learn = ">=1.7.1,<2"
+pybind11 = ">=3.0.0,<4"
+gxx = ">=15.1.0,<15.2"
+cmake = ">=4.1.0,<5"
+jupyterlab = ">=4.4.6,<5"
+pkgconfig = ">=1.5.5,<2"
+gromacs = ">=2025.2,<2026"
+
+[pypi-dependencies]
+gmx-clusterbyfeatures = ">=0.1.29, <0.2"
